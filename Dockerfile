@@ -19,3 +19,5 @@ RUN flask run
 COPY . /app
 
 ENTRYPOINT [ "python" ]
+
+CMD [ "run.py" ]
