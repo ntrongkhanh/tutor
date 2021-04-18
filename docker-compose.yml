@@ -1,7 +1,6 @@
 version: "3.5"
-
 services:
-  app:
+  tutor:
     container_name: tutor
     image: tutor
     build: ./
