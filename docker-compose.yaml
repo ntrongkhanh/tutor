@@ -3,6 +3,7 @@ services:
   tutor:
     container_name: tutor
     image: tutor
+    build: ./
     working_dir: /app
     ports:
-      - 80:5000
+      - "8087:8087"
