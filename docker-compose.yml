@@ -1,6 +1,7 @@
 version: "3.5"
 
 services:
+<<<<<<< HEAD
   web:
     restart: always
     build: ./app
@@ -44,3 +45,12 @@ volumes:
 =======
       - "5000:5000"
 >>>>>>> parent of eb8a223 (Update docker-compose.yml)
+=======
+  app:
+    container_name: tutor
+    image: tutor
+    build: ./
+    working_dir: /app
+    ports:
+      - "5000:5000"
+>>>>>>> parent of 65b9479 (Update docker-compose.yml)
