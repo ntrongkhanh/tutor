@@ -6,4 +6,4 @@ services:
     build: ./
     working_dir: /app
     expose:
-      - "5000:5000"
+      - "5000"
