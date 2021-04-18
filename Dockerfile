@@ -8,16 +8,17 @@ COPY ./requirements.txt /app/requirements.txt
 
 WORKDIR /app
 
+COPY . /app
+
 RUN pip install -r requirements.txt
 
 RUN export FLASK_APP=run.py
 
 RUN export FLASK_CONFIG=development
+#
+# RUN flask run
+#
 
-RUN flask run
-
-COPY . /app
-
-ENTRYPOINT [ "python" ]
+# ENTRYPOINT [ "python" ]
 
 CMD ["python", "run.py", "run" ]
