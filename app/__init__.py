@@ -1,6 +1,6 @@
 import os
 
-from flask import Flask
+from flask import Flask,render_template
 from config import app_config
 
 
@@ -16,8 +16,7 @@ def create_app(config_name):
 
     @app.route('/')
     def index():
-
-        return 'hello'
+        return render_template('hello.html')
 
     @app.route('/b')
     def a():
