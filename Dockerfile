@@ -12,8 +12,8 @@ COPY . /app
 
 RUN pip install -r requirements.txt
 
-RUN export FLASK_APP=run.py
-    export FLASK_CONFIG=development
+RUN export FLASK_APP=run.py && \
+    export FLASK_CONFIG=development && \
     flask run
 
 ENTRYPOINT [ "python" ]
