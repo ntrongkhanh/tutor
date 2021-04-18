@@ -11,6 +11,7 @@ COPY ./requirements.txt /app/requirements.txt
 WORKDIR /app
 
 COPY . /app
+ENV FLASK_RUN_HOST=0.0.0.0
 
 RUN pip install -r requirements.txt
 
