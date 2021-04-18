@@ -6,4 +6,4 @@ services:
     build: ./
     working_dir: /app
     ports:
-      - "8087:8087"
+      - "5000:5000"
