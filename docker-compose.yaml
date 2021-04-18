@@ -2,7 +2,7 @@ version: "3"
 services:
   tutor:
     container_name: tutor
-    image: khoaluan/tutor
+    image: tutor
     working_dir: /app
     ports:
       - 80:5000
