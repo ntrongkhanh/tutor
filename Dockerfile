@@ -6,17 +6,19 @@ RUN apt-get update
 RUN apt-get install -y python-pip python-dev
 
 # We copy just the requirements.txt first to leverage Docker cache
-COPY ./requirements.txt /app/requirements.txt
+COPY ~/requirements.txt /app/requirements.txt
 
 WORKDIR /app
 
 COPY . /app
-ENV FLASK_RUN_HOST=0.0.0.0
 
-RUN pip install -r requirements.txt
+RUN pip install -r ~/requirements.txt
+
+RUN export FLASK_CONFIG=development
 
 ENV FLASK_CONFIG = 'development'
 
 ENTRYPOINT [ "python", "run.py" ]
+
 
 # CMD ["python", "run.py", "run" ]
