@@ -1,6 +1,6 @@
 FROM python:3.8.7-buster
 
-EXPOSE 5000
+# EXPOSE 5000
 
 RUN apt-get update
 RUN apt-get install -y python-pip python-dev
