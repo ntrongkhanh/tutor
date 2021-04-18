@@ -15,6 +15,8 @@ ENV FLASK_RUN_HOST=0.0.0.0
 
 RUN pip install -r requirements.txt
 
+ENV FLASK_CONFIG = development
+
 ENTRYPOINT [ "python", "run.py" ]
 
 # CMD ["python", "run.py", "run" ]
