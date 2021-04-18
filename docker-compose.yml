@@ -3,15 +3,13 @@ version: "3.5"
 services:
   web:
     restart: always
-    build: ./
+    build: ./app
     expose:
       - "8000"
     links:
       - postgres:postgres
     volumes:
       - web-data:/usr/src/app/static
-    env_file:
-      - .env
     command: /usr/local/bin/gunicorn -w 2 -b :8000 app:app
 
   nginx:
