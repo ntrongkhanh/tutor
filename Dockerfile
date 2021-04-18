@@ -16,7 +16,7 @@ RUN pip install -r requirements.txt
 
 RUN export FLASK_APP=run.py && \
     export FLASK_CONFIG=development && \
-    flask run
+    flask run -h 0.0.0.0
 
 
 ENTRYPOINT [ "python" ]

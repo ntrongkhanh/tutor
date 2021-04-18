@@ -18,6 +18,7 @@ class DevelopmentConfig(Config):
     FLASK_ENV = 'development'
     DEBUG = True
     SQLALCHEMY_ECHO = True
+    HOST = '0.0.0.0'
 
 
 class ProductionConfig(Config):
