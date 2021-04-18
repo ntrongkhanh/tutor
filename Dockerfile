@@ -14,9 +14,6 @@ COPY . /app
 
 RUN pip install -r requirements.txt
 
-RUN export FLASK_CONFIG=development
-
-
-ENTRYPOINT [ "python","run.py" ]
+ENTRYPOINT [ "bash","run.sh" ]
 
 # CMD ["python", "run.py", "run" ]
