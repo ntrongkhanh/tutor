@@ -1,6 +1,6 @@
 version: "3"
 services:
-  resume-screening:
+  tutor:
     container_name: tutor
     image: khoaluan/tutor
     working_dir: /app
