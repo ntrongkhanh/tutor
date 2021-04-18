@@ -5,6 +5,7 @@ services:
     restart: always
     build: ./app
     expose:
+<<<<<<< HEAD
       - "8000"
     links:
       - postgres:postgres
@@ -40,3 +41,6 @@ services:
 volumes:
   db-data:
   web-data:
+=======
+      - "5000:5000"
+>>>>>>> parent of eb8a223 (Update docker-compose.yml)
