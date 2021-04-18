@@ -15,11 +15,6 @@ ENV FLASK_RUN_HOST=0.0.0.0
 
 RUN pip install -r requirements.txt
 
-RUN export FLASK_APP=run.py && \
-    export FLASK_CONFIG=development && \
-    flask run -h 0.0.0.0
-
-
-ENTRYPOINT [ "python" ]
+ENTRYPOINT [ "python", "run.py" ]
 
 # CMD ["python", "run.py", "run" ]
