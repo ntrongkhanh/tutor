@@ -16,8 +16,6 @@ RUN pip install -r ~/requirements.txt
 
 RUN export FLASK_CONFIG=development
 
-ENV FLASK_CONFIG = 'development'
-
 ENTRYPOINT [ "python", "run.py" ]
 
 
