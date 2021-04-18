@@ -1,5 +1,5 @@
 #!/bin/sh
-docker kill tutor
+#docker kill tutor
 
 sudo docker-compose build
 sudo docker-compose up
