@@ -20,14 +20,6 @@ def create_app(config_name):
 
     @app.route('/b')
     def a():
-        a = app.config['AAA']
-
-        print(type(a))
-        print(a)
-        if a:
-            print('true')
-        else:
-            print('false')
         return 'a'
 
     return app
