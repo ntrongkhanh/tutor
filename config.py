@@ -20,7 +20,8 @@ class DevelopmentConfig(Config):
     """
     # FLASK_ENV = 'development'
     DEBUG = True
-    SQLALCHEMY_DATABASE_URI = "postgresql://postgres:ntrongkhanh@localhost:5432/tutor"
+    # SQLALCHEMY_DATABASE_URI = "postgresql://postgres:ntrongkhanh@localhost:5432/tutor"
+    SQLALCHEMY_DATABASE_URI = "postgresql+psycopg2://postgres:password@40.71.25.150:54320/tutor"
     SQLALCHEMY_TRACK_MODIFICATIONS = True
 
 
