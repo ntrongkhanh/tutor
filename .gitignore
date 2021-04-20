@@ -1,6 +1,5 @@
-
-venv
-env
-
+/venv/
+/migrations/
 .idea/
+
 __pycache__/
