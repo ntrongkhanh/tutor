@@ -7,26 +7,31 @@ class Config(object):
     """
     Common configurations
     """
+    SECRET_KEY = os.getenv('SECRET_KEY', 'secret_key')
+    DEBUG = False
 
-    DEBUG = True
+    DEFAULT_PAGE_SIZE = 10
+    DEFAULT_PAGE = 1
 
 
 class DevelopmentConfig(Config):
     """
     Development configurations
     """
-    FLASK_ENV = 'development'
+    # FLASK_ENV = 'development'
     DEBUG = True
-    SQLALCHEMY_ECHO = True
-    HOST = '0.0.0.0'
+    SQLALCHEMY_DATABASE_URI = "postgresql://postgres:ntrongkhanh@localhost:5432/tutor"
+    SQLALCHEMY_TRACK_MODIFICATIONS = True
 
 
 class ProductionConfig(Config):
     """
     Production configurations
     """
+    SQLALCHEMY_DATABASE_URI = "postgresql://postgres:password@localhost:54320/tutor"
+    SQLALCHEMY_TRACK_MODIFICATIONS = True
 
-    DEBUG = True
+    DEBUG = False
 
 
 class TestingConfig(Config):

@@ -1,18 +1,21 @@
-import os
-
-from flask import Flask,render_template
+from flask import Flask, render_template
+from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
 from config import app_config
+
+db = SQLAlchemy()
+migrate = Migrate()
 
 
 def create_app(config_name):
-    if os.getenv('FLASK_CONFIG') == 'production':
-        app = Flask(__name__)
-        app.config.update(
-        )
-    else:
-        app = Flask(__name__)
-        app.config.from_object(app_config[config_name])
-        app.config.from_pyfile('../config.py')
+    app = Flask(__name__)
+    app.config.from_object(app_config[config_name])
+    app.config.from_pyfile('../config.py')
+
+    db.init_app(app)
+    migrate.init_app(app, db)
+
+    from app import model
 
     @app.route('/')
     def index():
