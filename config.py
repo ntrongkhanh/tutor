@@ -28,7 +28,7 @@ class ProductionConfig(Config):
     """
     Production configurations
     """
-    SQLALCHEMY_DATABASE_URI = "postgresql://postgres:password@localhost:54320/tutor"
+    SQLALCHEMY_DATABASE_URI = "postgresql://postgres:password@localhost:5432/tutor"
     SQLALCHEMY_TRACK_MODIFICATIONS = True
 
     DEBUG = False
