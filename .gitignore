@@ -141,3 +141,4 @@ cython_debug/
 *.iws
 *.iml
 *.ipr
+app/__pycache__/
