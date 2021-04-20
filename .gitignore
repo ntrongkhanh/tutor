@@ -142,3 +142,4 @@ cython_debug/
 *.iml
 *.ipr
 app/__pycache__/
+app/__pycache__/__init__.cpython-38.pyc
