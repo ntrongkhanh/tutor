@@ -8,8 +8,6 @@ class Config(object):
     Common configurations
     """
     SECRET_KEY = os.getenv('SECRET_KEY', 'secret_key')
-    DEBUG = False
-
     DEFAULT_PAGE_SIZE = 10
     DEFAULT_PAGE = 1
 
@@ -21,6 +19,16 @@ class DevelopmentConfig(Config):
     # FLASK_ENV = 'development'
     DEBUG = True
     SQLALCHEMY_DATABASE_URI = "postgresql://postgres:ntrongkhanh@localhost:5432/tutor"
+    SQLALCHEMY_TRACK_MODIFICATIONS = True
+
+
+class MySqlConfig(Config):
+    """
+    Development configurations
+    """
+    # FLASK_ENV = 'development'
+    DEBUG = True
+    SQLALCHEMY_DATABASE_URI = "mysql://ntrongkhanh:ntrongkhanh@127.0.0.1:3306/tutor"
     SQLALCHEMY_TRACK_MODIFICATIONS = True
 
 
@@ -45,5 +53,6 @@ class TestingConfig(Config):
 app_config = {
     'development': DevelopmentConfig,
     'production': ProductionConfig,
+    'mysql': MySqlConfig,
     'testing': TestingConfig
 }
