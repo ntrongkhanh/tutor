@@ -1,22 +1,159 @@
-from app import db
+import random
+import string
+
+import app.util.response_message as message
+from app import db, bcrypt
+from app.mail import mail
+from app.model.code import Code
 from app.model.user_model import User
+from app.util.api_response import response_object
 
 
 def create_user(args):
+    if User.query.filter_by(email=args['email']).first():
+        return response_object(status=False, message=message.EMAIL_ALREADY_EXISTS), 400
+
     user = User(
-        email='email',
-        password='password',
-        first_name='first_name',
-        last_name='last_name',
-        sex=True,
+        email=args['email'],
+        password=hash_password(args['password']),
+        first_name=args['first_name'],
+        last_name=args['last_name'],
+        sex=args['sex'],
         is_tutor=False,
         is_admin=False,
-        is_active=False,
-        avatar_id=None
+        is_active=False
+    )
+    active_code = Code(
+        email=user.email,
+        code=''.join(random.choice(string.ascii_letters) for i in range(20))
     )
 
     db.session.add(user)
-    db.session.commit()
+    db.session.add(active_code)
+    try:
+        db.session.commit()
+        send_mail_active_user(active_code=active_code)
+    except:
+        return response_object(status=False, message=message.CREATE_FAILED), 500
+    return response_object(), 201
 
-    data = user.to_json()
-    return data
+
+def update_user(args, id):
+    user = User.query.get(id)
+    if not user:
+        return response_object(status=False, message=message.USER_NOT_FOUND), 404
+    user.sex = args['sex']
+    user.last_name = args['last_name']
+    user.first_name = args['first_name']
+    try:
+        db.session.commit()
+    except:
+        return response_object(status=False, message=message.UPDATE_FAILED), 500
+
+    return response_object(), 200
+
+
+def get_profile(id):
+    user = User.query.get(id)
+    if not user:
+        return response_object(status=False, message=message.USER_NOT_FOUND), 404
+    return response_object(data=user.to_json()), 200
+
+
+def update_avatar():
+    return None
+
+
+def login(args):
+    user = User.query.filter_by(email=args['email']).first()
+    if not user:
+        return response_object(status=False, message=message.USER_NOT_FOUND), 404
+    if not user.verify_password(args['password']):
+        return response_object(status=False, message=message.PASSWORD_WRONG), 401
+
+    return response_object(), 200
+
+
+def send_mail_reset_password(args):
+    reset_code = Code(
+        email=args['email'],
+        code=''.join(random.choice(string.ascii_letters) for i in range(20))
+    )
+    db.session.add(reset_code)
+    db.session.commit()
+    if send_mail_reset_password(reset_code):
+        return response_object(), 200
+    else:
+        return response_object(status=False, message=message.FAILED), 500
+
+
+def reset_password(args):
+    reset_code = Code.query.filter_by(email=args['email']).first()
+    if not reset_code:
+        return response_object(status=False, message=message.NOT_FOUND), 404
+    if reset_code.code == args['code']:
+        try:
+            user = User.query.filter(User.email == reset_code.email).first()
+            user.password = hash_password(args['new_password'])
+            db.session.delete(reset_code)
+            db.session.commit()
+        except:
+            return response_object(status=False, message=message.RESET_FAILED), 500
+
+    return response_object(), 200
+
+
+def send_mail_active_user(active_code):
+    link_active = f'http://127.0.0.1:5000/api/user/active/?email={active_code.email}&code={active_code.code}'
+    content = 'Please click on the link to activate your account: ' + link_active
+    mail.send_mail_without_template(active_code.email, 'Active account', content=content)
+
+    return True
+
+
+def active_user(args):
+    active_code = Code.query.filter(Code.email == args['email']).first()
+    if not active_code:
+        return response_object(status=False, message=message.NOT_FOUND), 404
+    if active_code.code == args['code']:
+        try:
+            user = User.query.filter(User.email == active_code.email).first()
+            user.is_active = True
+            db.session.delete(active_code)
+            db.session.commit()
+        except:
+            return response_object(status=False, message=message.ACTIVE_FAILED), 500
+
+    return response_object(), 200
+
+
+def change_password(args, id_user):
+    user = User.query.get(id_user)
+    if not user:
+        return response_object(status=False, message=message.USER_NOT_FOUND), 404
+    if not user.verify_password(args['old_password']):
+        return response_object(status=False, message=message.PASSWORD_WRONG), 401
+    user.password = hash_password(args['new_password'])
+    try:
+        db.session.commit()
+    except:
+        return response_object(status=False, message=message.UPDATE_FAILED), 500
+    return response_object(), 200
+
+
+def hash_password(password):
+    return bcrypt.generate_password_hash(password).decode('utf-8')
+
+
+def send_mail_reset_password(reset_code):
+    try:
+        link_reset = f'http://127.0.0.1:5000/api/user/reset/?email={reset_code.email}&code={reset_code.code}'
+        content = 'Please click on the link to reset your password: ' + link_reset
+        mail.send_mail_without_template(reset_code.email, 'Reset password', content=content)
+    except:
+        return False
+    return True
+
+
+def test_send_mail():
+    mail.send_mail_without_template(receiver='trongkhanhvip1@gmail.com', content='hello')

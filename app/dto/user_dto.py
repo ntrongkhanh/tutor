@@ -26,34 +26,25 @@ class UserDto:
         'sex': fields.Boolean(required=False, description='user email address')
     })
 
-    user_data = api.inherit('login_data', {
-        'email': fields.String(required=False, description='user email address'),
-        'first_name': fields.String(required=False, description='user email address'),
-        'last_name': fields.String(required=False, description='user email address'),
-        'sex': fields.Boolean(required=False, description='user email address'),
-        'is_tutor': fields.Boolean(required=False, description='user email address'),
-        'avatar_id': fields.Integer(required=False, description='user email address'),
-        'token': fields.String(required=False, description='user email address')
+    avatar = api.inherit('avatar', {
+        'id': fields.Integer(required=False, description='user email address'),
+        'description': fields.String(required=False, description='user email address'),
+        'data': fields.String(required=False, description='user email address'),
     })
 
-
-
-    aaaa ={
+    login_data = api.inherit('login', {
         'email': fields.String(required=False, description='user email address'),
         'first_name': fields.String(required=False, description='user email address'),
         'last_name': fields.String(required=False, description='user email address'),
         'sex': fields.Boolean(required=False, description='user email address'),
         'is_tutor': fields.Boolean(required=False, description='user email address'),
         'avatar_id': fields.Integer(required=False, description='user email address'),
+        'avatar': fields.Nested(avatar),
         'token': fields.String(required=False, description='user email address')
-    }
+    })
 
     login_response = api.inherit('login_success', base, {
-        'data': fields.Nested(user_data)
-    })
-
-    create_response = api.inherit('create_success', base, {
-        'data': fields.Nested(user_data)
+        'data': fields.Nested(login_data)
     })
 
     active_response = api.inherit('active_success', base, {

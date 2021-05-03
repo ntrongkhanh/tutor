@@ -10,6 +10,13 @@ class Config(object):
     SECRET_KEY = os.getenv('SECRET_KEY', 'secret_key')
     DEFAULT_PAGE_SIZE = 10
     DEFAULT_PAGE = 1
+    MAIL_SERVER = 'smtp.gmail.com'
+    MAIL_PORT = 465
+    MAIL_USERNAME = 'khoaluan.tutor@gmail.com'
+    MAIL_PASSWORD = 'khoaluan2021'
+    MAIL_USE_TLS = False
+    MAIL_USE_SSL = True
+
 
 
 class DevelopmentConfig(Config):

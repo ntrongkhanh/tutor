@@ -1,5 +1,3 @@
-from datetime import datetime
-
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import relationship
 
@@ -22,6 +20,26 @@ class Post(db.Model):
     number_of_sessions = db.Column(db.String(255), nullable=True)
     require = db.Column(db.String(255), nullable=True)
     contact = db.Column(db.String(255), nullable=True)
+    form_of_teaching = db.Column(db.String(255), nullable=True)
 
     user_id = db.Column(db.Integer, ForeignKey('users.id'))
-    user = relationship("User", back_populates="posts")
+    # user = relationship("User", backref="posts", lazy=True)
+
+    def to_json(self):
+        return {
+            'id': self.id,
+            'is_tutor': self.is_tutor,
+            'title': self.title,
+            'description': self.description,
+            'teaching_address': self.teaching_address,
+            'subject': self.subject,
+            'class_type': self.class_type,
+            'other_information': self.other_information,
+            'fee': self.fee,
+            'schedule': self.schedule,
+            'number_of_sessions': self.number_of_sessions,
+            'require': self.require,
+            'contact': self.contact,
+            'form_of_teaching': self.form_of_teaching,
+            'user': self.user
+        }

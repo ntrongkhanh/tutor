@@ -1,17 +1,17 @@
 from datetime import datetime
 
+import response_message
 
-def response_object(code=200, status=True, message="Thành công.", data=[], pagination=None):
+
+def response_object(status=True, message=response_message.SUCCESS, data=[], pagination=None):
     if not pagination:
         return {
-            'code': code,
             'status': status,
             'message': message,
             'data': data,
         }
     else:
         return {
-            'code': code,
             'status': status,
             'message': message,
             'data': data,
