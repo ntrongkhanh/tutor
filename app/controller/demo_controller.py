@@ -1,9 +1,12 @@
 from flask import request
 from flask_restx import Resource
+from werkzeug.datastructures import FileStorage
 
+from app import db
 from app.dto.demo_dto import DemoDTO
-from app.util.api_response import response_object
+from app.model.image_model import Image
 from app.service import demo_service as service
+from app.util.api_response import response_object
 
 # create
 # create_parser = api.parser()
@@ -27,5 +30,42 @@ class create(Resource):
         data = service.create_demo(args)
 
         # create_success_response=DemoDTO.create_success_response
-        text = {'text':type(args)}
+        text = {'text': type(args)}
         return response_object(data=data)
+
+
+#
+# upload = api.parser()
+# upload.add_argument("file", type=FileStorage, location="files", required=True)
+#
+#
+# @api.route('/upload-image')
+# class upload(Resource):
+#     @api.doc('upload')
+#     @api.expect(upload,validate=True)
+#     def post(selfs):
+#         args = upload.parse_args()
+#         file = args['file'].read()
+#         image = Image(data=file, description='mô tả')
+#         db.session.add(image)
+#         db.session.commit()
+#
+#         return 'ok'
+
+upload_parser = api.parser()
+upload_parser.add_argument("file", type=FileStorage, location="files", required=True)
+upload_parser.add_argument("code", type=str, location='form', required=True)
+
+@api.route("/upload")
+class upload(Resource):
+    @api.doc('upload demo')
+    @api.expect(upload_parser, validate=True)
+    def post(self):
+        args = upload_parser.parse_args()
+        file = args['file'].read()
+        file_name = args['code']
+        image = Image(data=file, description=file_name)
+        db.session.add(image)
+        db.session.commit()
+
+        return 'ok'

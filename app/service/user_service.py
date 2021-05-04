@@ -1,3 +1,4 @@
+import datetime
 import random
 import string
 
@@ -5,23 +6,26 @@ import app.util.response_message as message
 from app import db, bcrypt
 from app.mail import mail
 from app.model.code import Code
+from app.model.image_model import Image
 from app.model.user_model import User
 from app.util.api_response import response_object
 
 
-def create_user(args):
-    if User.query.filter_by(email=args['email']).first():
+def create_user(args, file):
+    if User.query.filter(User.email == args['email']).first():
         return response_object(status=False, message=message.EMAIL_ALREADY_EXISTS), 400
+    data = file.read()
+    image = Image(description='Avatar of ' + args['email'], data=data)
+    db.session.add(image)
+    db.session.flush()
 
     user = User(
         email=args['email'],
-        password=hash_password(args['password']),
+        password=args['password'],
         first_name=args['first_name'],
         last_name=args['last_name'],
-        sex=args['sex'],
-        is_tutor=False,
-        is_admin=False,
-        is_active=False
+        sex=True if args['sex'] == 'true' else False,
+        avatar_id=image.id
     )
     active_code = Code(
         email=user.email,
@@ -30,21 +34,28 @@ def create_user(args):
 
     db.session.add(user)
     db.session.add(active_code)
+
     try:
-        db.session.commit()
+
         send_mail_active_user(active_code=active_code)
-    except:
+
+        db.session.commit()
+
+    except Exception as e:
+        print(e)
         return response_object(status=False, message=message.CREATE_FAILED), 500
     return response_object(), 201
 
 
-def update_user(args, id):
-    user = User.query.get(id)
+def update_user(args, user_id):
+    user = User.query.get(user_id)
     if not user:
         return response_object(status=False, message=message.USER_NOT_FOUND), 404
     user.sex = args['sex']
     user.last_name = args['last_name']
     user.first_name = args['first_name']
+    user.updated_date = datetime.datetime.now()
+
     try:
         db.session.commit()
     except:
@@ -60,8 +71,20 @@ def get_profile(id):
     return response_object(data=user.to_json()), 200
 
 
-def update_avatar():
-    return None
+def update_avatar(args, id_user):
+    user = User.query.get(id_user)
+    if not user:
+        return response_object(status=False, message=message.USER_NOT_FOUND), 404
+    image = Image.query.filter(Image.user == user).first()
+
+    data = args['file'].read()
+    file_name = args['file'].filename
+    image.data = data
+    image.description = file_name
+    image.updated_date = datetime.datetime.now()
+    db.session.commit()
+
+    return response_object(), 200
 
 
 def login(args):
@@ -71,7 +94,9 @@ def login(args):
     if not user.verify_password(args['password']):
         return response_object(status=False, message=message.PASSWORD_WRONG), 401
 
-    return response_object(), 200
+    data = user.to_json()
+
+    return response_object(data=data), 200
 
 
 def send_mail_reset_password(args):
@@ -95,6 +120,7 @@ def reset_password(args):
         try:
             user = User.query.filter(User.email == reset_code.email).first()
             user.password = hash_password(args['new_password'])
+            user.updated_date = datetime.datetime.now()
             db.session.delete(reset_code)
             db.session.commit()
         except:
@@ -134,6 +160,7 @@ def change_password(args, id_user):
     if not user.verify_password(args['old_password']):
         return response_object(status=False, message=message.PASSWORD_WRONG), 401
     user.password = hash_password(args['new_password'])
+    user.updated_date = datetime.datetime.now()
     try:
         db.session.commit()
     except:

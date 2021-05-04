@@ -1,6 +1,6 @@
 from datetime import datetime
 
-import response_message
+from . import response_message
 
 
 def response_object(status=True, message=response_message.SUCCESS, data=[], pagination=None):
