@@ -1,7 +1,8 @@
 import json
-from datetime import datetime, timedelta
+from datetime import datetime
 
 import jwt
+import pytz
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import relationship
 
@@ -52,18 +53,22 @@ class User(db.Model):
         """
         try:
             payload = {
-                "expired_time": json.dumps((datetime.utcnow() + timedelta(days=1)), default=json_serial),
-                "issued_at": json.dumps(datetime.utcnow(), default=json_serial),
+                "expired_time": json.dumps((datetime.now() + app.config['TOKEN_EXPIRED_TIME']), default=json_serial),
+                "issued_at": json.dumps(datetime.now(), default=json_serial),
                 "user_id": user_id,
-                "admin": is_admin,
-                "tutor": is_tutor
+                "is_admin": is_admin,
+                "is_tutor": is_tutor
             }
-
-            return jwt.encode(
+            auth_token = jwt.encode(
                 payload,
                 app.config.get('SECRET_KEY'),
                 algorithm="HS256"
             )
+
+            token = Token(token=auth_token)
+            db.session.add(token)
+            db.session.commit()
+            return auth_token
         except Exception as e:
             return e
 
@@ -75,14 +80,25 @@ class User(db.Model):
         :return: integer|string
         """
         try:
-            print('vào payload')
+
             payload = jwt.decode(auth_token, app.config.get('SECRET_KEY'), algorithms=["HS256"])
-            print('ra payload')
-            is_blacklisted_token = Token.check_token(auth_token)
-            print(f'is    {is_blacklisted_token}')
-            if is_blacklisted_token:
+
+            token = Token.query.filter(Token.token == auth_token).first()
+
+            # is_blacklisted_token = Token.check_token(auth_token)
+            if not token:
                 return 'Token blacklisted. Please log in again.'
             else:
+                tz_London = pytz.timezone('Asia/Saigon')
+                print(token.created_date+app.config.get("TOKEN_EXPIRED_TIME"))
+                print(datetime.now())
+                print((token.created_date+app.config.get("TOKEN_EXPIRED_TIME"))<datetime.now())
+                print('aa')
+                if (token.created_date+app.config.get("TOKEN_EXPIRED_TIME")) < datetime.now():
+                    print('hết hạn')
+                    db.session.delete(token)
+                    db.session.commit()
+                    return 'Signature expired. Please log in again.'
                 return payload
         except jwt.ExpiredSignatureError:
             return 'Signature expired. Please log in again.'

@@ -1,4 +1,5 @@
 import os
+from datetime import timedelta
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 
@@ -16,6 +17,7 @@ class Config(object):
     MAIL_PASSWORD = 'khoaluan2021'
     MAIL_USE_TLS = False
     MAIL_USE_SSL = True
+    TOKEN_EXPIRED_TIME = timedelta(seconds=10)
 
 
 

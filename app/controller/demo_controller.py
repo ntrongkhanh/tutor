@@ -14,7 +14,7 @@ from app.util.api_response import response_object
 # create_parser.add_argument("username", type=str, location='username', required=True)
 # create_parser.add_argument("password", type=str, location='password', required=True)
 #
-from app.util.jwt_util import token_required
+from app.util.jwt_util import token_required, tutor_required
 
 api = DemoDTO.api
 _create = DemoDTO.demo_request
@@ -83,7 +83,7 @@ auth_parser.add_argument("Authorization", type=str, location='headers', required
 class auth(Resource):
     @api.doc('auth')
     @api.expect(_create, validate=True)
-    @token_required
+    @tutor_required
     def post(self, user):
 
         print(user)
