@@ -1,5 +1,5 @@
-import json
 import datetime
+import json
 
 from sqlalchemy.orm import relationship
 
@@ -11,6 +11,7 @@ class Tutor(db.Model):
     __tablename__ = 'tutor'
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    public_id = db.Column(db.String(50), unique=True)
     birthday = db.Column(db.DateTime, nullable=True)
     career = db.Column(db.String(255), nullable=True)
     tutor_description = db.Column(db.Text, nullable=True)
@@ -29,8 +30,9 @@ class Tutor(db.Model):
     created_date = db.Column(db.DateTime, nullable=True)
     updated_date = db.Column(db.DateTime, nullable=True)
 
-    def __init__(self, birthday, career, tutor_description, majors, degree, school, address, class_type, experience,
-                 other_information):
+    def __init__(self, public_id, birthday, career, tutor_description, majors, degree, school, address, class_type,
+                 experience, other_information):
+        self.public_id = public_id
         self.birthday = birthday
         self.career = career
         self.tutor_description = tutor_description
@@ -47,6 +49,7 @@ class Tutor(db.Model):
     def to_json(self):
         return {
             'id': self.id,
+            'public_id': self.public_id,
             'birthday': json.dumps(self.birthday, default=json_serial),
             'career': self.career,
             'tutor_description': self.tutor_description,

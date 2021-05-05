@@ -10,6 +10,7 @@ class DemoDTO:
     demo_request = api.model('demo', {
         'username': fields.String(required=True, description='user email address'),
         'password': fields.String(required=True, description='user password'),
+
     })
 
     file_content_data = api.inherit('create_data', {

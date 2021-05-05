@@ -1,3 +1,4 @@
+import flask
 from flask import request
 from flask_restx import Resource
 from werkzeug.datastructures import FileStorage
@@ -7,13 +8,14 @@ from app.dto.demo_dto import DemoDTO
 from app.model.image_model import Image
 from app.service import demo_service as service
 from app.util.api_response import response_object
-
 # create
 # create_parser = api.parser()
 # create_parser.add_argument("id", type=int, location='id', required=True)
 # create_parser.add_argument("username", type=str, location='username', required=True)
 # create_parser.add_argument("password", type=str, location='password', required=True)
 #
+from app.util.jwt_util import token_required
+
 api = DemoDTO.api
 _create = DemoDTO.demo_request
 
@@ -56,6 +58,7 @@ upload_parser = api.parser()
 upload_parser.add_argument("file", type=FileStorage, location="files", required=True)
 upload_parser.add_argument("code", type=str, location='form', required=True)
 
+
 @api.route("/upload")
 class upload(Resource):
     @api.doc('upload demo')
@@ -69,3 +72,19 @@ class upload(Resource):
         db.session.commit()
 
         return 'ok'
+
+
+auth_parser = api.parser()
+auth_parser.add_argument("Authorization", type=str, location='headers', required=True)
+
+
+@api.route('/test-auth')
+@api.expect(auth_parser)
+class auth(Resource):
+    @api.doc('auth')
+    @api.expect(_create, validate=True)
+    @token_required
+    def post(self, user):
+
+        print(user)
+        return flask.make_response(user.first_name )
