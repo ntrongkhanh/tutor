@@ -90,11 +90,11 @@ class User(db.Model):
                 return 'Token blacklisted. Please log in again.'
             else:
                 tz_London = pytz.timezone('Asia/Saigon')
-                print(token.created_date+app.config.get("TOKEN_EXPIRED_TIME"))
+                print(token.created_date + app.config.get("TOKEN_EXPIRED_TIME"))
                 print(datetime.now())
-                print((token.created_date+app.config.get("TOKEN_EXPIRED_TIME"))<datetime.now())
+                print((token.created_date + app.config.get("TOKEN_EXPIRED_TIME")) < datetime.now())
                 print('aa')
-                if (token.created_date+app.config.get("TOKEN_EXPIRED_TIME")) < datetime.now():
+                if (token.created_date + app.config.get("TOKEN_EXPIRED_TIME")) < datetime.now():
                     print('hết hạn')
                     db.session.delete(token)
                     db.session.commit()
@@ -121,6 +121,14 @@ class User(db.Model):
             'avatar_id': self.avatar_id,
             'avatar': self.avatar,
             'created_date': self.created_date  # json.dumps(self.created_date, default=json_serial),
+        }
+
+    def to_payload(self):
+        return {
+            'user_id': self.id,
+            'is_tutor': self.is_tutor,
+            'is_admin': self.is_admin,
+            'is_active': self.is_active,
         }
 
 

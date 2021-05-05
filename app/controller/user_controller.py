@@ -1,9 +1,12 @@
+from datetime import timedelta
+
 import flask
-from flask import request, jsonify
+from flask import request
+from flask_jwt_extended import create_access_token
 from flask_restx import Resource
 from werkzeug.datastructures import FileStorage
 
-from app import bcrypt
+from app import bcrypt, app
 from app.dto.user_dto import UserDto
 from app.model.user_model import User
 from app.service import user_service as service
@@ -88,39 +91,23 @@ class login1(Resource):
         post_data = request.json
         try:
             # fetch the user data
-            user = User.query.filter_by(
-                email=post_data.get('email')
-            ).first()
+            user = User.query.filter_by(email=post_data.get('email')).first()
+            if not user:
+                return flask.make_response('không tồn tại tài khoản')
+            if bcrypt.check_password_hash(user.password, post_data.get('password')):
+                # auth_token = user.encode_auth_token(user.id, user.is_admin, user.is_tutor)
+                expires = timedelta(days=10)
 
-            if user and bcrypt.check_password_hash(
-                    user.password, post_data.get('password')
-            ):
-                auth_token = user.encode_auth_token(user.id, user.is_admin, user.is_tutor)
-                print('11111111111111111111111111111111111')
-                print(auth_token)
-                print(type(auth_token))
+                auth_token = create_access_token(identity=user.to_payload(), expires_delta=expires)
+
                 if auth_token:
-                    responseObject = {
-                        'status': 'success',
-                        'message': 'Successfully logged in.',
-                        'auth_token': auth_token
-                    }
-                    print('222222222222222222222222222222222222')
                     response = flask.make_response(auth_token)
                     return response
             else:
-                responseObject = {
-                    'status': 'fail',
-                    'message': 'User does not exist.'
-                }
-                return flask.make_response('jsonify(responseObject)'), 404
+                return flask.make_response('sai mật khẩu')
         except Exception as e:
             print(e)
-            responseObject = {
-                'status': 'fail',
-                'message': 'Try again'
-            }
-            return flask.make_response('jsonify(responseObject)'), 500
+            return flask.make_response('thất bại')
 
 
 checkapi = api.parser()

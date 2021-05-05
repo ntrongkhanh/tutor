@@ -1,5 +1,6 @@
 import flask
 from flask import request
+from flask_jwt_extended import jwt_required, get_jwt_identity
 from flask_restx import Resource
 from werkzeug.datastructures import FileStorage
 
@@ -14,7 +15,7 @@ from app.util.api_response import response_object
 # create_parser.add_argument("username", type=str, location='username', required=True)
 # create_parser.add_argument("password", type=str, location='password', required=True)
 #
-from app.util.jwt_util import token_required, tutor_required
+from app.util.jwt_util import tutor_required, admin_required, HR_only
 
 api = DemoDTO.api
 _create = DemoDTO.demo_request
@@ -83,8 +84,22 @@ auth_parser.add_argument("Authorization", type=str, location='headers', required
 class auth(Resource):
     @api.doc('auth')
     @api.expect(_create, validate=True)
-    @tutor_required
+    # @tutor_required()
     def post(self, user):
-
         print(user)
-        return flask.make_response(user.first_name )
+        return flask.make_response(user.first_name)
+
+
+@api.route('/test-auth2')
+@api.expect(auth_parser)
+class auth2(Resource):
+    @api.doc('auth2')
+    # @jwt_required()
+    # @html_tag_generator()
+    @jwt_required()
+    @admin_required()
+    # @HR_only
+    def get(self):
+        identity = get_jwt_identity()
+        print(identity['user_id'])
+        return flask.make_response(str(identity['user_id']))
