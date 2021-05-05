@@ -1,5 +1,5 @@
-from datetime import datetime, timedelta
 import json
+from datetime import datetime, timedelta
 
 import jwt
 from sqlalchemy import ForeignKey
@@ -52,8 +52,8 @@ class User(db.Model):
         """
         try:
             payload = {
-                "expired_time":  json.dumps((datetime.utcnow() + timedelta(days=1)), default=json_serial),
-                "issued_at":  json.dumps(datetime.utcnow(), default=json_serial),
+                "expired_time": json.dumps((datetime.utcnow() + timedelta(days=1)), default=json_serial),
+                "issued_at": json.dumps(datetime.utcnow(), default=json_serial),
                 "user_id": user_id,
                 "admin": is_admin,
                 "tutor": is_tutor
@@ -75,7 +75,7 @@ class User(db.Model):
         :return: integer|string
         """
         try:
-            payload = jwt.decode(auth_token, app.config.get('SECRET_KEY'),algorithms=["HS256"])
+            payload = jwt.decode(auth_token, app.config.get('SECRET_KEY'), algorithms=["HS256"])
             is_blacklisted_token = Token.check_token(auth_token)
             if is_blacklisted_token:
                 return 'Token blacklisted. Please log in again.'
@@ -84,7 +84,7 @@ class User(db.Model):
         except jwt.ExpiredSignatureError:
             return 'Signature expired. Please log in again.'
         except jwt.InvalidTokenError:
-                return 'Invalid token. Please log in again.'
+            return 'Invalid token. Please log in again.'
 
     def verify_password(self, password):
         return bcrypt.check_password_hash(self.password, password)
