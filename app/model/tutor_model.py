@@ -4,7 +4,7 @@ import json
 from sqlalchemy.orm import relationship
 
 from app import db
-from app.util.api_response import json_serial
+from app.util.api_response import json_serial, date_to_json
 
 
 class Tutor(db.Model):
@@ -62,6 +62,6 @@ class Tutor(db.Model):
             'experience': self.experience,
             'other_information': self.other_information,
             'images': [image for image in self.images],
-            'created_date': json.dumps(self.created_date, default=json_serial),
-            'updated_date': json.dumps(self.updated_date, default=json_serial)
+            'created_date': date_to_json(self.created_date),
+            'updated_date': date_to_json(self.updated_date)
         }

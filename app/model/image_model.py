@@ -1,11 +1,10 @@
 import datetime
 
-from flask import json
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import relationship
 
 from app import db
-from app.util.api_response import json_serial
+from app.util.api_response import date_to_json
 
 
 class Image(db.Model):
@@ -13,7 +12,7 @@ class Image(db.Model):
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     description = db.Column(db.String(255), nullable=True)
-    data = db.Column(db.LargeBinary(length=(2 ** 32) - 1), nullable=True)
+    data = db.Column(db.LargeBinary(), nullable=True)
 
     # user = relationship("User", uselist=False, backref="avatar")
     user = relationship("User", backref="avatar", lazy=True, uselist=False)
@@ -36,7 +35,6 @@ class Image(db.Model):
         return {
             'id': self.id,
             'description': self.description,
-            'created_date':self.created_date, #json.dumps(self.created_date, default=json_serial),
-            'updated_date':self.updated_date, #json.dumps(self.updated_date, default=json_serial),
-            'data': self.data,
+            'created_date': date_to_json(self.created_date),
+            'updated_date': date_to_json(self.updated_date)
         }

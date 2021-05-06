@@ -3,8 +3,10 @@ from flask import Blueprint
 from flask_restx import Api
 
 from app.controller.demo_controller import api as demo_api
-from app.controller.user_controller import api as user_api
 from app.controller.image_controller import api as image_api
+from app.controller.post_controller import api as post_api
+from app.controller.tutor_controller import api as tutor_api
+from app.controller.user_controller import api as user_api
 from app.util.api_response import response_object
 
 blueprint = Blueprint('api', __name__, url_prefix="/api", template_folder='templates')
@@ -16,6 +18,8 @@ api = Api(blueprint,
 api.add_namespace(demo_api, path='/demo')
 api.add_namespace(user_api, path='/user')
 api.add_namespace(image_api, path='/image')
+api.add_namespace(post_api, path='/post')
+api.add_namespace(tutor_api, path='/tutor')
 
 
 @api.errorhandler(werkzeug.exceptions.BadRequest)

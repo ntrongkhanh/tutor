@@ -8,7 +8,7 @@ from sqlalchemy.orm import relationship
 
 from app import db, bcrypt, app
 from app.model.token import Token
-from app.util.api_response import json_serial
+from app.util.api_response import json_serial, date_to_json
 
 
 class User(db.Model):
@@ -120,7 +120,7 @@ class User(db.Model):
             'is_active': self.is_active,
             'avatar_id': self.avatar_id,
             'avatar': self.avatar,
-            'created_date': self.created_date  # json.dumps(self.created_date, default=json_serial),
+            'created_date': date_to_json(self.created_date)  # json.dumps(self.created_date, default=json_serial),
         }
 
     def to_payload(self):

@@ -1,8 +1,12 @@
 import datetime
 
 from sqlalchemy import ForeignKey
+from sqlalchemy.orm import relationship
 
 from app import db
+from app.util.api_response import date_to_json
+
+
 
 
 class Post(db.Model):
@@ -25,7 +29,7 @@ class Post(db.Model):
     is_active = db.Column(db.Boolean, default=True, nullable=False)
 
     user_id = db.Column(db.Integer, ForeignKey('users.id'))
-    # user = relationship("User", backref="posts", lazy=True)
+    # user = relationship("User", backref="posts")
 
     created_date = db.Column(db.DateTime, nullable=True)
     updated_date = db.Column(db.DateTime, nullable=True)
@@ -65,5 +69,7 @@ class Post(db.Model):
             'require': self.require,
             'contact': self.contact,
             'form_of_teaching': self.form_of_teaching,
-            'user': self.user
+            # 'user': self.user.to_json(),
+            'created_date':date_to_json(self.created_date),
+            'updated_date':date_to_json(self.updated_date),
         }

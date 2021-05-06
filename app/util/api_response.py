@@ -21,4 +21,9 @@ def response_object(status=True, message=response_message.SUCCESS, data=[], pagi
 
 def json_serial(obj):
     if isinstance(obj, datetime):
-        return obj.isoformat()
+        # return obj.isoformat()
+        return obj.__str__()
+
+
+def date_to_json(obj):
+    return obj.strftime("%Y-%m-%d %H:%M:%S")
