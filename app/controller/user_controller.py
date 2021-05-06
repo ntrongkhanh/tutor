@@ -1,4 +1,4 @@
-from datetime import timedelta
+from datetime import timedelta, datetime
 
 import flask
 from flask import request
@@ -26,6 +26,7 @@ create_parser.add_argument("password", type=str, location='form', required=True)
 create_parser.add_argument("first_name", type=str, location='form', required=True)
 create_parser.add_argument("last_name", type=str, location='form', required=True)
 create_parser.add_argument("sex", type=bool, location='form', required=True)
+create_parser.add_argument("birthday", type=datetime, location='form', required=True)
 
 
 @api.route("/create")

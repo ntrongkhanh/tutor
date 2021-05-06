@@ -24,6 +24,7 @@ def create_user(args, file):
         password=args['password'],
         first_name=args['first_name'],
         last_name=args['last_name'],
+        birthday=args['birthday'],
         sex=True if args['sex'] == 'true' else False,
         avatar_id=image.id
     )
@@ -54,6 +55,7 @@ def update_user(args, user_id):
     user.sex = args['sex']
     user.last_name = args['last_name']
     user.first_name = args['first_name']
+    user.birthday = args['birthday']
     user.updated_date = datetime.datetime.now()
 
     try:

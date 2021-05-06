@@ -23,7 +23,8 @@ class UserDto:
     user_update_request = api.model('user_update_request', {
         'first_name': fields.String(required=False, description='user email address'),
         'last_name': fields.String(required=False, description='user email address'),
-        'sex': fields.Boolean(required=False, description='user email address')
+        'sex': fields.Boolean(required=False, description='user email address'),
+        'birthday': fields.DateTime(required=False, description='user email address')
     })
 
     avatar = api.inherit('avatar', {

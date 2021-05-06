@@ -1,12 +1,9 @@
 import datetime
 
 from sqlalchemy import ForeignKey
-from sqlalchemy.orm import relationship
 
 from app import db
 from app.util.api_response import date_to_json
-
-
 
 
 class Post(db.Model):
@@ -70,6 +67,6 @@ class Post(db.Model):
             'contact': self.contact,
             'form_of_teaching': self.form_of_teaching,
             # 'user': self.user.to_json(),
-            'created_date':date_to_json(self.created_date),
-            'updated_date':date_to_json(self.updated_date),
+            'created_date': date_to_json(self.created_date),
+            'updated_date': date_to_json(self.updated_date),
         }

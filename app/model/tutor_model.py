@@ -12,7 +12,7 @@ class Tutor(db.Model):
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     public_id = db.Column(db.String(50), unique=True)
-    birthday = db.Column(db.DateTime, nullable=True)
+
     career = db.Column(db.String(255), nullable=True)
     tutor_description = db.Column(db.Text, nullable=True)
     majors = db.Column(db.String(255), nullable=True)
@@ -26,14 +26,14 @@ class Tutor(db.Model):
     is_active = db.Column(db.Boolean, default=False, nullable=False)
 
     images = relationship("Image", backref="tutor", lazy=True)
+    user = relationship("User", backref="tutor", lazy=True, uselist=False)
 
     created_date = db.Column(db.DateTime, nullable=True)
     updated_date = db.Column(db.DateTime, nullable=True)
 
-    def __init__(self, public_id, birthday, career, tutor_description, majors, degree, school, address, class_type,
+    def __init__(self, public_id, career, tutor_description, majors, degree, school, address, class_type,
                  experience, other_information):
         self.public_id = public_id
-        self.birthday = birthday
         self.career = career
         self.tutor_description = tutor_description
         self.majors = majors
@@ -50,7 +50,6 @@ class Tutor(db.Model):
         return {
             'id': self.id,
             'public_id': self.public_id,
-            'birthday': json.dumps(self.birthday, default=json_serial),
             'career': self.career,
             'tutor_description': self.tutor_description,
             'majors': self.majors,
@@ -61,7 +60,7 @@ class Tutor(db.Model):
             'class_type': self.class_type,
             'experience': self.experience,
             'other_information': self.other_information,
-            'images': [image for image in self.images],
+            'images': [image.to_json() for image in self.images],
             'created_date': date_to_json(self.created_date),
             'updated_date': date_to_json(self.updated_date)
         }
