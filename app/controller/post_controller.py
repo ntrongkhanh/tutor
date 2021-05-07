@@ -27,10 +27,16 @@ _create_parser.add_argument("form_of_teaching", type=str, location="json", requi
 
 
 @api.route('/create-tutor-post')
-class create_tutor_post(Resource):
+class CreateTutorPost(Resource):
     @api.doc('create tutor post')
     @api.expect(_create_parser, validate=True)
+    @api.response(201, 'Created')
+    @api.response(401, 'Unauthorized')
+    @api.response(403, 'Forbidden')
+    @api.response(404, 'Not found')
+    @api.response(500, 'Internal server error')
     def post(self):
+        """Create tutor post (Gia sư tạo bài đăng)"""
         args = _create_parser.parse_args()
         post = Post(
             is_tutor=True,
@@ -55,10 +61,16 @@ class create_tutor_post(Resource):
 
 
 @api.route('/create-search-post')
-class create_search_post(Resource):
+class CreateSearchPost(Resource):
     @api.doc('create search post')
     @api.expect(_create_parser, validate=True)
+    @api.response(201, 'Created')
+    @api.response(401, 'Unauthorized')
+    @api.response(403, 'Forbidden')
+    @api.response(404, 'Not found')
+    @api.response(500, 'Internal server error')
     def post(self):
+        """Create search post (Đăng bài tìm kiếm gia sư)"""
         args = _create_parser.parse_args()
         post = Post(
             is_tutor=False,
@@ -99,10 +111,17 @@ _update_parser.add_argument("form_of_teaching", type=str, location="json", requi
 
 
 @api.route('/update')
-class update(Resource):
+class Update(Resource):
     @api.doc('update post')
+    @api.expect(_update_parser, validate=True)
+    @api.response(200, 'OK')
+    @api.response(401, 'Unauthorized')
+    @api.response(403, 'Forbidden')
+    @api.response(404, 'Not found')
+    @api.response(500, 'Internal server error')
     def put(self):
-        args = _create_parser.parse_args()
+        """Update post (Cập nhật bài post)"""
+        args = _update_parser.parse_args()
         post = Post.query.get(args['id'])
         if not post:
             return response_object(status=False, message=response_message.NOT_FOUND), 404
@@ -125,11 +144,17 @@ class update(Resource):
         return response_object(), 200
 
 
-@api.route('/delete/<id>')
-class delete(Resource):
+@api.route('/delete/<post_id>')
+class Delete(Resource):
     @api.doc('delete post')
-    def delete(self, id):
-        Post.query.filter(PostDto.id == id).delete()
+    @api.response(200, 'OK')
+    @api.response(401, 'Unauthorized')
+    @api.response(403, 'Forbidden')
+    @api.response(404, 'Not found')
+    @api.response(500, 'Internal server error')
+    def delete(self, post_id):
+        """Delete post by id (Xóa bài post)"""
+        Post.query.filter(PostDto.id == post_id).delete()
         db.session.commit()
         return response_object(), 200
 
@@ -151,12 +176,20 @@ _filter_parser.add_argument("form_of_teaching", type=str, location="args", requi
 _filter_parser.add_argument("user_id", type=int, location="args", required=False)
 _filter_parser.add_argument("user_name", type=str, location="args", required=False)
 
+_filter_response = PostDto.post_list_response
+
 
 @api.route('/')
-class filter(Resource):
+class Filter(Resource):
     @api.doc('filter post')
     @api.expect(_filter_parser, validate=True)
+    @api.response(401, 'Unauthorized')
+    @api.response(403, 'Forbidden')
+    @api.response(404, 'Not found')
+    @api.response(500, 'Internal server error')
+    @api.marshal_with(_filter_response, 200)
     def get(self):
+        """Filter posts (lọc các bài post)"""
         args = _filter_parser.parse_args()
 
         posts = Post.query.filter(
@@ -187,10 +220,19 @@ class filter(Resource):
         return response_object(data=[post.to_json() for post in posts]), 200
 
 
-@api.route('/<id>')
-class get(Resource):
+_post_response = PostDto.post_response
+
+
+@api.route('/<post_id>')
+class Get(Resource):
     @api.doc('get post by id')
-    def get(self, id):
-        post = Post.query.get(id)
+    @api.response(401, 'Unauthorized')
+    @api.response(403, 'Forbidden')
+    @api.response(404, 'Not found')
+    @api.response(500, 'Internal server error')
+    @api.marshal_with(_post_response, 200)
+    def get(self, post_id):
+        """Get a post by id (Get bài post)"""
+        post = Post.query.get(post_id)
 
         return response_object(data=post.to_json()), 200

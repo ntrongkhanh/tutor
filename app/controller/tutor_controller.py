@@ -12,6 +12,8 @@ from app.util.api_response import response_object
 
 api = TutorDto.api
 
+_message_response = TutorDto.message_response
+
 _create_parser = api.parser()
 _create_parser.add_argument("user_id", type=int, location='json', required=True)
 _create_parser.add_argument("career", type=str, location='json', required=False)
@@ -26,10 +28,14 @@ _create_parser.add_argument("other_information", type=str, location='json', requ
 
 
 @api.route('/create')
-class create(Resource):
+class Create(Resource):
     @api.doc('create tutor')
     @api.expect(_create_parser, validate=True)
+    @api.response(404, 'Not found')
+    @api.response(500, 'Internal server error')
+    @api.marshal_with(_message_response, 201)
     def post(self):
+        """Create tutor (Tạo gia sư)"""
         args = _create_parser.parse_args()
         user = User.query.get(args['user_id'])
         if not user:
@@ -49,7 +55,7 @@ class create(Resource):
         db.session.add(tutor)
         user.tutor_id = tutor.id
         db.session.commit()
-        return response_object(data=tutor.to_json()), 200
+        return response_object(data=tutor.to_json()), 201
 
 
 _update_parser = api.parser()
@@ -66,10 +72,16 @@ _update_parser.add_argument("other_information", type=str, location='json', requ
 
 
 @api.route('/update')
-class update(Resource):
+class Update(Resource):
     @api.doc('update tutor')
     @api.expect(_update_parser, validate=True)
+    @api.response(401, 'Unauthorized')
+    @api.response(403, 'Forbidden')
+    @api.response(404, 'Not found')
+    @api.response(500, 'Internal server error')
+    @api.marshal_with(_message_response, 200)
     def put(self):
+        """Update tutor (Cập nhật thông tin gia sư)"""
         args = _update_parser.parse_args()
         tutor = Tutor.query.get(args['id'])
         if not tutor:
@@ -90,11 +102,17 @@ class update(Resource):
         return response_object(data=tutor.to_json()), 200
 
 
-@api.route('/delete/<id>')
-class delete(Resource):
+@api.route('/delete/<tutor_id>')
+class Delete(Resource):
     @api.doc('delete tutor')
-    def delete(self, id):
-        tutor = Tutor.query.get(id)
+    @api.response(401, 'Unauthorized')
+    @api.response(403, 'Forbidden')
+    @api.response(404, 'Not found')
+    @api.response(500, 'Internal server error')
+    @api.marshal_with(_message_response, 200)
+    def delete(self, tutor_id):
+        """Delete a tutor (Xóa 1 gia sư)"""
+        tutor = Tutor.query.get(tutor_id)
         if not tutor:
             return response_object(status=False, message=response_message.NOT_FOUND), 404
 
@@ -117,12 +135,20 @@ _filter_parser.add_argument("class_type", type=str, location='args', required=Fa
 _filter_parser.add_argument("experience", type=str, location='args', required=False)
 _filter_parser.add_argument("other_information", type=str, location='args', required=False)
 
+_filter_response = TutorDto.tutor_list_response
+
 
 @api.route('/')
-class filter(Resource):
+class Filter(Resource):
     @api.doc('filter tutor')
-    @api.expect(_filter_parser)
+    @api.expect(_filter_parser, validate=True)
+    @api.response(401, 'Unauthorized')
+    @api.response(403, 'Forbidden')
+    @api.response(404, 'Not found')
+    @api.response(500, 'Internal server error')
+    @api.marshal_with(_filter_response, 200)
     def get(self):
+        """Filter tutors (Lọc các gia sư)"""
         args = _filter_parser.parse_args()
 
         tutors = Tutor.query.filter(
@@ -145,10 +171,19 @@ class filter(Resource):
         return response_object(data=[tutor.to_json() for tutor in tutors]), 200
 
 
-@api.route('/<id>')
-class get(Resource):
+_tutor_response = TutorDto.tutor_response
+
+
+@api.route('/<tutor_id>')
+class Get(Resource):
     @api.doc('get tutor by id')
-    def get(self, id):
-        tutor = Tutor.query.filter(Tutor.id == id, Tutor.is_active).first()
+    @api.response(401, 'Unauthorized')
+    @api.response(403, 'Forbidden')
+    @api.response(404, 'Not found')
+    @api.response(500, 'Internal server error')
+    @api.marshal_with(_tutor_response, 200)
+    def get(self, tutor_id):
+        """Get a tutor by id (Get 1 gia sư)"""
+        tutor = Tutor.query.filter(Tutor.id == tutor_id, Tutor.is_active).first()
 
         return response_object(data=tutor.to_json()), 200

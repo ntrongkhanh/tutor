@@ -4,6 +4,7 @@ from datetime import datetime
 import jwt
 import pytz
 from sqlalchemy import ForeignKey
+from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import relationship
 
 from app import db, bcrypt, app
@@ -49,7 +50,16 @@ class User(db.Model):
         self.created_date = datetime.now()
         self.updated_date = datetime.now()
 
-    def encode_auth_token(self, user_id, is_admin, is_tutor):
+    @hybrid_property
+    def password(self):
+        return self.password
+
+    @password.setter
+    def password(self, password):
+        self.password = bcrypt.generate_password_hash(password).decode('utf-8')
+
+    @staticmethod
+    def encode_auth_token(user_id, is_admin, is_tutor):
         """
         Generates the Auth Token    .strftime("%d-%m-%Y %H:%M:%S"),
         :return: string         json.dumps((datetime.utcnow() + timedelta(days=1)), default=json_serial),

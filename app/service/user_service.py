@@ -3,7 +3,7 @@ import random
 import string
 
 import app.util.response_message as message
-from app import db, bcrypt
+from app import db
 from app.mail import mail
 from app.model.code import Code
 from app.model.image_model import Image
@@ -121,7 +121,7 @@ def reset_password(args):
     if reset_code.code == args['code']:
         try:
             user = User.query.filter(User.email == reset_code.email).first()
-            user.password = hash_password(args['new_password'])
+            user.password = args['new_password']
             user.updated_date = datetime.datetime.now()
             db.session.delete(reset_code)
             db.session.commit()
@@ -161,17 +161,13 @@ def change_password(args, id_user):
         return response_object(status=False, message=message.USER_NOT_FOUND), 404
     if not user.verify_password(args['old_password']):
         return response_object(status=False, message=message.PASSWORD_WRONG), 401
-    user.password = hash_password(args['new_password'])
+    user.password = args['new_password']
     user.updated_date = datetime.datetime.now()
     try:
         db.session.commit()
     except:
         return response_object(status=False, message=message.UPDATE_FAILED), 500
     return response_object(), 200
-
-
-def hash_password(password):
-    return bcrypt.generate_password_hash(password).decode('utf-8')
 
 
 def send_mail_reset_password(reset_code):

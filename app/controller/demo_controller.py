@@ -103,3 +103,4 @@ class auth2(Resource):
         identity = get_jwt_identity()
         print(identity['user_id'])
         return flask.make_response(str(identity['user_id']))
+

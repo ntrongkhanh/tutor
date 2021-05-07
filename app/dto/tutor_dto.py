@@ -1,30 +1,42 @@
 from flask_restx import Namespace, fields
 
 from app.dto.base_dto import base
+from app.dto.user_dto import UserDto
 
 
 class TutorDto:
     api = Namespace('Tutor', description="Tutor")
 
-    filter_request = api.model('filter', {
-        'id': fields.Integer(required=False, description='description'),
-        'description': fields.String(required=False, description='description'),
+    """data"""
 
+    tutor_data = api.inherit('image_data', {
+        'public_id': fields.Integer(required=False, description='description'),
+        'career': fields.String(required=False, description='description'),
+        'tutor_description': fields.String(required=False, description='description'),
+        'majors': fields.String(required=False, description='description'),
+        'degree': fields.String(required=False, description='description'),
+        'school': fields.String(required=False, description='description'),
+        'address': fields.String(required=False, description='description'),
+        'subject': fields.String(required=False, description='description'),
+        'class_type': fields.String(required=False, description='description'),
+        'experience': fields.String(required=False, description='description'),
+        'other_information': fields.String(required=False, description='description'),
+        'images': fields.String(required=False, description='description'),
+        'user': fields.Nested(UserDto.login_data, required=False, description='description'),
+        'created_date': fields.String(required=False, description='description'),
+        'updated_date': fields.String(required=False, description='description'),
     })
 
-    filter_request = api.model('filter', {
-        'id': fields.Integer(required=False, description='description'),
-        'description': fields.String(required=False, description='description'),
+    """response"""
 
+    tutor_response = api.inherit('tutor_response', base, {
+        'data': fields.Nested(tutor_data)
     })
 
-    image_data = api.inherit('image_data', {
-        'description': fields.String(required=False, description='description'),
-        'created_date': fields.DateTime(required=False, description='description'),
-        'updated_date': fields.DateTime(required=False, description='description'),
-        'data': fields.String(required=False, description='description'),
+    tutor_list_response = api.inherit('tutor_list_response', base, {
+        'data': fields.List(fields.Nested(tutor_data))
     })
 
-    image_response = api.inherit('login_response', base, {
-        'data': fields.Nested(image_data)
+    message_response = api.inherit('get_saved_resume_list_response', base, {
+        'data': fields.String,
     })

@@ -7,25 +7,7 @@ class UserDto:
     api = Namespace('User', description="User")
     __base = api.model("base", base)
 
-    login_request = api.model('login_request', {
-        'email': fields.String(required=True, description='user email address'),
-        'password': fields.String(required=True, description='user password'),
-    })
-
-    user_creation_request = api.model('user_creation_request', {
-        'email': fields.String(required=False, description='user email address'),
-        'password': fields.String(required=False, description='user email address'),
-        'first_name': fields.String(required=False, description='user email address'),
-        'last_name': fields.String(required=False, description='user email address'),
-        'sex': fields.Boolean(required=False, description='user email address'),
-    })
-
-    user_update_request = api.model('user_update_request', {
-        'first_name': fields.String(required=False, description='user email address'),
-        'last_name': fields.String(required=False, description='user email address'),
-        'sex': fields.Boolean(required=False, description='user email address'),
-        'birthday': fields.DateTime(required=False, description='user email address')
-    })
+    """data"""
 
     avatar = api.inherit('avatar', {
         'id': fields.Integer(required=False, description='user email address'),
@@ -45,6 +27,7 @@ class UserDto:
     })
 
     profile_data = api.inherit('profile_data', {
+        'id': fields.Integer(required=False, description='user email address'),
         'email': fields.String(required=False, description='user email address'),
         'first_name': fields.String(required=False, description='user email address'),
         'last_name': fields.String(required=False, description='user email address'),
@@ -52,9 +35,10 @@ class UserDto:
         'is_tutor': fields.Boolean(required=False, description='user email address'),
         'avatar_id': fields.Integer(required=False, description='user email address'),
         'avatar': fields.Nested(avatar),
-        'token': fields.String(required=False, description='user email address'),
         'created_date': fields.DateTime(required=False, description='user email address')
     })
+
+    """response"""
 
     profile_response = api.inherit('profile_response', base, {
         'data': fields.Nested(profile_data)
@@ -64,18 +48,14 @@ class UserDto:
         'data': fields.Nested(login_data)
     })
 
-    active_response = api.inherit('active_response', base, {
-        'data': 'active success'
+    user_response = api.inherit('user_response', base, {
+        'data': fields.Nested(profile_data)
     })
 
-    reset_password_response = api.inherit('reset_password_response', base, {
-        'data': 'active password success'
+    user_list_response=api.inherit('user_list_response',base,{
+        'data':fields.List(fields.Nested(profile_data))
     })
 
-    logout_response = api.inherit('logout_response', base, {
-        'data': 'logout success'
-    })
-
-    change_password_response = api.inherit('change_password_response', base, {
-        'data': 'change password success'
+    message_response = api.inherit('get_saved_resume_list_response', base, {
+        'data': fields.String,
     })
