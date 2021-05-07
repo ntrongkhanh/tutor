@@ -2,6 +2,7 @@ import base64
 
 from flask import Flask, render_template
 from flask_bcrypt import Bcrypt
+from flask_cors import CORS
 from flask_jwt_extended import JWTManager
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
@@ -23,6 +24,7 @@ def create_app(config_name):
     app.url_map.strict_slashes = False
     db.init_app(app)
     jwt = JWTManager(app)
+    cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
     migrate.init_app(app, db)
 
     from . import model
@@ -34,14 +36,6 @@ def create_app(config_name):
         from app.model.image_model import Image
         obj = Image.query.get(4)
         image = base64.b64encode(obj.data).decode("utf-8")
-        return render_template("image.html", image=image)
-
-    # @app.errorhandler(200)
-    # def bad_request(error):
-    #     return response_object(status=False, code=200, message=error.message), 200
-    #
-    # @app.route('/')
-    # def mainpage():
-    #     raise CustomError(404, 'Not found')
+        return render_template("hello.html")
 
     return app
