@@ -28,16 +28,20 @@ class PostDto:
         'updated_date': fields.String(required=False, description='description'),
         'user': fields.Nested(UserDto.login_data, required=False, description='description')
     })
-
+    pagination_data = api.model('pagination', {
+        'page': fields.Integer,
+        'total': fields.Integer,
+    })
     """response"""
 
     post_response = api.inherit('post_response', base, {
         'data': fields.Nested(post_data)
     })
     post_list_response = api.inherit('post_list_response', base, {
-        'data': fields.List(fields.Nested(post_data))
+        'data': fields.List(fields.Nested(post_data)),
+        'pagination': fields.Nested(pagination_data),
     })
 
-    message_response = api.inherit('get_saved_resume_list_response', base, {
+    message_response = api.inherit('message_response', base, {
         'data': fields.String,
     })

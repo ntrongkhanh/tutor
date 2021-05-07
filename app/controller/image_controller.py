@@ -16,11 +16,12 @@ _response_message = ImageDto.message_response
 
 _create_parser = api.parser()
 _create_parser.add_argument("file", type=FileStorage, location="files", required=True)
-_create_parser.add_argument("description", type=str, location='args', required=True)
+_create_parser.add_argument("description", type=str, location='args', required=False)
 
 _create_response = ImageDto.image_response
 
 
+# ok
 @api.route('/create')
 class Create(Resource):
     @api.doc('create image')
@@ -43,11 +44,12 @@ class Create(Resource):
 _upload_parser = api.parser()
 _upload_parser.add_argument("file", type=FileStorage, location="files", required=True)
 _upload_parser.add_argument("id", type=int, location='args', required=True)
-_upload_parser.add_argument("description", type=str, location='args', required=True)
+_upload_parser.add_argument("description", type=str, location='args', required=False)
 
 _upload_response = ImageDto.image_response
 
 
+# ok
 @api.route('/update')
 class Update(Resource):
     @api.doc('update image')
@@ -65,13 +67,14 @@ class Update(Resource):
         if not image:
             return response_object(status=False, data=response_message.NOT_FOUND), 404
 
-        image.description = args['description']
+        image.description = args['description'] if args['description'] else image.description
         image.data = args['file'].read()
         image.updated_date = datetime.now()
         db.session.commit()
         return response_object(data=image.to_json()), 200
 
 
+# ok
 @api.route('/delete/<image_id>')
 class Delete(Resource):
     @api.doc('delete image')
@@ -91,13 +94,16 @@ _filter_parser = api.parser()
 _filter_parser.add_argument("id", type=int, location="args", required=False)
 _filter_parser.add_argument("description", type=str, location="args", required=False)
 
-_filter_response=ImageDto.image_list_response
+_filter_response = ImageDto.image_list_response
+
+
+# ok
 @api.route('/')
 class Filter(Resource):
     @api.doc('get all')
     @api.expect(_filter_parser, validate=True)
     @api.response(500, 'Internal server error')
-    @api.marshal_with(_filter_response,200)
+    @api.marshal_with(_filter_response, 200)
     def get(self):
         """Filter images (Lọc hình ảnh)"""
         args = _filter_parser.parse_args()
@@ -105,7 +111,6 @@ class Filter(Resource):
         description = args['description']
         search = "%{}%".format(description)
         images = Image.query.filter(
-
             or_(Image.description.like(search), description is None),
             or_(Image.id == image_id, image_id is None)
         ).all()
@@ -114,6 +119,7 @@ class Filter(Resource):
         return response_object(data=[image.to_json() for image in images]), 200
 
 
+# ok
 @api.route('/<image_id>')
 class Get(Resource):
     @api.doc('get image')

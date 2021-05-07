@@ -32,10 +32,6 @@ class AuthDto:
         'data': fields.Nested(_login_data)
     })
 
-    # message_response = api.inherit('message_response', base, {
-    #     'data': fields.String(required=False, description='description')
-    # })
-
-    message_response = api.inherit('get_saved_resume_list_response', base, {
+    message_response = api.inherit('message_response', base, {
         'data': fields.String,
     })

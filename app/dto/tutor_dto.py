@@ -9,7 +9,7 @@ class TutorDto:
 
     """data"""
 
-    tutor_data = api.inherit('image_data', {
+    tutor_data = api.inherit('tutor_data', {
         'public_id': fields.Integer(required=False, description='description'),
         'career': fields.String(required=False, description='description'),
         'tutor_description': fields.String(required=False, description='description'),
@@ -26,7 +26,10 @@ class TutorDto:
         'created_date': fields.String(required=False, description='description'),
         'updated_date': fields.String(required=False, description='description'),
     })
-
+    pagination_data = api.model('pagination', {
+        'page': fields.Integer,
+        'total': fields.Integer,
+    })
     """response"""
 
     tutor_response = api.inherit('tutor_response', base, {
@@ -34,9 +37,10 @@ class TutorDto:
     })
 
     tutor_list_response = api.inherit('tutor_list_response', base, {
-        'data': fields.List(fields.Nested(tutor_data))
+        'data': fields.List(fields.Nested(tutor_data)),
+        'pagination':fields.Nested(pagination_data)
     })
 
-    message_response = api.inherit('get_saved_resume_list_response', base, {
+    message_response = api.inherit('message_response', base, {
         'data': fields.String,
     })

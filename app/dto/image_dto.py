@@ -12,7 +12,10 @@ class ImageDto:
         'id': fields.Integer(required=False, description='description'),
         'description': fields.String(required=False, description='description'),
     })
-
+    pagination_data = api.model('pagination', {
+        'page': fields.Integer,
+        'total': fields.Integer,
+    })
     """response"""
 
     image_response = api.inherit('image_response', base, {
@@ -20,9 +23,10 @@ class ImageDto:
     })
 
     image_list_response = api.inherit('image_list_response', base, {
-        'data': fields.List(fields.Nested(image_data))
+        'data': fields.List(fields.Nested(image_data)),
+        'pagination': fields.Nested(pagination_data)
     })
 
-    message_response = api.inherit('get_saved_resume_list_response', base, {
+    message_response = api.inherit('message_response', base, {
         'data': fields.String,
     })

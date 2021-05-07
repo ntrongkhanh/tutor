@@ -37,7 +37,10 @@ class UserDto:
         'avatar': fields.Nested(avatar),
         'created_date': fields.DateTime(required=False, description='user email address')
     })
-
+    pagination_data = api.model('pagination', {
+        'page': fields.Integer,
+        'total': fields.Integer,
+    })
     """response"""
 
     profile_response = api.inherit('profile_response', base, {
@@ -52,10 +55,11 @@ class UserDto:
         'data': fields.Nested(profile_data)
     })
 
-    user_list_response=api.inherit('user_list_response',base,{
-        'data':fields.List(fields.Nested(profile_data))
+    user_list_response = api.inherit('user_list_response', base, {
+        'data': fields.List(fields.Nested(profile_data)),
+        'pagination': fields.Nested(pagination_data)
     })
 
-    message_response = api.inherit('get_saved_resume_list_response', base, {
+    message_response = api.inherit('message_response', base, {
         'data': fields.String,
     })
