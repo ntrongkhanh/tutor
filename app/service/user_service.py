@@ -73,14 +73,14 @@ def get_profile(id):
     return response_object(data=user.to_json()), 200
 
 
-def update_avatar(args, id_user):
+def update_avatar(file, id_user):
     user = User.query.get(id_user)
     if not user:
         return response_object(status=False, message=message.USER_NOT_FOUND), 404
     image = Image.query.filter(Image.user == user).first()
 
-    data = args['file'].read()
-    file_name = args['file'].filename
+    data = file.read()
+    file_name = file.filename
     image.data = data
     image.description = file_name
     image.updated_date = datetime.datetime.now()
@@ -101,9 +101,9 @@ def login(args):
     return response_object(data=data), 200
 
 
-def send_mail_reset_password(args):
+def forgot_password(email):
     reset_code = Code(
-        email=args['email'],
+        email=email,
         code=''.join(random.choice(string.ascii_letters) for i in range(20))
     )
     db.session.add(reset_code)
