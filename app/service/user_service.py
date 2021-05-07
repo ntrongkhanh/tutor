@@ -38,7 +38,7 @@ def create_user(args, file):
 
     try:
 
-        send_mail_active_user(active_code=active_code)
+        # send_mail_active_user(active_code=active_code)
 
         db.session.commit()
 
@@ -161,7 +161,7 @@ def change_password(args, id_user):
         return response_object(status=False, message=message.USER_NOT_FOUND), 404
     if not user.verify_password(args['old_password']):
         return response_object(status=False, message=message.PASSWORD_WRONG), 401
-    user.password = args['new_password']
+    user.set_password(args['new_password'])
     user.updated_date = datetime.datetime.now()
     try:
         db.session.commit()

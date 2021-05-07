@@ -50,13 +50,8 @@ class User(db.Model):
         self.created_date = datetime.now()
         self.updated_date = datetime.now()
 
-    @hybrid_property
-    def password(self):
-        return self.password
-
-    @password.setter
-    def password(self, password):
-        self.password = bcrypt.generate_password_hash(password).decode('utf-8')
+    def set_password(self,password):
+        self.password= bcrypt.generate_password_hash(password).decode('utf-8')
 
     @staticmethod
     def encode_auth_token(user_id, is_admin, is_tutor):

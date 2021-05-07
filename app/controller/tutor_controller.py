@@ -27,6 +27,7 @@ _create_parser.add_argument("experience", type=str, location='json', required=Fa
 _create_parser.add_argument("other_information", type=str, location='json', required=False)
 
 
+# sai
 @api.route('/create')
 class Create(Resource):
     @api.doc('create tutor')
@@ -48,6 +49,7 @@ class Create(Resource):
             degree=args['degree'],
             school=args['school'],
             address=args['address'],
+            subject=args['subject'],
             class_type=args['class_type'],
             experience=args['experience'],
             other_information=args['other_information'],
@@ -55,7 +57,7 @@ class Create(Resource):
         db.session.add(tutor)
         user.tutor_id = tutor.id
         db.session.commit()
-        return response_object(data=tutor.to_json()), 201
+        return response_object(), 201
 
 
 _update_parser = api.parser()
@@ -71,6 +73,7 @@ _update_parser.add_argument("experience", type=str, location='json', required=Fa
 _update_parser.add_argument("other_information", type=str, location='json', required=False)
 
 
+# cũng ok
 @api.route('/update')
 class Update(Resource):
     @api.doc('update tutor')
@@ -84,24 +87,25 @@ class Update(Resource):
         """Update tutor (Cập nhật thông tin gia sư)"""
         args = _update_parser.parse_args()
         tutor = Tutor.query.get(args['id'])
-        # if not tutor:
-        #     return response_object(status=False, message=response_message.NOT_FOUND), 404
-        #
-        # tutor.career = args['career'] if args['career'] else tutor.career
-        # tutor.tutor_description = args['tutor_description'] if args['tutor_description'] else tutor.tutor_description
-        # tutor.majors = args['majors'] if args['majors'] else tutor.majors
-        # tutor.degree = args['degree'] if args['degree'] else tutor.degree
-        # tutor.school = args['school'] if args['school'] else tutor.school
-        # tutor.address = args['address'] if args['address'] else tutor.address
-        # tutor.class_type = args['class_type'] if args['class_type'] else tutor.class_type
-        # tutor.experience = args['experience'] if args['experience'] else tutor.experience
-        # tutor.other_information = args['other_information'] if args['other_information'] else tutor.other_information
-        #
-        # db.session.commit()
+        if not tutor:
+            return response_object(status=False, message=response_message.NOT_FOUND), 404
 
-        return response_object(data=tutor.to_json()), 200
+        tutor.career = args['career'] if args['career'] else tutor.career
+        tutor.tutor_description = args['tutor_description'] if args['tutor_description'] else tutor.tutor_description
+        tutor.majors = args['majors'] if args['majors'] else tutor.majors
+        tutor.degree = args['degree'] if args['degree'] else tutor.degree
+        tutor.school = args['school'] if args['school'] else tutor.school
+        tutor.address = args['address'] if args['address'] else tutor.address
+        tutor.class_type = args['class_type'] if args['class_type'] else tutor.class_type
+        tutor.experience = args['experience'] if args['experience'] else tutor.experience
+        tutor.other_information = args['other_information'] if args['other_information'] else tutor.other_information
+
+        db.session.commit()
+
+        return response_object()
 
 
+# ok
 @api.route('/delete/<tutor_id>')
 class Delete(Resource):
     @api.doc('delete tutor')
@@ -137,7 +141,9 @@ _filter_parser.add_argument("other_information", type=str, location='args', requ
 
 _filter_response = TutorDto.tutor_list_response
 
-
+#ok
+# sửa user như get by id
+# public id quá dài
 @api.route('/')
 class Filter(Resource):
     @api.doc('filter tutor')
@@ -173,7 +179,8 @@ class Filter(Resource):
 
 _tutor_response = TutorDto.tutor_response
 
-
+# chưa  hiện đc user
+# public id quá dài
 @api.route('/<tutor_id>')
 class Get(Resource):
     @api.doc('get tutor by id')

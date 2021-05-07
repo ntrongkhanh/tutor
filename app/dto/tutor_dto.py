@@ -10,7 +10,7 @@ class TutorDto:
     """data"""
 
     tutor_data = api.inherit('tutor_data', {
-        'public_id': fields.Integer(required=False, description='description'),
+        'public_id': fields.String(required=False, description='description'),
         'career': fields.String(required=False, description='description'),
         'tutor_description': fields.String(required=False, description='description'),
         'majors': fields.String(required=False, description='description'),
