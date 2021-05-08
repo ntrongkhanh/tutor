@@ -45,7 +45,7 @@ class UserDto:
         'sex': fields.Boolean(required=False, description='user email address'),
         'is_tutor': fields.Boolean(required=False, description='user email address'),
         'avatar_id': fields.Integer(required=False, description='user email address'),
-        'avatar': fields.Nested(avatar),
+        # 'avatar': fields.Nested(avatar),
         'created_date': fields.String(required=False, description='user email address')
     })
     pagination_data = api.model('pagination', {

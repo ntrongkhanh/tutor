@@ -24,7 +24,7 @@ class AuthDto:
         'is_tutor': fields.Boolean(required=False, description='description'),
         'is_admin': fields.Boolean(required=False, description='description'),
         'avatar_id': fields.Integer(required=False, description='description'),
-        'avatar': fields.Nested(_avatar_data),
+        # 'avatar': fields.Nested(_avatar_data),
         'token': fields.String(required=False, description='description'),
     })
 
