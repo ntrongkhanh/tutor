@@ -72,10 +72,6 @@ class Update(Resource):
 
 # chưa làm
 
-_active_parser = api.parser()
-_active_parser.add_argument("email", type=str, location='args', required=True)
-_active_parser.add_argument("code", type=str, location='args', required=True)
-
 
 @api.route('/inactive/<user_id>')
 class Inactive(Resource):
@@ -93,13 +89,19 @@ class Inactive(Resource):
         # return user_service.active_user(args)
 
 
-@api.response('/active')
+_active_parser = api.parser()
+_active_parser.add_argument("email", type=str, location='args', required=True)
+_active_parser.add_argument("code", type=str, location='args', required=True)
+
+
+@api.route('/active')
 class Active(Resource):
     @api.doc('active account')
     @api.response(401, 'Unauthorized')
     @api.response(403, 'Forbidden')
     @api.response(404, 'Not found')
     @api.response(500, 'Internal server error')
+    @api.expect(_active_parser, validate=True)
     def get(self):
         args = _active_parser.parse_args()
 
