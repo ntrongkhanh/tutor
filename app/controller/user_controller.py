@@ -24,7 +24,7 @@ _create_parser.add_argument("last_name", type=str, location='form', required=Tru
 _create_parser.add_argument("sex", type=bool, location='form', required=True)
 _create_parser.add_argument("birthday", type=datetime, location='form', required=True)
 
-
+#tạm ok
 @api.route('/create')
 class Create(Resource):
     @api.doc('create user')
@@ -53,7 +53,7 @@ _update_parser.add_argument("birthday", type=datetime, location='json', required
 
 
 # coi lại cái lấy từ parser
-
+# truyền jwt
 @api.route('/update')
 class Update(Resource):
     @api.doc('update user')
@@ -94,7 +94,7 @@ _active_parser = api.parser()
 _active_parser.add_argument("email", type=str, location='args', required=True)
 _active_parser.add_argument("code", type=str, location='args', required=True)
 
-
+# ok
 @api.route('/active')
 class Active(Resource):
     @api.doc('active account')
@@ -165,7 +165,7 @@ class GetById(Resource):
         """get by id user"""
         return response_object(), 200
 
-    # jwt required , truyền user id vào
+# jwt required , truyền user id vào
 
 
 @api.route('/profile')
@@ -270,5 +270,5 @@ class Reset(Resource):
     def post(self):
         """reset password"""
         args = _reset_parser.parse_args()
-        password = request.json
+        password = request.json['password']
         return user_service.reset_password(args, password)

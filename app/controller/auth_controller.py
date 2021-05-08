@@ -81,6 +81,7 @@ class CheckToken(Resource):
     @api.expect(get_auth_required_parser(api), validate=True)
     @api.response(401, 'Unauthorized')
     @api.marshal_with(_message_response, 200)
+    @jwt_required()
     def get(self):
         """Check token (Kiểm tra hạn của token)"""
         return response_object(), 200

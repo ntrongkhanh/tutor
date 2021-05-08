@@ -15,7 +15,7 @@ api = TutorDto.api
 _message_response = TutorDto.message_response
 
 _create_parser = api.parser()
-_create_parser.add_argument("user_id", type=int, location='json', required=True)
+# _create_parser.add_argument("user_id", type=int, location='json', required=True)
 _create_parser.add_argument("career", type=str, location='json', required=False)
 _create_parser.add_argument("tutor_description", type=str, location='json', required=False)
 _create_parser.add_argument("majors", type=str, location='json', required=False)
@@ -28,7 +28,8 @@ _create_parser.add_argument("experience", type=str, location='json', required=Fa
 _create_parser.add_argument("other_information", type=str, location='json', required=False)
 
 
-# sai
+# tạm ok
+#truyền jwt get user id
 @api.route('/create')
 class Create(Resource):
     @api.doc('create tutor')
@@ -39,13 +40,13 @@ class Create(Resource):
     def post(self):
         """Create tutor (Tạo gia sư)"""
         args = _create_parser.parse_args()
-        user = User.query.get(args['user_id'])
+        user = User.query.get(1)
         if not user:
             return response_object(status=False, message=response_message.NOT_FOUND), 404
         if user.is_tutor:
             return response_object(status=False, message=response_message.ACCOUNT_IS_A_TUTOR_ALREADY), 400
         tutor = Tutor(
-            public_id='G' + str(uuid.uuid4())[:8].upper(),
+            public_id='GS' + str(uuid.uuid4())[:6].upper(),
             career=args['career'],
             tutor_description=args['tutor_description'],
             majors=args['majors'],
@@ -152,8 +153,8 @@ _filter_response = TutorDto.tutor_list_response
 
 
 # ok
-# sửa user như get by id
-# public id quá dài
+#
+#
 @api.route('/')
 class Filter(Resource):
     @api.doc('filter tutor')
@@ -193,8 +194,8 @@ class Filter(Resource):
 _tutor_response = TutorDto.tutor_response
 
 
-# chưa  hiện đc user
-# public id quá dài
+
+# tạm ok
 @api.route('/<tutor_id>')
 class Get(Resource):
     @api.doc('get tutor by id')

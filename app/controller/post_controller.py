@@ -199,7 +199,7 @@ _filter_response = PostDto.post_list_response
 
 
 # ok
-# chưa pagination
+
 @api.route('/')
 class Filter(Resource):
     @api.doc('filter post')

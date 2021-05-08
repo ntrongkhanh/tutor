@@ -17,7 +17,8 @@ class Config(object):
     MAIL_PASSWORD = 'khoaluan2021'
     MAIL_USE_TLS = False
     MAIL_USE_SSL = True
-    TOKEN_EXPIRED_TIME = timedelta(days=30)
+    TOKEN_EXPIRED_TIME = timedelta(seconds=50)
+    PROPAGATE_EXCEPTIONS = True
 
 
 class DevelopmentConfig(Config):
@@ -29,6 +30,7 @@ class DevelopmentConfig(Config):
     SQLALCHEMY_DATABASE_URI = "postgresql://postgres:ntrongkhanh@localhost:5432/tutor"
     SQLALCHEMY_TRACK_MODIFICATIONS = True
     SERVER_ADDRESS = ' http://127.0.0.1:5000'
+
 
 class MySqlConfig(Config):
     """
