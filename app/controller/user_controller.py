@@ -72,6 +72,10 @@ class Update(Resource):
 
 # chưa làm
 
+_active_parser = api.parser()
+_active_parser.add_argument("email", type=str, location='args', required=True)
+_active_parser.add_argument("code", type=str, location='args', required=True)
+
 
 @api.route('/inactive/<user_id>')
 class Inactive(Resource):
@@ -83,7 +87,23 @@ class Inactive(Resource):
     @api.marshal_with(_message_response, 200)
     def get(self, user_id):
         """inactive user"""
-        return response_object(), 200
+        pass
+        # args=_active_parser.parse_args()
+        #
+        # return user_service.active_user(args)
+
+
+@api.response('/active')
+class Active(Resource):
+    @api.doc('active account')
+    @api.response(401, 'Unauthorized')
+    @api.response(403, 'Forbidden')
+    @api.response(404, 'Not found')
+    @api.response(500, 'Internal server error')
+    def get(self):
+        args = _active_parser.parse_args()
+
+        return user_service.active_user(args)
 
 
 _filter_parser = api.parser()

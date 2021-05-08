@@ -56,6 +56,7 @@ class Create(Resource):
             other_information=args['other_information'],
         )
         db.session.add(tutor)
+        db.session.flush()
         user.tutor_id = tutor.id
         db.session.commit()
         return response_object(), 201
