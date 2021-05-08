@@ -175,6 +175,7 @@ class Delete(Resource):
 
 _filter_parser = api.parser()
 _filter_parser.add_argument("id", type=int, location="args", required=False)
+_filter_parser.add_argument("is_tutor", type=bool, location="args", required=False)
 _filter_parser.add_argument("title", type=str, location="args", required=False)
 _filter_parser.add_argument("description", type=str, location="args", required=False)
 _filter_parser.add_argument("teaching_address", type=str, location="args", required=False)
@@ -214,6 +215,7 @@ class Filter(Resource):
         page_size = args['page_size']
         posts = Post.query.filter(
             or_(Post.id == args['id'], args['id'] is None),
+            or_(Post.is_tutor == args['is_tutor'], args['is_tutor'] is None),
             or_(Post.title.like("%{}%".format(args['title'])), args['title'] is None),
             or_(Post.description.like("%{}%".format(args['description'])), args['description'] is None),
             or_(Post.teaching_address.like("%{}%".format(args['teaching_address'])), args['teaching_address'] is None),
