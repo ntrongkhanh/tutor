@@ -83,6 +83,7 @@ class CreateSearchPost(Resource):
         args = _create_parser.parse_args()
         post = Post(
             is_tutor=False,
+            public_id=str(uuid.uuid4())[:8].upper(),
             title=args['title'],
             description=args['description'],
             teaching_address=args['teaching_address'],
