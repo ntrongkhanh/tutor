@@ -42,6 +42,8 @@ class Create(Resource):
         user = User.query.get(args['user_id'])
         if not user:
             return response_object(status=False, message=response_message.NOT_FOUND), 404
+        if user.is_tutor:
+            return response_object(status=False, message=response_message.THE_ACCOUNT_IS_A_TUTOR_ALREADY), 400
         tutor = Tutor(
             public_id='G' + str(uuid.uuid4())[:8].upper(),
             career=args['career'],
@@ -58,6 +60,7 @@ class Create(Resource):
         db.session.add(tutor)
         db.session.flush()
         user.tutor_id = tutor.id
+        user.is_tutor = True
         db.session.commit()
         return response_object(), 201
 
@@ -164,6 +167,7 @@ class Filter(Resource):
         args = _filter_parser.parse_args()
         page = args['page']
         page_size = args['page_size']
+
         tutors = Tutor.query.filter(
             or_(Tutor.user.has(User.id == args['user_id']), args['user_id'] is None),
             or_(Tutor.public_id == args['public_id'], args['public_id'] is None),

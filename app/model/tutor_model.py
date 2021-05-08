@@ -25,8 +25,8 @@ class Tutor(db.Model):
     is_active = db.Column(db.Boolean, default=False, nullable=False)
 
     images = relationship("Image", backref="tutor", lazy=True)
-    user = relationship("User", backref="tutor", lazy=True)  # , uselist=False
-
+    # user = relationship("User", backref="tutor", lazy=True)  # , uselist=False
+    user = relationship("User", backref="tutor", lazy=True, uselist=False)
     created_date = db.Column(db.DateTime, nullable=True)
     updated_date = db.Column(db.DateTime, nullable=True)
 
@@ -63,5 +63,6 @@ class Tutor(db.Model):
             'other_information': self.other_information,
             'images': [image.to_json() for image in self.images],
             'created_date': date_to_json(self.created_date),
-            'updated_date': date_to_json(self.updated_date)
+            'updated_date': date_to_json(self.updated_date),
+            'user': self.user.to_json()
         }
