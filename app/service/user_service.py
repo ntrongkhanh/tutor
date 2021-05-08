@@ -3,7 +3,7 @@ import random
 import string
 
 import app.util.response_message as message
-from app import db
+from app import db, app
 from app.mail import mail
 from app.model.code import Code
 from app.model.image_model import Image
@@ -133,7 +133,7 @@ def reset_password(args, password):
 
 
 def send_mail_active_user(active_code):
-    link_active = f'http://127.0.0.1:5000/api/user/active/?email={active_code.email}&code={active_code.code}'
+    link_active = app.config['SERVER_ADDRESS'] + f'/api/user/active/?email={active_code.email}&code={active_code.code}'
     content = 'Please click on the link to activate your account: ' + link_active
     mail.send_mail_without_template(active_code.email, 'Active account', content=content)
 
@@ -173,7 +173,7 @@ def change_password(args, id_user):
 
 def send_mail_reset_password(reset_code):
     try:
-        link_reset = f'http://127.0.0.1:5000/api/user/reset/?email={reset_code.email}&code={reset_code.code}'
+        link_reset = app.config['SERVER_ADDRESS'] + f'/api/user/reset/?email={reset_code.email}&code={reset_code.code}'
         content = 'Please click on the link to reset your password: ' + link_reset
         mail.send_mail_without_template(reset_code.email, 'Reset password', content=content)
     except:
