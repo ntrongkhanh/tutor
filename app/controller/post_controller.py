@@ -41,6 +41,9 @@ class CreateTutorPost(Resource):
     def post(self):
         """Create tutor post (Gia sư tạo bài đăng)"""
         args = _create_parser.parse_args()
+        user = User.query.get(1)
+        if not user.is_tutor:
+            return response_object(status=False,message=response_message.FORBIDDEN), 403
         post = Post(
             public_id=str(uuid.uuid4())[:8].upper(),
             is_tutor=True,
