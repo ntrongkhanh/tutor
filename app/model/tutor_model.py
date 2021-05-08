@@ -25,7 +25,7 @@ class Tutor(db.Model):
     is_active = db.Column(db.Boolean, default=False, nullable=False)
 
     images = relationship("Image", backref="tutor", lazy=True)
-    user = relationship("User", backref="tutor", lazy=True, uselist=False)
+    user = relationship("User", backref="tutor", lazy=True) #, uselist=False
 
     created_date = db.Column(db.DateTime, nullable=True)
     updated_date = db.Column(db.DateTime, nullable=True)
