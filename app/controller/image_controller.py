@@ -5,7 +5,7 @@ import flask
 from flask_restx import Resource
 from werkzeug.datastructures import FileStorage
 
-from app import db
+from app import db, app
 from app.dto.image_dto import ImageDto
 from app.model.image_model import Image
 from app.util import response_message
@@ -94,8 +94,9 @@ _filter_parser = api.parser()
 _filter_parser.add_argument("id", type=int, location="args", required=False)
 _filter_parser.add_argument("description", type=str, location="args", required=False)
 
-_filter_parser.add_argument("page", type=int, location="args", required=False, default=1)
-_filter_parser.add_argument("page_size", type=int, location="args", required=False, default=10)
+_filter_parser.add_argument("page", type=int, location="args", required=False, default=app.config['DEFAULT_PAGE'])
+_filter_parser.add_argument("page_size", type=int, location="args", required=False,
+                            default=app.config['DEFAULT_PAGE_SIZE'])
 
 _filter_response = ImageDto.image_list_response
 

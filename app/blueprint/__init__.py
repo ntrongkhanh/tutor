@@ -1,7 +1,7 @@
 import werkzeug
 from flask import Blueprint
 from flask_restx import Api
-
+from flask_jwt_extended.exceptions import NoAuthorizationError
 from app.controller.auth_controller import api as auth_api
 from app.controller.demo_controller import api as demo_api
 from app.controller.image_controller import api as image_api
@@ -31,7 +31,7 @@ def bad_request(error):
 
 @api.errorhandler(werkzeug.exceptions.Unauthorized)
 def bad_request(error):
-    return response_object(status=False, message='Bad Request'), 401
+    return response_object(status=False, message='Unauthorized'), 401
 
 
 @api.errorhandler(werkzeug.exceptions.Forbidden)

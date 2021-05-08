@@ -1,17 +1,17 @@
 from flask import request
-from flask_jwt_extended import jwt_required, create_access_token
+from flask_jwt_extended import jwt_required, create_access_token, get_jwt
 from flask_restx import Resource
 
-from app import bcrypt, app
+from app import app, db
 from app.dto.auth_dto import AuthDto
+from app.model.black_list_token import BlacklistToken
 from app.model.user_model import User
+from app.util import response_message
 from app.util.api_response import response_object
 from app.util.auth_parser_util import get_auth_required_parser
-from app.util import response_message
 
 api = AuthDto.api
 _message_response = AuthDto.message_response
-
 
 _login_parser = api.parser()
 _login_parser.add_argument("email", type=str, location="json", required=True)
@@ -20,6 +20,7 @@ _login_parser.add_argument("password", type=str, location="json", required=True)
 _login_response = AuthDto.login_response
 
 
+# tạm ok
 @api.route('/login')
 class Login(Resource):
     @api.doc('login ')
@@ -29,19 +30,23 @@ class Login(Resource):
     @api.marshal_with(_login_response, code=200)
     def post(self):
         """Login (Đăng nhập)"""
-        args=request.json
-        user=User.query.filter(User.email==args['email']).first()
+        args = request.json
+        user = User.query.filter(User.email == args['email']).first()
         if not user:
-            return response_object(status=False,message=response_message.EMAIL_ALREADY_EXISTS), 401
+            return response_object(status=False, message=response_message.EMAIL_ALREADY_EXISTS), 401
+        if not user.is_active:
+            return response_object(status=False, message=response_message.ACCOUNT_IS_NOT_ACTIVATED), 401
         if not user.verify_password(args['password']):
             return response_object(status=False, message=response_message.PASSWORD_WRONG), 401
-        auth_token=create_access_token(identity=user.to_json(),expires_delta=app.config['TOKEN_EXPIRED_TIME'])
+        auth_token = create_access_token(identity=user.to_payload(), expires_delta=app.config['TOKEN_EXPIRED_TIME'])
         if auth_token:
-            data=user.to_json()
-            data['token']=auth_token
+            data = user.to_json()
+            data['token'] = auth_token
             return response_object(data=data), 200
-        return response_object(status=False,message=response_message.UNAUTHORIZED), 401
+        return response_object(status=False, message=response_message.UNAUTHORIZED), 401
 
+
+# tạm ok
 @api.route('/logout')
 class Logout(Resource):
     @api.doc('logout')
@@ -51,6 +56,19 @@ class Logout(Resource):
     @api.marshal_with(_message_response, 200)
     def get(self):
         """Logout (Đăng xuất)"""
+        # jti = get_jwt()["jti"]
+        # jwt_redis_blocklist.set(jti, "", ex=app.config['TOKEN_EXPIRED_TIME'])
+        # return response_object(), 200
+        auth_token = request.headers['Authorization'].split(" ")[1]
+        jti = get_jwt()["jti"]
+        if auth_token:
+            black_list = BlacklistToken(token=jti)
+            db.session.add(black_list)
+            db.session.commit()
+
+
+        # jwt_redis_blocklist
+
         return response_object(), 200
 
 

@@ -16,7 +16,7 @@ class Image(db.Model):
 
     # user = relationship("User", uselist=False, backref="avatar")
     user = relationship("User", backref="avatar", lazy=True, uselist=False)
-    tutor_id = db.Column(db.Integer, ForeignKey('tutor.id'))
+    tutor_id = db.Column(db.Integer, ForeignKey('tutor.id'), nullable=True)
 
     created_date = db.Column(db.DateTime, nullable=True)
     updated_date = db.Column(db.DateTime, nullable=True)

@@ -4,7 +4,7 @@ from operator import or_
 from flask_restx import Resource
 
 import app.util.response_message as response_message
-from app import db
+from app import db, app
 from app.dto.post_dto import PostDto
 from app.model.post_model import Post
 from app.model.user_model import User
@@ -191,8 +191,9 @@ _filter_parser.add_argument("form_of_teaching", type=str, location="args", requi
 _filter_parser.add_argument("user_id", type=int, location="args", required=False)
 _filter_parser.add_argument("user_name", type=str, location="args", required=False)
 
-_filter_parser.add_argument("page", type=int, location="args", required=False, default=1)
-_filter_parser.add_argument("page_size", type=int, location="args", required=False, default=10)
+_filter_parser.add_argument("page", type=int, location="args", required=False, default=app.config['DEFAULT_PAGE'])
+_filter_parser.add_argument("page_size", type=int, location="args", required=False,
+                            default=app.config['DEFAULT_PAGE_SIZE'])
 
 _filter_response = PostDto.post_list_response
 

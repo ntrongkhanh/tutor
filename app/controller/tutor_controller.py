@@ -3,7 +3,7 @@ from operator import or_
 
 from flask_restx import Resource
 
-from app import db
+from app import db, app
 from app.dto.tutor_dto import TutorDto
 from app.model.tutor_model import Tutor
 from app.model.user_model import User
@@ -43,7 +43,7 @@ class Create(Resource):
         if not user:
             return response_object(status=False, message=response_message.NOT_FOUND), 404
         if user.is_tutor:
-            return response_object(status=False, message=response_message.THE_ACCOUNT_IS_A_TUTOR_ALREADY), 400
+            return response_object(status=False, message=response_message.ACCOUNT_IS_A_TUTOR_ALREADY), 400
         tutor = Tutor(
             public_id='G' + str(uuid.uuid4())[:8].upper(),
             career=args['career'],
@@ -145,8 +145,9 @@ _filter_parser.add_argument("class_type", type=str, location='args', required=Fa
 _filter_parser.add_argument("experience", type=str, location='args', required=False)
 _filter_parser.add_argument("other_information", type=str, location='args', required=False)
 
-_filter_parser.add_argument("page", type=int, location="args", required=False, default=1)
-_filter_parser.add_argument("page_size", type=int, location="args", required=False, default=10)
+_filter_parser.add_argument("page", type=int, location="args", required=False, default=app.config['DEFAULT_PAGE'])
+_filter_parser.add_argument("page_size", type=int, location="args", required=False,
+                            default=app.config['DEFAULT_PAGE_SIZE'])
 _filter_response = TutorDto.tutor_list_response
 
 

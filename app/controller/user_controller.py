@@ -5,6 +5,7 @@ from flask import request
 from flask_restx import Resource
 from werkzeug.datastructures import FileStorage
 
+from app import app
 from app.dto.user_dto import UserDto
 from app.model.user_model import User
 from app.service import user_service
@@ -114,8 +115,9 @@ _filter_parser.add_argument("first_name", type=str, location='args', required=Fa
 _filter_parser.add_argument("last_name", type=str, location='args', required=False)
 _filter_parser.add_argument("sex", type=bool, location='args', required=False)
 _filter_parser.add_argument("birthday", type=datetime, location='args', required=False)
-_filter_parser.add_argument("page", type=int, location="args", required=False, default=1)
-_filter_parser.add_argument("page_size", type=int, location="args", required=False, default=10)
+_filter_parser.add_argument("page", type=int, location="args", required=False, default=app.config['DEFAULT_PAGE'])
+_filter_parser.add_argument("page_size", type=int, location="args", required=False,
+                            default=app.config['DEFAULT_PAGE_SIZE'])
 _filter_response = UserDto.user_list_response
 
 

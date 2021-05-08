@@ -15,7 +15,7 @@ def create_user(args, file):
     if User.query.filter(User.email == args['email']).first():
         return response_object(status=False, message=message.EMAIL_ALREADY_EXISTS), 400
     data = file.read()
-    image = Image(description='Avatar of ' + args['email'], data=data)
+    image = Image(description='Avatar of ' + args['email'], data=data if data else None)
     db.session.add(image)
     db.session.flush()
 

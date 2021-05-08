@@ -15,7 +15,7 @@ from app.util.api_response import response_object
 # create_parser.add_argument("username", type=str, location='username', required=True)
 # create_parser.add_argument("password", type=str, location='password', required=True)
 #
-from app.util.jwt_util import tutor_required, admin_required, HR_only
+from app.util.jwt_util import tutor_required, admin_required
 
 api = DemoDTO.api
 _create = DemoDTO.demo_request

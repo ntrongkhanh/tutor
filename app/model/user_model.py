@@ -8,7 +8,7 @@ from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import relationship
 
 from app import db, bcrypt, app
-from app.model.token import Token
+from app.model.black_list_token import BlacklistToken
 from app.util.api_response import json_serial, date_to_json
 
 
@@ -73,7 +73,7 @@ class User(db.Model):
                 algorithm="HS256"
             )
 
-            token = Token(token=auth_token)
+            token = BlacklistToken(token=auth_token)
             db.session.add(token)
             db.session.commit()
             return auth_token
@@ -91,7 +91,7 @@ class User(db.Model):
 
             payload = jwt.decode(auth_token, app.config.get('SECRET_KEY'), algorithms=["HS256"])
 
-            token = Token.query.filter(Token.token == auth_token).first()
+            token = BlacklistToken.query.filter(BlacklistToken.token == auth_token).first()
 
             # is_blacklisted_token = Token.check_token(auth_token)
             if not token:

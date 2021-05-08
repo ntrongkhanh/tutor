@@ -9,7 +9,7 @@ class Config(object):
     Common configurations
     """
     SECRET_KEY = os.getenv('SECRET_KEY', 'secret_key')
-    DEFAULT_PAGE_SIZE = 10
+    DEFAULT_PAGE_SIZE = 15
     DEFAULT_PAGE = 1
     MAIL_SERVER = 'smtp.gmail.com'
     MAIL_PORT = 465

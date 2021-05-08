@@ -83,18 +83,4 @@ def tutor_required():
     return decorator
 
 
-def HR_only(func):
-    @wraps(func)
-    def wrapper(*args, **kwargs):
-        identity = get_jwt_identity()
-        admin = identity['is_admin']
-        id=identity['user_id']
-        if admin:
-            user=User.query.filter(User.id==id).first()
-            return func(*args, **kwargs)
-            # return user.to_payload()
-        else:
-            return func(*args, **kwargs)
-            # return response_object(status=False, message=NOT_FOUND), 404
 
-    return jwt_required(wrapper)

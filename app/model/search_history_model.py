@@ -9,7 +9,7 @@ class SearchHistory(db.Model):
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     content = db.Column(db.String(255), nullable=True)
-    user_id = db.Column(db.Integer, ForeignKey('users.id'))
+    user_id = db.Column(db.Integer, ForeignKey('users.id'), nullable=True)
     # user = relationship("User", backref="search_history", lazy=True)
 
     def to_json(self):
