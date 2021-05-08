@@ -94,6 +94,9 @@ _filter_parser = api.parser()
 _filter_parser.add_argument("id", type=int, location="args", required=False)
 _filter_parser.add_argument("description", type=str, location="args", required=False)
 
+_filter_parser.add_argument("page", type=int, location="args", required=False, default=1)
+_filter_parser.add_argument("page_size", type=int, location="args", required=False, default=10)
+
 _filter_response = ImageDto.image_list_response
 
 
@@ -110,13 +113,16 @@ class Filter(Resource):
         image_id = args['id']
         description = args['description']
         search = "%{}%".format(description)
+        page = args['page']
+        page_size = args['page_size']
         images = Image.query.filter(
             or_(Image.description.like(search), description is None),
             or_(Image.id == image_id, image_id is None)
-        ).all()
+        ).paginate(page, page_size, error_out=False)
 
         # return None
-        return response_object(data=[image.to_json() for image in images]), 200
+        return response_object(data=[image.to_json() for image in images.items],
+                               pagination={'total': images.total, 'page': images.page}), 200
 
 
 # ok

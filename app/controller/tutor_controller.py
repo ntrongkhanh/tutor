@@ -42,7 +42,7 @@ class Create(Resource):
         if not user:
             return response_object(status=False, message=response_message.NOT_FOUND), 404
         tutor = Tutor(
-            public_id='G'+str(uuid.uuid4())[:8].upper(),
+            public_id='G' + str(uuid.uuid4())[:8].upper(),
             career=args['career'],
             tutor_description=args['tutor_description'],
             majors=args['majors'],
@@ -106,7 +106,7 @@ class Update(Resource):
 
 
 # ok
-#chưa jwt
+# chưa jwt
 @api.route('/delete/<tutor_id>')
 class Delete(Resource):
     @api.doc('delete tutor')
@@ -140,9 +140,12 @@ _filter_parser.add_argument("class_type", type=str, location='args', required=Fa
 _filter_parser.add_argument("experience", type=str, location='args', required=False)
 _filter_parser.add_argument("other_information", type=str, location='args', required=False)
 
+_filter_parser.add_argument("page", type=int, location="args", required=False, default=1)
+_filter_parser.add_argument("page_size", type=int, location="args", required=False, default=10)
 _filter_response = TutorDto.tutor_list_response
 
-#ok
+
+# ok
 # sửa user như get by id
 # public id quá dài
 @api.route('/')
@@ -157,7 +160,8 @@ class Filter(Resource):
     def get(self):
         """Filter tutors (Lọc các gia sư)"""
         args = _filter_parser.parse_args()
-
+        page = args['page']
+        page_size = args['page_size']
         tutors = Tutor.query.filter(
             or_(Tutor.user.has(User.id == args['user_id']), args['user_id'] is None),
             or_(Tutor.public_id == args['public_id'], args['public_id'] is None),
@@ -173,12 +177,14 @@ class Filter(Resource):
             or_(Tutor.other_information.like("%{}%".format(args['other_information'])),
                 args['other_information'] is None),
             Tutor.is_active == True
-        )
+        ).paginate(page, page_size, error_out=False)
 
-        return response_object(data=[tutor.to_json() for tutor in tutors]), 200
+        return response_object(data=[tutor.to_json() for tutor in tutors.items],
+                               pagination={'total': tutors.total, 'page': tutors.page}), 200
 
 
 _tutor_response = TutorDto.tutor_response
+
 
 # chưa  hiện đc user
 # public id quá dài

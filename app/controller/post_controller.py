@@ -117,7 +117,7 @@ _update_parser.add_argument("form_of_teaching", type=str, location="json", requi
 
 
 # ok
-#chưa jwt, get user lên so sánh có phải là post của nó hay k
+# chưa jwt, get user lên so sánh có phải là post của nó hay k
 @api.route('/update')
 class Update(Resource):
     @api.doc('update post')
@@ -186,6 +186,9 @@ _filter_parser.add_argument("form_of_teaching", type=str, location="args", requi
 _filter_parser.add_argument("user_id", type=int, location="args", required=False)
 _filter_parser.add_argument("user_name", type=str, location="args", required=False)
 
+_filter_parser.add_argument("page", type=int, location="args", required=False, default=1)
+_filter_parser.add_argument("page_size", type=int, location="args", required=False, default=10)
+
 _filter_response = PostDto.post_list_response
 
 
@@ -203,7 +206,8 @@ class Filter(Resource):
     def get(self):
         """Filter posts (lọc các bài post)"""
         args = _filter_parser.parse_args()
-
+        page = args['page']
+        page_size = args['page_size']
         posts = Post.query.filter(
             or_(Post.id == args['id'], args['id'] is None),
             or_(Post.title.like("%{}%".format(args['title'])), args['title'] is None),
@@ -224,12 +228,10 @@ class Filter(Resource):
                 or_(Post.user.has(User.first_name.like("%{}%".format(args['user_name']))), args['user_name'] is None),
                 or_(Post.user.has(User.last_name.like("%{}%".format(args['user_name']))), args['user_name'] is None)
             )
-        ).all()
+        ).paginate(page, page_size, error_out=False)
 
-        for i in posts:
-            print(i.user.id)
-
-        return response_object(data=[post.to_json() for post in posts]), 200
+        return response_object(data=[post.to_json() for post in posts.items],
+                               pagination={'total': posts.total, 'page': posts.page}), 200
 
 
 _post_response = PostDto.post_response
