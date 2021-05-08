@@ -34,8 +34,6 @@ def create_app(config_name):
     @app.route('/')
     def update():
         from app.model.image_model import Image
-        obj = Image.query.get(4)
-        image = base64.b64encode(obj.data).decode("utf-8")
         return render_template("hello.html")
 
     return app
