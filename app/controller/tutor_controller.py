@@ -42,7 +42,7 @@ class Create(Resource):
         if not user:
             return response_object(status=False, message=response_message.NOT_FOUND), 404
         tutor = Tutor(
-            public_id=uuid.uuid4(),
+            public_id='G'+str(uuid.uuid4())[:8].upper(),
             career=args['career'],
             tutor_description=args['tutor_description'],
             majors=args['majors'],
@@ -106,6 +106,7 @@ class Update(Resource):
 
 
 # ok
+#chưa jwt
 @api.route('/delete/<tutor_id>')
 class Delete(Resource):
     @api.doc('delete tutor')

@@ -38,7 +38,8 @@ def create_user(args, file):
 
     try:
 
-        # send_mail_active_user(active_code=active_code)
+        if not send_mail_active_user(active_code=active_code):
+            return response_object(status=False, message=message.CREATE_FAILED), 500
 
         db.session.commit()
 
@@ -114,14 +115,14 @@ def forgot_password(email):
         return response_object(status=False, message=message.FAILED), 500
 
 
-def reset_password(args):
+def reset_password(args, password):
     reset_code = Code.query.filter_by(email=args['email']).first()
     if not reset_code:
         return response_object(status=False, message=message.NOT_FOUND), 404
     if reset_code.code == args['code']:
         try:
             user = User.query.filter(User.email == reset_code.email).first()
-            user.password = args['new_password']
+            user.set_password(password)
             user.updated_date = datetime.datetime.now()
             db.session.delete(reset_code)
             db.session.commit()

@@ -22,8 +22,6 @@ _create_parser.add_argument("sex", type=bool, location='form', required=True)
 _create_parser.add_argument("birthday", type=datetime, location='form', required=True)
 
 
-# còn jwt required
-
 @api.route('/create')
 class Create(Resource):
     @api.doc('create user')
@@ -64,7 +62,8 @@ class Update(Resource):
     @api.marshal_with(_message_response, 200)
     def put(self):
         """update user"""
-        args = _update_parser.parse_args()
+        # args = _update_parser.parse_args()
+        args = request.json
         return user_service.update_user(args, 1)
         # cần bổ sung token, truyên user id vào
 
@@ -184,21 +183,28 @@ class ChangePassword(Resource):
     @api.marshal_with(_message_response, 200)
     def post(self):
         """change password"""
-        args = _change_password_parser.parse_args()
+        # args = _change_password_parser.parse_args()
+        args = request.json
         return user_service.change_password(args, 1)
 
 
+_forgot_password_parser = api.parser()
+_forgot_password_parser.add_argument("email", type=str, location='args', required=False)
+
+
 # maybe
-@api.route('/password/forgot/<email>')
+@api.route('/password/forgot')
 class ForgotPassword(Resource):
     @api.doc('forgot password')
     @api.response(401, 'Unauthorized')
     @api.response(403, 'Forbidden')
     @api.response(404, 'Not found')
     @api.response(500, 'Internal server error')
+    @api.expect(_forgot_password_parser, validate=True)
     @api.marshal_with(_message_response, 200)
-    def get(self, email):
+    def get(self):
         """forgot password"""
+        email = _forgot_password_parser.parse_args()['email']
         return user_service.forgot_password(email)
 
 
@@ -224,4 +230,5 @@ class Reset(Resource):
     def post(self):
         """reset password"""
         args = _reset_parser.parse_args()
-        return user_service.reset_password(args)
+        password = request.json
+        return user_service.reset_password(args, password)

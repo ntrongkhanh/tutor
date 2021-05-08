@@ -1,3 +1,4 @@
+import uuid
 from operator import or_
 
 from flask_restx import Resource
@@ -27,6 +28,7 @@ _create_parser.add_argument("form_of_teaching", type=str, location="json", requi
 
 
 # ok
+# chưa jwt , truyền user vào
 @api.route('/create-tutor-post')
 class CreateTutorPost(Resource):
     @api.doc('create tutor post')
@@ -40,6 +42,7 @@ class CreateTutorPost(Resource):
         """Create tutor post (Gia sư tạo bài đăng)"""
         args = _create_parser.parse_args()
         post = Post(
+            public_id=str(uuid.uuid4())[:8].upper(),
             is_tutor=True,
             title=args['title'],
             description=args['description'],
@@ -62,6 +65,7 @@ class CreateTutorPost(Resource):
 
 
 # ok
+# chưa jwt , truyền user vào
 @api.route('/create-search-post')
 class CreateSearchPost(Resource):
     @api.doc('create search post')
@@ -113,6 +117,7 @@ _update_parser.add_argument("form_of_teaching", type=str, location="json", requi
 
 
 # ok
+#chưa jwt, get user lên so sánh có phải là post của nó hay k
 @api.route('/update')
 class Update(Resource):
     @api.doc('update post')
@@ -148,6 +153,7 @@ class Update(Resource):
 
 
 # ok
+# chưa jwt
 @api.route('/delete/<post_id>')
 class Delete(Resource):
     @api.doc('delete post')
@@ -184,6 +190,7 @@ _filter_response = PostDto.post_list_response
 
 
 # ok
+# chưa pagination
 @api.route('/')
 class Filter(Resource):
     @api.doc('filter post')

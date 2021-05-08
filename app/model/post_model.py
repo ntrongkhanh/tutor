@@ -10,6 +10,7 @@ class Post(db.Model):
     __tablename__ = 'post'
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    public_id = db.Column(db.String(50), unique=True)
     is_tutor = db.Column(db.Boolean, default=False, nullable=False)
     title = db.Column(db.String(255), nullable=True)
     description = db.Column(db.String(255), nullable=True)
@@ -31,8 +32,10 @@ class Post(db.Model):
     created_date = db.Column(db.DateTime, nullable=True)
     updated_date = db.Column(db.DateTime, nullable=True)
 
-    def __init__(self, is_tutor, title, description, teaching_address, subject, class_type, other_information, fee,
+    def __init__(self, public_id, is_tutor, title, description, teaching_address, subject, class_type,
+                 other_information, fee,
                  schedule, number_of_sessions, require, contact, form_of_teaching, user_id):
+        self.public_id = public_id
         self.is_tutor = is_tutor
         self.title = title
         self.description = description
@@ -66,7 +69,7 @@ class Post(db.Model):
             'require': self.require,
             'contact': self.contact,
             'form_of_teaching': self.form_of_teaching,
-            # 'user': self.user.to_json(),
+            'user': self.user.to_json(),
             'created_date': date_to_json(self.created_date),
             'updated_date': date_to_json(self.updated_date),
         }

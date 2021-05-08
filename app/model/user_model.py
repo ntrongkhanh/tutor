@@ -120,7 +120,7 @@ class User(db.Model):
         return {
             'id': self.id,
             'email': self.email,
-            'first_name': self.last_name,
+            'first_name': self.first_name,
             'last_name': self.last_name,
             'birthday': date_to_json(self.birthday),
             'sex': self.sex,
@@ -128,7 +128,7 @@ class User(db.Model):
             'is_admin': self.is_admin,
             'is_active': self.is_active,
             'avatar_id': self.avatar_id,
-            'avatar': self.avatar,
+            # 'avatar': self.avatar.to_json(),
             'created_date': date_to_json(self.created_date)  # json.dumps(self.created_date, default=json_serial),
         }
 

@@ -26,7 +26,7 @@ class PostDto:
         'form_of_teaching': fields.String(required=False, description='description'),
         'created_date': fields.String(required=False, description='description'),
         'updated_date': fields.String(required=False, description='description'),
-        'user': fields.Nested(UserDto.login_data, required=False, description='description')
+        'user': fields.Nested(UserDto.user_data, required=False, description='description')
     })
     pagination_data = api.model('pagination', {
         'page': fields.Integer,

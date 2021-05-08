@@ -22,7 +22,7 @@ class TutorDto:
         'experience': fields.String(required=False, description='description'),
         'other_information': fields.String(required=False, description='description'),
         'images': fields.String(required=False, description='description'),
-        'user': fields.Nested(UserDto.login_data, required=False, description='description'),
+        'user': fields.Nested(UserDto.user_data, required=False, description='description'),
         'created_date': fields.String(required=False, description='description'),
         'updated_date': fields.String(required=False, description='description'),
     })

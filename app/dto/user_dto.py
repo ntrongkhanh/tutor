@@ -20,10 +20,21 @@ class UserDto:
         'last_name': fields.String(required=False, description='user email address'),
         'sex': fields.Boolean(required=False, description='user email address'),
         'is_tutor': fields.Boolean(required=False, description='user email address'),
+        'is_admin': fields.Boolean(required=False, description='user email address'),
         'avatar_id': fields.Integer(required=False, description='user email address'),
-        'avatar': fields.Nested(avatar),
         'token': fields.String(required=False, description='user email address'),
-        'created_date': fields.DateTime(required=False, description='user email address')
+        'created_date': fields.String(required=False, description='user email address')
+    })
+
+    user_data = api.inherit('user_data', {
+        'email': fields.String(required=False, description='user email address'),
+        'first_name': fields.String(required=False, description='user email address'),
+        'last_name': fields.String(required=False, description='user email address'),
+        'sex': fields.Boolean(required=False, description='user email address'),
+        'is_tutor': fields.Boolean(required=False, description='user email address'),
+        'is_admin': fields.Boolean(required=False, description='user email address'),
+        'avatar_id': fields.Integer(required=False, description='user email address'),
+        'created_date': fields.String(required=False, description='user email address')
     })
 
     profile_data = api.inherit('profile_data', {
