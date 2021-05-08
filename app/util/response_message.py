@@ -1,6 +1,7 @@
 NOT_FOUND = 'Not found'
 USER_NOT_FOUND = 'User not found'
 EMAIL_ALREADY_EXISTS = 'Email already exists'
+EMAIL_NOT_EXISTS = 'Email not exists'
 CREATE_FAILED = 'Create failed'
 UPDATE_FAILED = 'Update failed'
 BAD_REQUEST = 'Bad request'
