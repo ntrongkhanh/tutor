@@ -66,7 +66,6 @@ class Logout(Resource):
             db.session.add(black_list)
             db.session.commit()
 
-
         # jwt_redis_blocklist
 
         return response_object(), 200

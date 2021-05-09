@@ -10,6 +10,7 @@ from app.dto.user_dto import UserDto
 from app.model.user_model import User
 from app.service import user_service
 from app.util.api_response import response_object
+from app.util.auth_parser_util import get_auth_required_parser
 
 api = UserDto.api
 
@@ -24,7 +25,8 @@ _create_parser.add_argument("last_name", type=str, location='form', required=Tru
 _create_parser.add_argument("sex", type=bool, location='form', required=True)
 _create_parser.add_argument("birthday", type=datetime, location='form', required=True)
 
-#tạm ok
+
+# tạm ok
 @api.route('/create')
 class Create(Resource):
     @api.doc('create user')
@@ -44,7 +46,7 @@ class Create(Resource):
         return user_service.create_user(args, file)
 
 
-_update_parser = api.parser()
+_update_parser = get_auth_required_parser(api)
 _update_parser.add_argument("email", type=str, location='json', required=True)
 _update_parser.add_argument("first_name", type=str, location='json', required=True)
 _update_parser.add_argument("last_name", type=str, location='json', required=True)
@@ -94,6 +96,7 @@ _active_parser = api.parser()
 _active_parser.add_argument("email", type=str, location='args', required=True)
 _active_parser.add_argument("code", type=str, location='args', required=True)
 
+
 # ok
 @api.route('/active')
 class Active(Resource):
@@ -109,7 +112,7 @@ class Active(Resource):
         return user_service.active_user(args)
 
 
-_filter_parser = api.parser()
+_filter_parser = get_auth_required_parser(api)
 _filter_parser.add_argument("email", type=str, location='args', required=False)
 _filter_parser.add_argument("first_name", type=str, location='args', required=False)
 _filter_parser.add_argument("last_name", type=str, location='args', required=False)
@@ -150,6 +153,8 @@ class Filter(Resource):
 
 _user_response = UserDto.user_response
 
+_get_parser = get_auth_required_parser(api)
+
 
 # chưa làm
 
@@ -160,13 +165,17 @@ class GetById(Resource):
     @api.response(403, 'Forbidden')
     @api.response(404, 'Not found')
     @api.response(500, 'Internal server error')
+    @api.expect(_get_parser, validate=True)
     @api.marshal_with(_user_response, 200)
     def get(self, user_id):
         """get by id user"""
         return response_object(), 200
 
-# jwt required , truyền user id vào
 
+_profile_parser = get_auth_required_parser(api)
+
+
+# jwt required , truyền user id vào
 
 @api.route('/profile')
 class Profile(Resource):
@@ -175,13 +184,14 @@ class Profile(Resource):
     @api.response(403, 'Forbidden')
     @api.response(404, 'Not found')
     @api.response(500, 'Internal server error')
+    @api.expect(_profile_parser, validate=True)
     @api.marshal_with(_user_response, 200)
     def get(self):
         """get profile"""
         return user_service.get_profile(1)
 
 
-_update_avatar_parser = api.parser()
+_update_avatar_parser = get_auth_required_parser(api)
 _update_avatar_parser.add_argument("file", type=FileStorage, location="files", required=True)
 _update_avatar_parser.add_argument("user_id", type=int, location='form', required=True)
 
@@ -196,6 +206,7 @@ class UpdateAvatar(Resource):
     @api.response(403, 'Forbidden')
     @api.response(404, 'Not found')
     @api.response(500, 'Internal server error')
+    @api.expect(_update_avatar_parser)
     @api.marshal_with(_message_response, 200)
     def put(self):
         """update avatar"""
@@ -204,7 +215,7 @@ class UpdateAvatar(Resource):
         return user_service.update_avatar(file, user_id)
 
 
-_change_password_parser = api.parser()
+_change_password_parser = get_auth_required_parser(api)
 _change_password_parser.add_argument("new_password", type=str, location='json', required=False)
 _change_password_parser.add_argument("old_password", type=str, location='json', required=False)
 

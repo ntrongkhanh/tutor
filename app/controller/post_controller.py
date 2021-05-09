@@ -9,10 +9,11 @@ from app.dto.post_dto import PostDto
 from app.model.post_model import Post
 from app.model.user_model import User
 from app.util.api_response import response_object
+from app.util.auth_parser_util import get_auth_required_parser, get_auth_not_required_parser
 
 api = PostDto.api
 
-_create_parser = api.parser()
+_create_parser = get_auth_required_parser(api)
 _create_parser.add_argument("title", type=str, location="json", required=True)
 _create_parser.add_argument("description", type=str, location="json", required=False)
 _create_parser.add_argument("teaching_address", type=str, location="json", required=False)
@@ -43,7 +44,7 @@ class CreateTutorPost(Resource):
         args = _create_parser.parse_args()
         user = User.query.get(1)
         if not user.is_tutor:
-            return response_object(status=False,message=response_message.FORBIDDEN), 403
+            return response_object(status=False, message=response_message.FORBIDDEN), 403
         post = Post(
             public_id=str(uuid.uuid4())[:8].upper(),
             is_tutor=True,
@@ -104,7 +105,7 @@ class CreateSearchPost(Resource):
         return response_object(), 201
 
 
-_update_parser = api.parser()
+_update_parser = get_auth_required_parser(api)
 _update_parser.add_argument("id", type=int, location="json", required=True)
 _update_parser.add_argument("title", type=str, location="json", required=False)
 _update_parser.add_argument("description", type=str, location="json", required=False)
@@ -166,6 +167,7 @@ class Delete(Resource):
     @api.response(403, 'Forbidden')
     @api.response(404, 'Not found')
     @api.response(500, 'Internal server error')
+    @api.expect(get_auth_required_parser(api), validate=True)
     def delete(self, post_id):
         """Delete post by id (Xóa bài post)"""
         Post.query.filter(Post.id == post_id).delete()
@@ -173,7 +175,7 @@ class Delete(Resource):
         return response_object(), 200
 
 
-_filter_parser = api.parser()
+_filter_parser = get_auth_not_required_parser(api)
 _filter_parser.add_argument("id", type=int, location="args", required=False)
 _filter_parser.add_argument("is_tutor", type=bool, location="args", required=False)
 _filter_parser.add_argument("title", type=str, location="args", required=False)
@@ -242,6 +244,8 @@ class Filter(Resource):
 
 
 _post_response = PostDto.post_response
+
+_get_parser = get_auth_not_required_parser(api)
 
 
 # chưa load user lên

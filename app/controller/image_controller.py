@@ -10,11 +10,12 @@ from app.dto.image_dto import ImageDto
 from app.model.image_model import Image
 from app.util import response_message
 from app.util.api_response import response_object
+from app.util.auth_parser_util import get_auth_not_required_parser, get_auth_required_parser
 
 api = ImageDto.api
 _response_message = ImageDto.message_response
 
-_create_parser = api.parser()
+_create_parser = get_auth_required_parser(api)
 _create_parser.add_argument("file", type=FileStorage, location="files", required=True)
 _create_parser.add_argument("description", type=str, location='args', required=False)
 
@@ -41,7 +42,7 @@ class Create(Resource):
         return response_object(data=image.to_json()), 201
 
 
-_upload_parser = api.parser()
+_upload_parser = get_auth_required_parser(api)
 _upload_parser.add_argument("file", type=FileStorage, location="files", required=True)
 _upload_parser.add_argument("id", type=int, location='args', required=True)
 _upload_parser.add_argument("description", type=str, location='args', required=False)
@@ -74,6 +75,9 @@ class Update(Resource):
         return response_object(data=image.to_json()), 200
 
 
+_delete_parser = get_auth_required_parser(api)
+
+
 # ok
 @api.route('/delete/<image_id>')
 class Delete(Resource):
@@ -82,6 +86,7 @@ class Delete(Resource):
     @api.response(403, 'Forbidden')
     @api.response(404, 'Not found')
     @api.response(500, 'Internal server error')
+    @api.expect(_delete_parser, validate=True)
     @api.marshal_with(_response_message, 200)
     def delete(self, image_id):
         """Delete an image (Xóa hình ảnh)"""
@@ -90,7 +95,7 @@ class Delete(Resource):
         return response_object(), 200
 
 
-_filter_parser = api.parser()
+_filter_parser = get_auth_not_required_parser(api)
 _filter_parser.add_argument("id", type=int, location="args", required=False)
 _filter_parser.add_argument("description", type=str, location="args", required=False)
 
@@ -133,6 +138,7 @@ class Get(Resource):
     @api.response(200, 'OK')
     @api.response(404, 'Not found')
     @api.response(500, 'Internal server error')
+    @api.expect(get_auth_not_required_parser(api))
     def get(self, image_id):
         """Get image by id  (Get hình ảnh by id)"""
         image = Image.query.get(image_id)

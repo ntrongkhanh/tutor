@@ -6,7 +6,7 @@ from flask_jwt_extended.exceptions import NoAuthorizationError
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 
-from app.util.ApiError import CustomError
+from app.util.api_error import CustomError
 from app.util.api_response import response_object
 from config import app_config
 
