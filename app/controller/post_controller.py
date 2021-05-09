@@ -1,7 +1,8 @@
 import uuid
 from operator import or_
 
-from flask_restx import Resource
+
+from flask_restx import Resource, inputs
 
 import app.util.response_message as response_message
 from app import db, app
@@ -177,7 +178,7 @@ class Delete(Resource):
 
 _filter_parser = get_auth_not_required_parser(api)
 _filter_parser.add_argument("id", type=int, location="args", required=False)
-_filter_parser.add_argument("is_tutor", type=bool, location="args", required=False)
+_filter_parser.add_argument("is_tutor", type=inputs.boolean, location="args", required=False)
 _filter_parser.add_argument("title", type=str, location="args", required=False)
 _filter_parser.add_argument("description", type=str, location="args", required=False)
 _filter_parser.add_argument("teaching_address", type=str, location="args", required=False)
@@ -216,6 +217,7 @@ class Filter(Resource):
         args = _filter_parser.parse_args()
         page = args['page']
         page_size = args['page_size']
+        print((args['is_tutor']))
         posts = Post.query.filter(
             or_(Post.id == args['id'], args['id'] is None),
             or_(Post.is_tutor == args['is_tutor'], args['is_tutor'] is None),

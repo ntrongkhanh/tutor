@@ -2,7 +2,7 @@ from datetime import datetime
 from operator import or_
 
 from flask import request
-from flask_restx import Resource
+from flask_restx import Resource, inputs
 from werkzeug.datastructures import FileStorage
 
 from app import app
@@ -22,7 +22,7 @@ _create_parser.add_argument("email", type=str, location='form', required=True)
 _create_parser.add_argument("password", type=str, location='form', required=True)
 _create_parser.add_argument("first_name", type=str, location='form', required=True)
 _create_parser.add_argument("last_name", type=str, location='form', required=True)
-_create_parser.add_argument("sex", type=bool, location='form', required=True)
+_create_parser.add_argument("sex", type=inputs.boolean, location='form', required=True)
 _create_parser.add_argument("birthday", type=datetime, location='form', required=True)
 
 
