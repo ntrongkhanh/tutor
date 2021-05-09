@@ -217,7 +217,6 @@ class Filter(Resource):
         args = _filter_parser.parse_args()
         page = args['page']
         page_size = args['page_size']
-        print((args['is_tutor']))
         posts = Post.query.filter(
             or_(Post.id == args['id'], args['id'] is None),
             or_(Post.is_tutor == args['is_tutor'], args['is_tutor'] is None),
