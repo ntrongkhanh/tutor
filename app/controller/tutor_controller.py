@@ -3,7 +3,7 @@ from operator import or_
 
 from flask_restx import Resource
 
-from app import db, app
+from app import db
 from app.dto.tutor_dto import TutorDto
 from app.model.tutor_model import Tutor
 from app.model.user_model import User
@@ -15,32 +15,28 @@ api = TutorDto.api
 
 _message_response = TutorDto.message_response
 
-_create_parser = get_auth_required_parser(api)
-# _create_parser.add_argument("user_id", type=int, location='json', required=True)
-_create_parser.add_argument("career", type=str, location='json', required=False)
-_create_parser.add_argument("tutor_description", type=str, location='json', required=False)
-_create_parser.add_argument("majors", type=str, location='json', required=False)
-_create_parser.add_argument("degree", type=str, location='json', required=False)
-_create_parser.add_argument("subject", type=str, location='json', required=False)
-_create_parser.add_argument("school", type=str, location='json', required=False)
-_create_parser.add_argument("address", type=str, location='json', required=False)
-_create_parser.add_argument("class_type", type=str, location='json', required=False)
-_create_parser.add_argument("experience", type=str, location='json', required=False)
-_create_parser.add_argument("other_information", type=str, location='json', required=False)
+_create_request = TutorDto.create_parser
+
+_update_request = TutorDto.update_parser
+
+_filter_request = TutorDto.filter_parser
+_filter_response = TutorDto.tutor_list_response
+
+_tutor_response = TutorDto.tutor_response
 
 
-# tạm ok
-# truyền jwt get user id
-@api.route('/create')
-class Create(Resource):
+@api.route('')
+class TutorListController(Resource):
+    # tạm ok
+    # truyền jwt get user id
     @api.doc('create tutor')
     @api.response(404, 'Not found')
     @api.response(500, 'Internal server error')
-    @api.expect(_create_parser, validate=True)
+    @api.expect(_create_request, validate=True)
     @api.marshal_with(_message_response, 201)
     def post(self):
         """Create tutor (Tạo gia sư)"""
-        args = _create_parser.parse_args()
+        args = _create_request.parse_args()
         user = User.query.get(1)
         if not user:
             return response_object(status=False, message=response_message.NOT_FOUND), 404
@@ -66,101 +62,9 @@ class Create(Resource):
         db.session.commit()
         return response_object(), 201
 
-
-_update_parser = get_auth_required_parser(api)
-_update_parser.add_argument("id", type=int, location='json', required=True)
-_update_parser.add_argument("career", type=str, location='json', required=False)
-_update_parser.add_argument("tutor_description", type=str, location='json', required=False)
-_update_parser.add_argument("majors", type=str, location='json', required=False)
-_update_parser.add_argument("degree", type=str, location='json', required=False)
-_update_parser.add_argument("school", type=str, location='json', required=False)
-_update_parser.add_argument("address", type=str, location='json', required=False)
-_update_parser.add_argument("class_type", type=str, location='json', required=False)
-_update_parser.add_argument("experience", type=str, location='json', required=False)
-_update_parser.add_argument("other_information", type=str, location='json', required=False)
-
-
-# cũng ok
-@api.route('/update')
-class Update(Resource):
-    @api.doc('update tutor')
-    @api.response(401, 'Unauthorized')
-    @api.response(403, 'Forbidden')
-    @api.response(404, 'Not found')
-    @api.response(500, 'Internal server error')
-    @api.expect(_update_parser, validate=True)
-    @api.marshal_with(_message_response, 200)
-    def put(self):
-        """Update tutor (Cập nhật thông tin gia sư)"""
-        args = _update_parser.parse_args()
-        tutor = Tutor.query.get(args['id'])
-        if not tutor:
-            return response_object(status=False, message=response_message.NOT_FOUND), 404
-
-        tutor.career = args['career'] if args['career'] else tutor.career
-        tutor.tutor_description = args['tutor_description'] if args['tutor_description'] else tutor.tutor_description
-        tutor.majors = args['majors'] if args['majors'] else tutor.majors
-        tutor.degree = args['degree'] if args['degree'] else tutor.degree
-        tutor.school = args['school'] if args['school'] else tutor.school
-        tutor.address = args['address'] if args['address'] else tutor.address
-        tutor.class_type = args['class_type'] if args['class_type'] else tutor.class_type
-        tutor.experience = args['experience'] if args['experience'] else tutor.experience
-        tutor.other_information = args['other_information'] if args['other_information'] else tutor.other_information
-
-        db.session.commit()
-
-        return response_object()
-
-
-# ok
-# chưa jwt
-@api.route('/delete/<tutor_id>')
-class Delete(Resource):
-    @api.doc('delete tutor')
-    @api.response(401, 'Unauthorized')
-    @api.response(403, 'Forbidden')
-    @api.response(404, 'Not found')
-    @api.response(500, 'Internal server error')
-    @api.expect(get_auth_required_parser(api), validate=True)
-    @api.marshal_with(_message_response, 200)
-    def delete(self, tutor_id):
-        """Delete a tutor (Xóa 1 gia sư)"""
-        tutor = Tutor.query.get(tutor_id)
-        if not tutor:
-            return response_object(status=False, message=response_message.NOT_FOUND), 404
-
-        tutor.is_active = False
-        db.session.commit()
-
-        return response_object(), 200
-
-
-_filter_parser = get_auth_not_required_parser(api)
-_filter_parser.add_argument("user_id", type=int, location='args', required=False)
-_filter_parser.add_argument("public_id", type=int, location='args', required=False)
-_filter_parser.add_argument("career", type=str, location='args', required=False)
-_filter_parser.add_argument("tutor_description", type=str, location='args', required=False)
-_filter_parser.add_argument("majors", type=str, location='args', required=False)
-_filter_parser.add_argument("degree", type=str, location='args', required=False)
-_filter_parser.add_argument("school", type=str, location='args', required=False)
-_filter_parser.add_argument("address", type=str, location='args', required=False)
-_filter_parser.add_argument("class_type", type=str, location='args', required=False)
-_filter_parser.add_argument("experience", type=str, location='args', required=False)
-_filter_parser.add_argument("other_information", type=str, location='args', required=False)
-
-_filter_parser.add_argument("page", type=int, location="args", required=False, default=app.config['DEFAULT_PAGE'])
-_filter_parser.add_argument("page_size", type=int, location="args", required=False,
-                            default=app.config['DEFAULT_PAGE_SIZE'])
-_filter_response = TutorDto.tutor_list_response
-
-
-# ok
-#
-#
-@api.route('/')
-class Filter(Resource):
+    # ok
     @api.doc('filter tutor')
-    @api.expect(_filter_parser, validate=True)
+    @api.expect(_filter_request, validate=True)
     @api.response(401, 'Unauthorized')
     @api.response(403, 'Forbidden')
     @api.response(404, 'Not found')
@@ -168,7 +72,7 @@ class Filter(Resource):
     @api.marshal_with(_filter_response, 200)
     def get(self):
         """Filter tutors (Lọc các gia sư)"""
-        args = _filter_parser.parse_args()
+        args = _filter_request.parse_args()
         page = args['page']
         page_size = args['page_size']
 
@@ -193,12 +97,10 @@ class Filter(Resource):
                                pagination={'total': tutors.total, 'page': tutors.page}), 200
 
 
-_tutor_response = TutorDto.tutor_response
-
-
-# tạm ok
 @api.route('/<tutor_id>')
-class Get(Resource):
+class TutorController(Resource):
+    # tạm ok
+    # chưa jwt
     @api.doc('get tutor by id')
     @api.response(401, 'Unauthorized')
     @api.response(403, 'Forbidden')
@@ -211,3 +113,52 @@ class Get(Resource):
         tutor = Tutor.query.filter(Tutor.id == tutor_id, Tutor.is_active).first()
 
         return response_object(data=tutor.to_json()), 200
+
+    # cũng ok
+    # chưa jwt
+    @api.doc('update tutor')
+    @api.response(401, 'Unauthorized')
+    @api.response(403, 'Forbidden')
+    @api.response(404, 'Not found')
+    @api.response(500, 'Internal server error')
+    @api.expect(_update_request, validate=True)
+    @api.marshal_with(_message_response, 200)
+    def put(self):
+        """Update tutor (Cập nhật thông tin gia sư)"""
+        args = _update_request.parse_args()
+        tutor = Tutor.query.get(args['id'])
+        if not tutor:
+            return response_object(status=False, message=response_message.NOT_FOUND), 404
+
+        tutor.career = args['career'] if args['career'] else tutor.career
+        tutor.tutor_description = args['tutor_description'] if args['tutor_description'] else tutor.tutor_description
+        tutor.majors = args['majors'] if args['majors'] else tutor.majors
+        tutor.degree = args['degree'] if args['degree'] else tutor.degree
+        tutor.school = args['school'] if args['school'] else tutor.school
+        tutor.address = args['address'] if args['address'] else tutor.address
+        tutor.class_type = args['class_type'] if args['class_type'] else tutor.class_type
+        tutor.experience = args['experience'] if args['experience'] else tutor.experience
+        tutor.other_information = args['other_information'] if args['other_information'] else tutor.other_information
+
+        db.session.commit()
+
+        return response_object()
+
+    # chưa jwt
+    @api.doc('delete tutor')
+    @api.response(401, 'Unauthorized')
+    @api.response(403, 'Forbidden')
+    @api.response(404, 'Not found')
+    @api.response(500, 'Internal server error')
+    @api.expect(get_auth_required_parser(api), validate=True)
+    @api.marshal_with(_message_response, 200)
+    def delete(self, tutor_id):
+        """Delete a tutor (Xóa 1 gia sư)"""
+        tutor = Tutor.query.get(tutor_id)
+        if not tutor:
+            return response_object(status=False, message=response_message.NOT_FOUND), 404
+
+        tutor.is_active = False
+        db.session.commit()
+
+        return response_object(), 200

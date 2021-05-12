@@ -1,11 +1,8 @@
-from datetime import datetime
 from operator import or_
 
 from flask import request
-from flask_restx import Resource, inputs
-from werkzeug.datastructures import FileStorage
+from flask_restx import Resource
 
-from app import app
 from app.dto.user_dto import UserDto
 from app.model.user_model import User
 from app.service import user_service
@@ -16,19 +13,19 @@ api = UserDto.api
 
 _message_response = UserDto.message_response
 
-_create_parser = api.parser()
-_create_parser.add_argument("file", type=FileStorage, location="files", required=True)
-_create_parser.add_argument("email", type=str, location='form', required=True)
-_create_parser.add_argument("password", type=str, location='form', required=True)
-_create_parser.add_argument("first_name", type=str, location='form', required=True)
-_create_parser.add_argument("last_name", type=str, location='form', required=True)
-_create_parser.add_argument("sex", type=inputs.boolean, location='form', required=True)
-_create_parser.add_argument("birthday", type=datetime, location='form', required=True)
+_create_parser = UserDto.create_parser
+
+_update_parser = UserDto.update_parser
+
+_filter_parser = UserDto.filter_parser
+_filter_response = UserDto.user_list_response
+
+_user_response = UserDto.user_response
 
 
-# tạm ok
-@api.route('/create')
-class Create(Resource):
+@api.route('')
+class UserListController(Resource):
+    # tạm ok
     @api.doc('create user')
     @api.response(201, 'Created')
     @api.response(401, 'Unauthorized')
@@ -45,19 +42,8 @@ class Create(Resource):
 
         return user_service.create_user(args, file)
 
-
-_update_parser = get_auth_required_parser(api)
-_update_parser.add_argument("email", type=str, location='json', required=True)
-_update_parser.add_argument("first_name", type=str, location='json', required=True)
-_update_parser.add_argument("last_name", type=str, location='json', required=True)
-_update_parser.add_argument("sex", type=bool, location='json', required=True)
-_update_parser.add_argument("birthday", type=datetime, location='json', required=True)
-
-
-# coi lại cái lấy từ parser
-# truyền jwt
-@api.route('/update')
-class Update(Resource):
+    # coi lại cái lấy từ parser
+    # truyền jwt
     @api.doc('update user')
     @api.response(401, 'Unauthorized')
     @api.response(403, 'Forbidden')
@@ -70,65 +56,8 @@ class Update(Resource):
         # args = _update_parser.parse_args()
         args = request.json
         return user_service.update_user(args, 1)
-        # cần bổ sung token, truyên user id vào
 
-
-# chưa làm
-
-
-@api.route('/inactive/<user_id>')
-class Inactive(Resource):
-    @api.doc('inactive')
-    @api.response(401, 'Unauthorized')
-    @api.response(403, 'Forbidden')
-    @api.response(404, 'Not found')
-    @api.response(500, 'Internal server error')
-    @api.marshal_with(_message_response, 200)
-    def get(self, user_id):
-        """inactive user"""
-        pass
-        # args=_active_parser.parse_args()
-        #
-        # return user_service.active_user(args)
-
-
-_active_parser = api.parser()
-_active_parser.add_argument("email", type=str, location='args', required=True)
-_active_parser.add_argument("code", type=str, location='args', required=True)
-
-
-# ok
-@api.route('/active')
-class Active(Resource):
-    @api.doc('active account')
-    @api.response(401, 'Unauthorized')
-    @api.response(403, 'Forbidden')
-    @api.response(404, 'Not found')
-    @api.response(500, 'Internal server error')
-    @api.expect(_active_parser, validate=True)
-    def get(self):
-        args = _active_parser.parse_args()
-
-        return user_service.active_user(args)
-
-
-_filter_parser = get_auth_required_parser(api)
-_filter_parser.add_argument("email", type=str, location='args', required=False)
-_filter_parser.add_argument("first_name", type=str, location='args', required=False)
-_filter_parser.add_argument("last_name", type=str, location='args', required=False)
-_filter_parser.add_argument("sex", type=bool, location='args', required=False)
-_filter_parser.add_argument("birthday", type=datetime, location='args', required=False)
-_filter_parser.add_argument("page", type=int, location="args", required=False, default=app.config['DEFAULT_PAGE'])
-_filter_parser.add_argument("page_size", type=int, location="args", required=False,
-                            default=app.config['DEFAULT_PAGE_SIZE'])
-_filter_response = UserDto.user_list_response
-
-
-# chưa làm
-
-
-@api.route('/')
-class Filter(Resource):
+    # tạm
     @api.doc('filter user')
     @api.response(500, 'Internal server error')
     @api.expect(_filter_parser, validate=True)
@@ -151,7 +80,42 @@ class Filter(Resource):
                                pagination={'total': users.total, 'page': users.page}), 200
 
 
-_user_response = UserDto.user_response
+# chưa làm
+
+
+@api.route('/inactive/<user_id>')
+class Inactive(Resource):
+    @api.doc('inactive')
+    @api.response(401, 'Unauthorized')
+    @api.response(403, 'Forbidden')
+    @api.response(404, 'Not found')
+    @api.response(500, 'Internal server error')
+    @api.marshal_with(_message_response, 200)
+    def get(self, user_id):
+        """inactive user"""
+        pass
+        # args=_active_parser.parse_args()
+        #
+        # return user_service.active_user(args)
+
+
+_active_parser = UserDto.active_parser
+
+
+# ok
+@api.route('/active')
+class Active(Resource):
+    @api.doc('active account')
+    @api.response(401, 'Unauthorized')
+    @api.response(403, 'Forbidden')
+    @api.response(404, 'Not found')
+    @api.response(500, 'Internal server error')
+    @api.expect(_active_parser, validate=True)
+    def get(self):
+        args = _active_parser.parse_args()
+
+        return user_service.active_user(args)
+
 
 _get_parser = get_auth_required_parser(api)
 
@@ -191,9 +155,7 @@ class Profile(Resource):
         return user_service.get_profile(1)
 
 
-_update_avatar_parser = get_auth_required_parser(api)
-_update_avatar_parser.add_argument("file", type=FileStorage, location="files", required=True)
-_update_avatar_parser.add_argument("user_id", type=int, location='form', required=True)
+_update_avatar_parser = UserDto.update_avatar_parser
 
 
 # còn jwt
@@ -215,9 +177,7 @@ class UpdateAvatar(Resource):
         return user_service.update_avatar(file, user_id)
 
 
-_change_password_parser = get_auth_required_parser(api)
-_change_password_parser.add_argument("new_password", type=str, location='json', required=False)
-_change_password_parser.add_argument("old_password", type=str, location='json', required=False)
+_change_password_parser = UserDto.change_password_parser
 
 
 # coi lại cái lấy từ parser
@@ -239,8 +199,7 @@ class ChangePassword(Resource):
         return user_service.change_password(args, 1)
 
 
-_forgot_password_parser = api.parser()
-_forgot_password_parser.add_argument("email", type=str, location='args', required=False)
+_forgot_password_parser = UserDto.forgot_password_parser
 
 
 # maybe
@@ -259,10 +218,7 @@ class ForgotPassword(Resource):
         return user_service.forgot_password(email)
 
 
-_reset_parser = api.parser()
-_reset_parser.add_argument("email", type=str, location='args', required=True)
-_reset_parser.add_argument("code", type=str, location='args', required=True)
-_reset_parser.add_argument("password", type=str, location='json', required=True)
+_reset_parser = UserDto.reset_parser
 
 
 # coi lại cái lấy từ parser
