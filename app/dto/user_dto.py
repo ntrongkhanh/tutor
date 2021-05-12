@@ -4,6 +4,7 @@ from flask_restx import Namespace, fields, inputs
 from werkzeug.datastructures import FileStorage
 
 from .base_dto import base
+from .. import app
 from ..util.auth_parser_util import get_auth_required_parser
 
 
