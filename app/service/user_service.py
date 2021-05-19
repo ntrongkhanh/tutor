@@ -68,15 +68,15 @@ def update_user(args, user_id):
     return response_object(), 200
 
 
-def get_profile(id):
-    user = User.query.get(id)
+def get_profile(user_id):
+    user = User.query.get(user_id)
     if not user:
         return response_object(status=False, message=message.USER_NOT_FOUND), 404
     return response_object(data=user.to_json()), 200
 
 
-def update_avatar(file, id_user):
-    user = User.query.get(id_user)
+def update_avatar(file, user_id):
+    user = User.query.get(user_id)
     if not user:
         return response_object(status=False, message=message.USER_NOT_FOUND), 404
     image = Image.query.filter(Image.user == user).first()

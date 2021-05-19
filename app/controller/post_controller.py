@@ -147,6 +147,8 @@ class PostListController(Resource):
 
 @api.route('/<int:post_id>')
 class PostController(Resource):
+
+
     # chưa load user lên
     @api.doc('get post by id')
     @api.response(401, 'Unauthorized')
