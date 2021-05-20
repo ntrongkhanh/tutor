@@ -25,8 +25,8 @@ def create_user(args, file):
         first_name=args['first_name'],
         last_name=args['last_name'],
         birthday=args['birthday'],
-        # sex=True if args['sex'] == 'true' else False,
-        sex=args['sex'],
+        sex=True if args['sex'] == 'true' else False,
+        # sex=args['sex'],
         avatar_id=image.id
     )
     active_code = Code(
