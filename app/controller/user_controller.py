@@ -1,6 +1,7 @@
 from operator import or_
 
 from flask import request
+from flask_jwt_extended import jwt_required, get_jwt_identity
 from flask_restx import Resource
 
 from app.dto.user_dto import UserDto
@@ -150,9 +151,13 @@ class Profile(Resource):
     @api.response(500, 'Internal server error')
     @api.expect(_profile_parser, validate=True)
     @api.marshal_with(_user_response, 200)
+    @jwt_required()
     def get(self):
         """get profile"""
-        return user_service.get_profile(1)
+
+        user_id = get_jwt_identity()['user_id']
+
+        return user_service.get_profile(user_id)
 
 
 _update_avatar_parser = UserDto.update_avatar_parser

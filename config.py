@@ -17,7 +17,7 @@ class Config(object):
     MAIL_PASSWORD = 'khoaluan2021'
     MAIL_USE_TLS = False
     MAIL_USE_SSL = True
-    TOKEN_EXPIRED_TIME = timedelta(seconds=50)
+    TOKEN_EXPIRED_TIME = timedelta(days=50)
     PROPAGATE_EXCEPTIONS = True
 
 
