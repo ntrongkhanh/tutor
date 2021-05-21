@@ -1,6 +1,7 @@
 import uuid
 from operator import or_
 
+from flask_jwt_extended import get_jwt_identity, jwt_required
 from flask_restx import Resource
 
 from app import db
@@ -10,6 +11,7 @@ from app.model.user_model import User
 from app.util import response_message
 from app.util.api_response import response_object
 from app.util.auth_parser_util import get_auth_required_parser, get_auth_not_required_parser
+from app.util.jwt_util import tutor_required
 
 api = TutorDto.api
 
@@ -34,10 +36,13 @@ class TutorListController(Resource):
     @api.response(500, 'Internal server error')
     @api.expect(_create_request, validate=True)
     @api.marshal_with(_message_response, 201)
+    @jwt_required()
+    @tutor_required()
     def post(self):
         """Create tutor (Tạo gia sư)"""
         args = _create_request.parse_args()
-        user = User.query.get(1)
+
+        user = User.query.get(get_jwt_identity()['user_id'])
         if not user:
             return response_object(status=False, message=response_message.NOT_FOUND), 404
         if user.is_tutor:

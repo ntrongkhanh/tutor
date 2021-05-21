@@ -1,6 +1,7 @@
 import uuid
 from operator import or_
 
+from flask_jwt_extended import jwt_required, get_jwt_identity
 from flask_restx import Resource
 
 import app.util.response_message as response_message
@@ -10,6 +11,7 @@ from app.model.post_model import Post
 from app.model.user_model import User
 from app.util.api_response import response_object
 from app.util.auth_parser_util import get_auth_required_parser, get_auth_not_required_parser
+from app.util.jwt_util import tutor_required
 
 api = PostDto.api
 
@@ -37,10 +39,14 @@ class CreateTutorPost(Resource):
     @api.response(403, 'Forbidden')
     @api.response(404, 'Not found')
     @api.response(500, 'Internal server error')
+    @jwt_required()
+    @tutor_required()
     def post(self):
         """Create tutor post (Gia sư tạo bài đăng)"""
         args = _create_request.parse_args()
-        user = User.query.get(1)
+        user = User.query.get(get_jwt_identity()['user_id'])
+        if not user:
+            return response_object(status=False, message=response_message.UNAUTHORIZED), 401
         if not user.is_tutor:
             return response_object(status=False, message=response_message.FORBIDDEN), 403
         post = Post(
@@ -58,7 +64,7 @@ class CreateTutorPost(Resource):
             require=args['require'],
             contact=args['contact'],
             form_of_teaching=args['form_of_teaching'],
-            user_id=1
+            user_id=user.id
         )
         db.session.add(post)
         db.session.commit()
@@ -77,9 +83,13 @@ class CreateSearchPost(Resource):
     @api.response(403, 'Forbidden')
     @api.response(404, 'Not found')
     @api.response(500, 'Internal server error')
+    @jwt_required()
     def post(self):
         """Create search post (Đăng bài tìm kiếm gia sư)"""
         args = _create_request.parse_args()
+        user = User.query.get(get_jwt_identity()['user_id'])
+        if not user:
+            return response_object(status=False, message=response_message.UNAUTHORIZED), 401
         post = Post(
             is_tutor=False,
             public_id=str(uuid.uuid4())[:8].upper(),
@@ -95,7 +105,7 @@ class CreateSearchPost(Resource):
             require=args['require'],
             contact=args['contact'],
             form_of_teaching=args['form_of_teaching'],
-            user_id=1
+            user_id=user.id
         )
         db.session.add(post)
         db.session.commit()
