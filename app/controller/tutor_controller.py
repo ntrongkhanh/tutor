@@ -167,3 +167,19 @@ class TutorController(Resource):
         db.session.commit()
 
         return response_object(), 200
+
+
+@api.route('/profile')
+class Profile(Resource):
+    @api.doc('profile')
+    @api.expect(get_auth_required_parser(api), validate=True)
+    @api.marshal_with(_tutor_response, 200)
+    @jwt_required()
+    @tutor_required()
+    def get(self):
+        user_id = get_jwt_identity()['user_id'];
+
+        tutor = Tutor.query.filter(Tutor.user.has(User.id == user_id)).first()
+        if not tutor:
+            return response_object(status=False, message=response_message.NOT_FOUND), 404
+        return response_object(data=tutor.to_json()), 200
