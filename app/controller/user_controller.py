@@ -39,9 +39,9 @@ class UserListController(Resource):
         """create user (Tạo tài khoản)"""
 
         args = request.form
-        file = request.files['file']
+        # file = request.files['file']
 
-        return user_service.create_user(args, file)
+        return user_service.create_user(args, None)
 
     # coi lại cái lấy từ parser
     # truyền jwt

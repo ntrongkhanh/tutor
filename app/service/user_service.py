@@ -14,8 +14,11 @@ from app.util.api_response import response_object
 def create_user(args, file):
     if User.query.filter(User.email == args['email']).first():
         return response_object(status=False, message=message.EMAIL_ALREADY_EXISTS), 400
-    data = file.read()
-    image = Image(description='Avatar of ' + args['email'], data=data if data else None)
+    if file:
+        data = file.read()
+    else:
+        data=None
+    image = Image(description='Avatar of ' + args['email'], data=data)
     db.session.add(image)
     db.session.flush()
 
@@ -24,7 +27,7 @@ def create_user(args, file):
         password=args['password'],
         first_name=args['first_name'],
         last_name=args['last_name'],
-        birthday=args['birthday'],
+        # birthday=args['birthday'],
         sex=True if args['sex'] == 'true' else False,
         # sex=args['sex'],
         avatar_id=image.id

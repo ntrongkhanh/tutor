@@ -4,7 +4,6 @@ from datetime import datetime
 import jwt
 import pytz
 from sqlalchemy import ForeignKey
-from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import relationship
 
 from app import db, bcrypt, app
@@ -36,12 +35,11 @@ class User(db.Model):
     created_date = db.Column(db.DateTime, nullable=True)
     updated_date = db.Column(db.DateTime, nullable=True)
 
-    def __init__(self, email, password, first_name, last_name, birthday, sex, avatar_id):
+    def __init__(self, email, password, first_name, last_name, sex, avatar_id):
         self.email = email
         self.password = bcrypt.generate_password_hash(password).decode('utf-8')
         self.first_name = first_name
         self.last_name = last_name
-        self.birthday = birthday
         self.sex = sex
         self.avatar_id = avatar_id
         self.is_tutor = False
@@ -50,8 +48,8 @@ class User(db.Model):
         self.created_date = datetime.now()
         self.updated_date = datetime.now()
 
-    def set_password(self,password):
-        self.password= bcrypt.generate_password_hash(password).decode('utf-8')
+    def set_password(self, password):
+        self.password = bcrypt.generate_password_hash(password).decode('utf-8')
 
     @staticmethod
     def encode_auth_token(user_id, is_admin, is_tutor):
@@ -122,7 +120,7 @@ class User(db.Model):
             'email': self.email,
             'first_name': self.first_name,
             'last_name': self.last_name,
-            'birthday': date_to_json(self.birthday),
+            'birthday': date_to_json(self.birthday) if self.birthday else None,
             'sex': self.sex,
             'is_tutor': self.is_tutor,
             'is_admin': self.is_admin,

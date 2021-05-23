@@ -78,6 +78,8 @@ class ImageController(Resource):
         image = Image.query.get(image_id)
         if not image:
             return response_object(status=False, message=response_message.NOT_FOUND), 404
+        if not image.data:
+            return response_object(status=False, message=response_message.NOT_FOUND), 404
         image_binary = image.data
         response = flask.make_response(image_binary)
         response.headers.set('Content-Type', 'image/jpeg')

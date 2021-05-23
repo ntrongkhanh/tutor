@@ -13,13 +13,13 @@ class UserDto:
     __base = api.model("base", base)
     """request"""
     create_parser = api.parser()
-    create_parser.add_argument("file", type=FileStorage, location="files", required=True)
+    # create_parser.add_argument("file", type=FileStorage, location="files", required=True)
     create_parser.add_argument("email", type=str, location='form', required=True)
     create_parser.add_argument("password", type=str, location='form', required=True)
     create_parser.add_argument("first_name", type=str, location='form', required=True)
     create_parser.add_argument("last_name", type=str, location='form', required=True)
     create_parser.add_argument("sex", type=inputs.boolean, location='form', required=True)
-    create_parser.add_argument("birthday", type=datetime, location='form', required=True)
+    # create_parser.add_argument("birthday", type=datetime, location='form', required=True)
 
     update_parser = get_auth_required_parser(api)
     update_parser.add_argument("email", type=str, location='json', required=True)
