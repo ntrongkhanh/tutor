@@ -24,13 +24,13 @@ def create_app(config_name):
     app.url_map.strict_slashes = False
     db.init_app(app)
     jwt = JWTManager(app)
-    cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
+    # cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
     migrate.init_app(app, db)
 
     from . import model
     from app.blueprint import blueprint
     app.register_blueprint(blueprint)
-
+    CORS(app, resources={r"/api/*": {"origins": "http://localhost:3000"}})
     @jwt.token_in_blocklist_loader
     def check_token_in_blacklist(jwt_header, jwt_payload):
         from app.model.user_model import User
