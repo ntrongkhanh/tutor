@@ -17,7 +17,7 @@ def create_user(args, file):
     if file:
         data = file.read()
     else:
-        data=None
+        data = None
     image = Image(description='Avatar of ' + args['email'], data=data)
     db.session.add(image)
     db.session.flush()

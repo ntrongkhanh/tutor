@@ -38,7 +38,7 @@ class UserListController(Resource):
     def post(self):
         """create user (Tạo tài khoản)"""
 
-        args = request.form
+        args = _create_parser.parse_args()
         # file = request.files['file']
 
         return user_service.create_user(args, None)
