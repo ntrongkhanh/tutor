@@ -31,7 +31,7 @@ def create_app(config_name):
     from app.blueprint import blueprint
     app.register_blueprint(blueprint)
     # CORS(app, resources={r"/*": {"origins": "*"}})
-    CORS(app, resources={r"/api/*": {"origins": "http://localhost:3000"}})
+    # CORS(app, resources={r"/api/*": {"origins": "http://localhost:3000"}})
 
     @jwt.token_in_blocklist_loader
     def check_token_in_blacklist(jwt_header, jwt_payload):
