@@ -1,13 +1,14 @@
 # imports for PyJWT authentication
-import json
 from functools import wraps
 
 from flask import request, jsonify
-from flask_jwt_extended import get_jwt_identity, jwt_required
+from flask_jwt_extended import get_jwt_identity
 
+from app.model.model_enum import TutorStatus
+from app.model.tutor_model import Tutor
 from app.model.user_model import User
 from app.util.api_response import response_object
-from app.util.response_message import UNAUTHORIZED, NOT_FOUND
+from app.util.response_message import UNAUTHORIZED_401, NOT_FOUND_404
 
 
 def token_required(f):
@@ -33,7 +34,7 @@ def token_required(f):
             #     .first()
 
         except:
-            return response_object(status=False, message=UNAUTHORIZED), 401
+            return response_object(status=False, message=UNAUTHORIZED_401), 401
         # returns the current logged in users contex to the routes
         return f(*args, user, **kwargs)
 
@@ -46,18 +47,18 @@ def admin_required():
         def wrapper(*args, **kwargs):
             identity = get_jwt_identity()
             user_id = identity['user_id']
-            print(user_id)
-            print('11111111111111111111111111')
+
             try:
                 user = User.query.filter(User.id == user_id).first()
                 if user.is_admin:
                     return function(*args, **kwargs)
                 else:
-                    return response_object(status=False, message=NOT_FOUND), 404
+                    return response_object(status=False, message=NOT_FOUND_404), 404
             except:
-                return response_object(status=False, message=NOT_FOUND), 404
+                return response_object(status=False, message=NOT_FOUND_404), 404
 
         return wrapper
+
     return decorator
 
 
@@ -67,20 +68,21 @@ def tutor_required():
         def wrapper(*args, **kwargs):
             identity = get_jwt_identity()
             user_id = identity['user_id']
-            print(user_id)
+
             try:
-                user = User.query.filter(User.id == user_id).first()
+                user = User.query.get(user_id)
                 if user.is_tutor:
-                    return function(*args, **kwargs)
+                    tutor = Tutor.query.get(user.tutor_id)
+                    if not tutor:
+                        return response_object(status=False, message=UNAUTHORIZED_401), 401
+                    if tutor.status == TutorStatus.APPROVED:
+                        return function(*args, **kwargs)
                 else:
-                    return response_object(status=False, message=NOT_FOUND), 404
+                    return response_object(status=False, message=UNAUTHORIZED_401), 401
             except:
-                return response_object(status=False, message=NOT_FOUND), 404
+                return response_object(status=False, message=NOT_FOUND_404), 404
 
         return wrapper
 
     # print('1111111111111111111111111111111')
     return decorator
-
-
-

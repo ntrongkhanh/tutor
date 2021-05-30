@@ -1,11 +1,14 @@
 import uuid
 from operator import or_
 
+from flask import request
 from flask_jwt_extended import get_jwt_identity, jwt_required
 from flask_restx import Resource
 
 from app import db
 from app.dto.tutor_dto import TutorDto
+from app.model.image_model import Image
+from app.model.model_enum import TutorStatus
 from app.model.tutor_model import Tutor
 from app.model.user_model import User
 from app.util import response_message
@@ -37,14 +40,17 @@ class TutorListController(Resource):
     @api.expect(_create_request, validate=True)
     @api.marshal_with(_message_response, 201)
     @jwt_required()
-    @tutor_required()
+    # @tutor_required()
     def post(self):
         """Create tutor (Tạo gia sư)"""
+
         args = _create_request.parse_args()
 
         user = User.query.get(get_jwt_identity()['user_id'])
+
         if not user:
-            return response_object(status=False, message=response_message.NOT_FOUND), 404
+            return response_object(status=False, message=response_message.USER_NOT_FOUND), 404
+
         if user.is_tutor:
             return response_object(status=False, message=response_message.ACCOUNT_IS_A_TUTOR_ALREADY), 400
         tutor = Tutor(
@@ -54,7 +60,9 @@ class TutorListController(Resource):
             majors=args['majors'],
             degree=args['degree'],
             school=args['school'],
-            address=args['address'],
+            city_address=args['city_address'],
+            district_address=args['district_address'],
+            detailed_address=args['detailed_address'],
             subject=args['subject'],
             class_type=args['class_type'],
             experience=args['experience'],
@@ -90,16 +98,84 @@ class TutorListController(Resource):
             or_(Tutor.majors.like("%{}%".format(args['majors'])), args['majors'] is None),
             or_(Tutor.degree.like("%{}%".format(args['degree'])), args['degree'] is None),
             or_(Tutor.school.like("%{}%".format(args['school'])), args['school'] is None),
-            or_(Tutor.address.like("%{}%".format(args['address'])), args['address'] is None),
+            or_(Tutor.city_address.like("%{}%".format(args['city_address'])), args['city_address'] is None),
+            or_(Tutor.district_address.like("%{}%".format(args['district_address'])), args['district_address'] is None),
+            or_(Tutor.detailed_address.like("%{}%".format(args['detailed_address'])), args['detailed_address'] is None),
             or_(Tutor.class_type.like("%{}%".format(args['class_type'])), args['class_type'] is None),
             or_(Tutor.experience.like("%{}%".format(args['experience'])), args['experience'] is None),
             or_(Tutor.other_information.like("%{}%".format(args['other_information'])),
                 args['other_information'] is None),
+            (Tutor.status == args['status'] if get_jwt_identity()['is_admin']
+             else Tutor.status == TutorStatus.APPROVED),
             Tutor.is_active == True
         ).paginate(page, page_size, error_out=False)
 
         return response_object(data=[tutor.to_json() for tutor in tutors.items],
                                pagination={'total': tutors.total, 'page': tutors.page}), 200
+
+    # cũng ok
+    # chưa jwt
+    @api.doc('update tutor')
+    @api.response(401, 'Unauthorized')
+    @api.response(403, 'Forbidden')
+    @api.response(404, 'Not found')
+    @api.response(500, 'Internal server error')
+    @api.expect(_update_request, validate=True)
+    @api.marshal_with(_message_response, 200)
+    @jwt_required()
+    @tutor_required()
+    def put(self):
+        """Update tutor (Cập nhật thông tin gia sư)"""
+        args = _update_request.parse_args()
+        user = User.query.get(get_jwt_identity()['user_id'])
+        if not user:
+            return response_object(status=False, message=response_message.NOT_FOUND_404), 404
+        tutor = Tutor.query.get(user.tutor_id)
+        if not tutor:
+            return response_object(status=False, message=response_message.NOT_FOUND_404), 404
+
+        tutor.career = args['career'] if args['career'] else tutor.career
+        tutor.tutor_description = args['tutor_description'] if args['tutor_description'] else tutor.tutor_description
+        tutor.majors = args['majors'] if args['majors'] else tutor.majors
+        tutor.degree = args['degree'] if args['degree'] else tutor.degree
+        tutor.school = args['school'] if args['school'] else tutor.school
+        tutor.address = args['address'] if args['address'] else tutor.address
+        tutor.class_type = args['class_type'] if args['class_type'] else tutor.class_type
+        tutor.experience = args['experience'] if args['experience'] else tutor.experience
+        tutor.other_information = args['other_information'] if args['other_information'] else tutor.other_information
+
+        db.session.commit()
+
+        return response_object()
+
+
+_create_verification_image_parser = TutorDto.create_verification_image_parser
+
+
+@api.route('/verification-image')
+class VerificationImageController(Resource):
+    @api.doc('verification image')
+    @api.expect(_create_verification_image_parser, validate=True)
+    @api.marshal_with(_message_response, 201)
+    @jwt_required()
+    def post(self):
+        """upload verification image"""
+        user_id = get_jwt_identity()['user_id']
+        user = User.query.get(user_id)
+        if not user:
+            return response_object(status=False, message=response_message.USER_NOT_FOUND), 404
+        tutor = Tutor.query.get(user.tutor_id)
+        if not tutor:
+            return response_object(status=False, message=response_message.TUTOR_NOT_FOUND), 404
+        args = _create_verification_image_parser.parse_args()
+        file = args['file'].read()
+        description = request.form['description']
+        # args = request.form
+        image = Image(data=file, description=description, tutor_id=tutor.id)
+        db.session.add(image)
+        db.session.commit()
+
+        return response_object(data=image.to_json()), 201
 
 
 @api.route('/<tutor_id>')
@@ -119,36 +195,6 @@ class TutorController(Resource):
 
         return response_object(data=tutor.to_json()), 200
 
-    # cũng ok
-    # chưa jwt
-    @api.doc('update tutor')
-    @api.response(401, 'Unauthorized')
-    @api.response(403, 'Forbidden')
-    @api.response(404, 'Not found')
-    @api.response(500, 'Internal server error')
-    @api.expect(_update_request, validate=True)
-    @api.marshal_with(_message_response, 200)
-    def put(self):
-        """Update tutor (Cập nhật thông tin gia sư)"""
-        args = _update_request.parse_args()
-        tutor = Tutor.query.get(args['id'])
-        if not tutor:
-            return response_object(status=False, message=response_message.NOT_FOUND), 404
-
-        tutor.career = args['career'] if args['career'] else tutor.career
-        tutor.tutor_description = args['tutor_description'] if args['tutor_description'] else tutor.tutor_description
-        tutor.majors = args['majors'] if args['majors'] else tutor.majors
-        tutor.degree = args['degree'] if args['degree'] else tutor.degree
-        tutor.school = args['school'] if args['school'] else tutor.school
-        tutor.address = args['address'] if args['address'] else tutor.address
-        tutor.class_type = args['class_type'] if args['class_type'] else tutor.class_type
-        tutor.experience = args['experience'] if args['experience'] else tutor.experience
-        tutor.other_information = args['other_information'] if args['other_information'] else tutor.other_information
-
-        db.session.commit()
-
-        return response_object()
-
     # chưa jwt
     @api.doc('delete tutor')
     @api.response(401, 'Unauthorized')
@@ -161,7 +207,7 @@ class TutorController(Resource):
         """Delete a tutor (Xóa 1 gia sư)"""
         tutor = Tutor.query.get(tutor_id)
         if not tutor:
-            return response_object(status=False, message=response_message.NOT_FOUND), 404
+            return response_object(status=False, message=response_message.NOT_FOUND_404), 404
 
         tutor.is_active = False
         db.session.commit()
@@ -177,9 +223,9 @@ class Profile(Resource):
     @jwt_required()
     @tutor_required()
     def get(self):
-        user_id = get_jwt_identity()['user_id'];
+        user_id = get_jwt_identity()['user_id']
 
         tutor = Tutor.query.filter(Tutor.user.has(User.id == user_id)).first()
         if not tutor:
-            return response_object(status=False, message=response_message.NOT_FOUND), 404
+            return response_object(status=False, message=response_message.NOT_FOUND_404), 404
         return response_object(data=tutor.to_json()), 200

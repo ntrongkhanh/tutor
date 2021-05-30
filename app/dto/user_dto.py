@@ -26,14 +26,14 @@ class UserDto:
     update_parser.add_argument("first_name", type=str, location='json', required=True)
     update_parser.add_argument("last_name", type=str, location='json', required=True)
     update_parser.add_argument("sex", type=bool, location='json', required=True)
-    update_parser.add_argument("birthday", type=datetime, location='json', required=True)
+    # update_parser.add_argument("birthday", type=datetime, location='json', required=True)
 
     filter_parser = get_auth_required_parser(api)
     filter_parser.add_argument("email", type=str, location='args', required=False)
     filter_parser.add_argument("first_name", type=str, location='args', required=False)
     filter_parser.add_argument("last_name", type=str, location='args', required=False)
     filter_parser.add_argument("sex", type=bool, location='args', required=False)
-    filter_parser.add_argument("birthday", type=datetime, location='args', required=False)
+    # filter_parser.add_argument("birthday", type=datetime, location='args', required=False)
     filter_parser.add_argument("page", type=int, location="args", required=False, default=app.config['DEFAULT_PAGE'])
     filter_parser.add_argument("page_size", type=int, location="args", required=False,
                                default=app.config['DEFAULT_PAGE_SIZE'])
@@ -44,7 +44,6 @@ class UserDto:
 
     update_avatar_parser = get_auth_required_parser(api)
     update_avatar_parser.add_argument("file", type=FileStorage, location="files", required=True)
-    update_avatar_parser.add_argument("user_id", type=int, location='form', required=True)
 
     change_password_parser = get_auth_required_parser(api)
     change_password_parser.add_argument("new_password", type=str, location='json', required=False)
@@ -57,6 +56,10 @@ class UserDto:
     reset_parser.add_argument("email", type=str, location='args', required=True)
     reset_parser.add_argument("code", type=str, location='args', required=True)
     reset_parser.add_argument("password", type=str, location='json', required=True)
+
+    check_code_parser = api.parser()
+    check_code_parser.add_argument("email", type=str, location='args', required=True)
+    check_code_parser.add_argument("code", type=str, location='args', required=True)
     """data"""
 
     avatar = api.inherit('avatar', {

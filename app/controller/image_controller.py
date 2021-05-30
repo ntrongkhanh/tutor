@@ -2,11 +2,13 @@ from datetime import datetime
 from operator import or_
 
 import flask
+from flask_jwt_extended import get_jwt_identity, jwt_required
 from flask_restx import Resource
 
-from app import db, app
+from app import db
 from app.dto.image_dto import ImageDto
 from app.model.image_model import Image
+from app.model.user_model import User
 from app.util import response_message
 from app.util.api_response import response_object
 from app.util.auth_parser_util import get_auth_not_required_parser, get_auth_required_parser
@@ -40,9 +42,21 @@ class ImageListController(Resource):
         search = "%{}%".format(description)
         page = args['page']
         page_size = args['page_size']
+
+        try:
+            user_id = get_jwt_identity()['user_id']
+        except:
+            user_id = 0
+        user = User.query.get(user_id)
+        if user.is_admin:
+            is_public = False
+        else:
+            is_public = True
+
         images = Image.query.filter(
             or_(Image.description.like(search), description is None),
-            or_(Image.id == image_id, image_id is None)
+            or_(Image.id == image_id, image_id is None),
+            Image.is_public if is_public else None
         ).paginate(page, page_size, error_out=False)
 
         # return None
@@ -77,9 +91,16 @@ class ImageController(Resource):
         """Get image by id  (Get hình ảnh by id)"""
         image = Image.query.get(image_id)
         if not image:
-            return response_object(status=False, message=response_message.NOT_FOUND), 404
+            return response_object(status=False, message=response_message.NOT_FOUND_404), 404
+        if not image.is_public:
+            try:
+                user = User.query.get(get_jwt_identity()['user_id'])
+                if image.tutor_id != user.tutor_id or not user.is_admin:
+                    return response_object(status=False, message=response_message.NOT_FOUND_404), 404
+            except:
+                pass
         if not image.data:
-            return response_object(status=False, message=response_message.NOT_FOUND), 404
+            return response_object(status=False, message=response_message.NOT_FOUND_404), 404
         image_binary = image.data
         response = flask.make_response(image_binary)
         response.headers.set('Content-Type', 'image/jpeg')
@@ -93,13 +114,20 @@ class ImageController(Resource):
     @api.response(404, 'Not found')
     @api.response(500, 'Internal server error')
     @api.marshal_with(_create_response, 200)
+    @jwt_required()
     def put(self):
         """Update an image (Cập nhật hình ảnh)"""
+        user = User.query.get(get_jwt_identity()['user_id'])
+        if not user:
+            return response_object(status=False, data=response_message.USER_NOT_FOUND), 404
         args = _upload_request.parse_args()
         image_id = args['id']
         image = Image.query.get(image_id)
         if not image:
-            return response_object(status=False, data=response_message.NOT_FOUND), 404
+            return response_object(status=False, data=response_message.NOT_FOUND_404), 404
+
+        if image.tutor_id != user.tutor_id:
+            return response_object(status=False, data=response_message.FORBIDDEN_403), 403
 
         image.description = args['description'] if args['description'] else image.description
         image.data = args['file'].read()

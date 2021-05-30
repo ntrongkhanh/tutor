@@ -1,4 +1,5 @@
 import uuid
+from datetime import datetime
 from operator import or_
 
 from flask_jwt_extended import jwt_required, get_jwt_identity
@@ -46,15 +47,16 @@ class CreateTutorPost(Resource):
         args = _create_request.parse_args()
         user = User.query.get(get_jwt_identity()['user_id'])
         if not user:
-            return response_object(status=False, message=response_message.UNAUTHORIZED), 401
-        if not user.is_tutor:
-            return response_object(status=False, message=response_message.FORBIDDEN), 403
+            return response_object(status=False, message=response_message.UNAUTHORIZED_401), 401
+
         post = Post(
             public_id=str(uuid.uuid4())[:8].upper(),
             is_tutor=True,
             title=args['title'],
             description=args['description'],
-            teaching_address=args['teaching_address'],
+            city_address=args['city_address'],
+            district_address=args['district_address'],
+            detailed_address=args['detailed_address'],
             subject=args['subject'],
             class_type=args['class_type'],
             other_information=args['other_information'],
@@ -84,18 +86,21 @@ class CreateSearchPost(Resource):
     @api.response(404, 'Not found')
     @api.response(500, 'Internal server error')
     @jwt_required()
+    @tutor_required()
     def post(self):
         """Create search post (Đăng bài tìm kiếm gia sư)"""
         args = _create_request.parse_args()
         user = User.query.get(get_jwt_identity()['user_id'])
         if not user:
-            return response_object(status=False, message=response_message.UNAUTHORIZED), 401
+            return response_object(status=False, message=response_message.UNAUTHORIZED_401), 401
         post = Post(
             is_tutor=False,
             public_id=str(uuid.uuid4())[:8].upper(),
             title=args['title'],
             description=args['description'],
-            teaching_address=args['teaching_address'],
+            city_address=args['city_address'],
+            district_address=args['district_address'],
+            detailed_address=args['detailed_address'],
             subject=args['subject'],
             class_type=args['class_type'],
             other_information=args['other_information'],
@@ -133,7 +138,9 @@ class PostListController(Resource):
             or_(Post.is_tutor == args['is_tutor'], args['is_tutor'] is None),
             or_(Post.title.like("%{}%".format(args['title'])), args['title'] is None),
             or_(Post.description.like("%{}%".format(args['description'])), args['description'] is None),
-            or_(Post.teaching_address.like("%{}%".format(args['teaching_address'])), args['teaching_address'] is None),
+            or_(Post.city_address.like("%{}%".format(args['city_address'])), args['city_address'] is None),
+            or_(Post.district_address.like("%{}%".format(args['district_address'])), args['district_address'] is None),
+            or_(Post.detailed_address.like("%{}%".format(args['detailed_address'])), args['detailed_address'] is None),
             or_(Post.subject.like("%{}%".format(args['subject'])), args['subject'] is None),
             or_(Post.other_information.like("%{}%".format(args['other_information'])),
                 args['other_information'] is None),
@@ -158,7 +165,6 @@ class PostListController(Resource):
 @api.route('/<int:post_id>')
 class PostController(Resource):
 
-
     # chưa load user lên
     @api.doc('get post by id')
     @api.response(401, 'Unauthorized')
@@ -172,8 +178,7 @@ class PostController(Resource):
 
         return response_object(data=post.to_json()), 200
 
-    # ok
-    # chưa jwt, get user lên so sánh có phải là post của nó hay k
+    # chưa test
     @api.doc('update post')
     @api.expect(_update_request, validate=True)
     @api.response(200, 'OK')
@@ -181,12 +186,20 @@ class PostController(Resource):
     @api.response(403, 'Forbidden')
     @api.response(404, 'Not found')
     @api.response(500, 'Internal server error')
+    @jwt_required()
+    @tutor_required()
     def put(self):
         """Update post (Cập nhật bài post)"""
         args = _update_request.parse_args()
+
+        user = User.query.get(get_jwt_identity()['user_id'])
+        if not user:
+            return response_object(status=False, message=response_message.USER_NOT_FOUND), 404
         post = Post.query.get(args['id'])
         if not post:
-            return response_object(status=False, message=response_message.NOT_FOUND), 404
+            return response_object(status=False, message=response_message.NOT_FOUND_404), 404
+        if post.user_id != user.id:
+            return response_object(status=False, message=response_message.FORBIDDEN_403), 403
 
         post.title = args['title'] if args['title'] else post.title
         post.description = args['description'] if args['description'] else post.description
@@ -200,7 +213,7 @@ class PostController(Resource):
         post.require = args['require'] if args['require'] else post.require
         post.contact = args['contact'] if args['contact'] else post.contact
         post.form_of_teaching = args['form_of_teaching'] if args['form_of_teaching'] else post.form_of_teaching
-
+        post.updated_date = datetime.now()
         db.session.commit()
 
         return response_object(), 200
@@ -214,8 +227,19 @@ class PostController(Resource):
     @api.response(404, 'Not found')
     @api.response(500, 'Internal server error')
     @api.expect(get_auth_required_parser(api), validate=True)
+    @jwt_required()
+    @tutor_required()
     def delete(self, post_id):
         """Delete post by id (Xóa bài post)"""
-        Post.query.filter(Post.id == post_id).delete()
+        user = User.query.get(get_jwt_identity()['user_id'])
+        if not user:
+            return response_object(status=False, message=response_message.USER_NOT_FOUND), 404
+        post = Post.query.get(post_id)
+        if not post:
+            return response_object(status=False, message=response_message.POST_NOT_FOUND), 404
+        if post.user_id != user.id:
+            return response_object(status=False, message=response_message.FORBIDDEN_403), 403
+        # Post.query.filter(Post.id == post_id).delete()
+        post.delete()
         db.session.commit()
         return response_object(), 200

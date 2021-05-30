@@ -19,6 +19,7 @@ class Config(object):
     MAIL_USE_SSL = True
     TOKEN_EXPIRED_TIME = timedelta(days=50)
     PROPAGATE_EXCEPTIONS = True
+    MIN_PASSWORD_CHARACTERS = 6
 
 
 class DevelopmentConfig(Config):

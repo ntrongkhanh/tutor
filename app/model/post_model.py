@@ -3,6 +3,7 @@ import datetime
 from sqlalchemy import ForeignKey
 
 from app import db
+from app.model.model_enum import PostStatus
 from app.util.api_response import date_to_json
 
 
@@ -14,7 +15,6 @@ class Post(db.Model):
     is_tutor = db.Column(db.Boolean, default=False, nullable=False)
     title = db.Column(db.String(255), nullable=True)
     description = db.Column(db.String(255), nullable=True)
-    teaching_address = db.Column(db.String(255), nullable=True)
     subject = db.Column(db.String(255), nullable=True)
     class_type = db.Column(db.String(255), nullable=True)
     other_information = db.Column(db.String(255), nullable=True)
@@ -25,6 +25,11 @@ class Post(db.Model):
     contact = db.Column(db.String(255), nullable=True)
     form_of_teaching = db.Column(db.String(255), nullable=True)
     is_active = db.Column(db.Boolean, default=True, nullable=False)
+    status = db.Column(db.Enum(PostStatus), default=PostStatus.OPEN, nullable=True)
+
+    city_address = db.Column(db.String(255), nullable=True)
+    district_address = db.Column(db.String(255), nullable=True)
+    detailed_address = db.Column(db.String(255), nullable=True)
 
     user_id = db.Column(db.Integer, ForeignKey('users.id'))
     # user = relationship("User", backref="posts")
@@ -32,14 +37,16 @@ class Post(db.Model):
     created_date = db.Column(db.DateTime, nullable=True)
     updated_date = db.Column(db.DateTime, nullable=True)
 
-    def __init__(self, public_id, is_tutor, title, description, teaching_address, subject, class_type,
-                 other_information, fee,
-                 schedule, number_of_sessions, require, contact, form_of_teaching, user_id):
+    def __init__(self, public_id, is_tutor, title, description, subject, class_type, other_information, fee, schedule,
+                 number_of_sessions, require, contact, form_of_teaching, user_id, city_address, district_address,
+                 detailed_address):
         self.public_id = public_id
         self.is_tutor = is_tutor
         self.title = title
         self.description = description
-        self.teaching_address = teaching_address
+        self.city_address = city_address
+        self.district_address = district_address
+        self.detailed_address = detailed_address
         self.subject = subject
         self.class_type = class_type
         self.other_information = other_information
@@ -52,6 +59,7 @@ class Post(db.Model):
         self.user_id = user_id
         self.created_date = datetime.datetime.now()
         self.updated_date = datetime.datetime.now()
+        self.status = PostStatus.OPEN
 
     def to_json(self):
         return {

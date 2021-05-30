@@ -1,4 +1,5 @@
 from flask_restx import Namespace, fields
+from werkzeug.datastructures import FileStorage
 
 from app import app
 from app.dto.base_dto import base
@@ -16,19 +17,26 @@ class TutorDto:
     create_parser.add_argument("degree", type=str, location='json', required=False)
     create_parser.add_argument("subject", type=str, location='json', required=False)
     create_parser.add_argument("school", type=str, location='json', required=False)
-    create_parser.add_argument("address", type=str, location='json', required=False)
+    create_parser.add_argument("city_address", type=str, location='json', required=False)
+    create_parser.add_argument("district_address", type=str, location='json', required=False)
+    create_parser.add_argument("detailed_address", type=str, location='json', required=False)
     create_parser.add_argument("class_type", type=str, location='json', required=False)
     create_parser.add_argument("experience", type=str, location='json', required=False)
     create_parser.add_argument("other_information", type=str, location='json', required=False)
 
+    create_verification_image_parser = get_auth_required_parser(api)
+    create_verification_image_parser.add_argument("file", type=FileStorage, location="files", required=True)
+    create_verification_image_parser.add_argument("description", type=str, location='form', required=False)
+
     update_parser = get_auth_required_parser(api)
-    update_parser.add_argument("id", type=int, location='json', required=True)
     update_parser.add_argument("career", type=str, location='json', required=False)
     update_parser.add_argument("tutor_description", type=str, location='json', required=False)
     update_parser.add_argument("majors", type=str, location='json', required=False)
     update_parser.add_argument("degree", type=str, location='json', required=False)
     update_parser.add_argument("school", type=str, location='json', required=False)
-    update_parser.add_argument("address", type=str, location='json', required=False)
+    update_parser.add_argument("city_address", type=str, location='json', required=False)
+    update_parser.add_argument("district_address", type=str, location='json', required=False)
+    update_parser.add_argument("detailed_address", type=str, location='json', required=False)
     update_parser.add_argument("class_type", type=str, location='json', required=False)
     update_parser.add_argument("experience", type=str, location='json', required=False)
     update_parser.add_argument("other_information", type=str, location='json', required=False)
@@ -41,10 +49,13 @@ class TutorDto:
     filter_parser.add_argument("majors", type=str, location='args', required=False)
     filter_parser.add_argument("degree", type=str, location='args', required=False)
     filter_parser.add_argument("school", type=str, location='args', required=False)
-    filter_parser.add_argument("address", type=str, location='args', required=False)
+    filter_parser.add_argument("city_address", type=str, location='json', required=False)
+    filter_parser.add_argument("district_address", type=str, location='json', required=False)
+    filter_parser.add_argument("detailed_address", type=str, location='json', required=False)
     filter_parser.add_argument("class_type", type=str, location='args', required=False)
     filter_parser.add_argument("experience", type=str, location='args', required=False)
     filter_parser.add_argument("other_information", type=str, location='args', required=False)
+    filter_parser.add_argument("status", type=str, location='args', required=False)
     filter_parser.add_argument("page", type=int, location="args", required=False, default=app.config['DEFAULT_PAGE'])
     filter_parser.add_argument("page_size", type=int, location="args", required=False,
                                default=app.config['DEFAULT_PAGE_SIZE'])
@@ -57,7 +68,9 @@ class TutorDto:
         'majors': fields.String(required=False, description='description'),
         'degree': fields.String(required=False, description='description'),
         'school': fields.String(required=False, description='description'),
-        'address': fields.String(required=False, description='description'),
+        'city_address': fields.String(required=False, description='description'),
+        'district_address': fields.String(required=False, description='description'),
+        'detailed_address': fields.String(required=False, description='description'),
         'subject': fields.String(required=False, description='description'),
         'class_type': fields.String(required=False, description='description'),
         'experience': fields.String(required=False, description='description'),
@@ -66,6 +79,7 @@ class TutorDto:
         'user': fields.Nested(UserDto.user_data, required=False, description='description'),
         'created_date': fields.String(required=False, description='description'),
         'updated_date': fields.String(required=False, description='description'),
+        'status': fields.String(required=False, description='description'),
     })
     pagination_data = api.model('pagination', {
         'page': fields.Integer,
@@ -79,7 +93,7 @@ class TutorDto:
 
     tutor_list_response = api.inherit('tutor_list_response', base, {
         'data': fields.List(fields.Nested(tutor_data)),
-        'pagination':fields.Nested(pagination_data)
+        'pagination': fields.Nested(pagination_data)
     })
 
     message_response = api.inherit('message_response', base, {

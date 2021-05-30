@@ -1,6 +1,7 @@
 from flask import request
-from flask_jwt_extended import jwt_required, create_access_token, get_jwt
+from flask_jwt_extended import jwt_required, create_access_token, get_jwt, get_jwt_identity
 from flask_restx import Resource
+from sqlalchemy import func
 
 from app import app, db
 from app.dto.auth_dto import AuthDto
@@ -31,7 +32,7 @@ class Login(Resource):
     def post(self):
         """Login (Đăng nhập)"""
         args = request.json
-        user = User.query.filter(User.email == args['email']).first()
+        user = User.query.filter(func.lower(User.email) == func.lower(args['email'])).first()
         if not user:
             return response_object(status=False, message=response_message.EMAIL_ALREADY_EXISTS), 401
         if not user.is_active:
@@ -43,7 +44,7 @@ class Login(Resource):
             data = user.to_json()
             data['token'] = auth_token
             return response_object(data=data), 200
-        return response_object(status=False, message=response_message.UNAUTHORIZED), 401
+        return response_object(status=False, message=response_message.UNAUTHORIZED_401), 401
 
 
 # tạm ok
@@ -79,8 +80,18 @@ class CheckToken(Resource):
     @api.doc('check Token expiration time')
     @api.expect(get_auth_required_parser(api), validate=True)
     @api.response(401, 'Unauthorized')
-    @api.marshal_with(_message_response, 200)
+    @api.marshal_with(_login_response, 200)
     @jwt_required()
     def get(self):
         """Check token (Kiểm tra hạn của token)"""
-        return response_object(), 200
+
+        user = User.query.get(get_jwt_identity()['user_id'])
+        if not user:
+            return response_object(status=False, message=response_message.UNAUTHORIZED_401), 401
+
+        auth_token = create_access_token(identity=user.to_payload(), expires_delta=app.config['TOKEN_EXPIRED_TIME'])
+        if auth_token:
+            data = user.to_json()
+            data['token'] = auth_token
+            return response_object(data=data), 200
+        return response_object(status=False, message=response_message.UNAUTHORIZED_401), 401

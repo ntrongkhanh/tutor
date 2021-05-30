@@ -21,7 +21,7 @@ def login(email, password):
         data = user.to_json()
         data['token'] = auth_token
         return response_object(data=data), 200
-    return response_object(status=False, message=response_message.UNAUTHORIZED), 401
+    return response_object(status=False, message=response_message.UNAUTHORIZED_401), 401
 
 
 def logout(token):

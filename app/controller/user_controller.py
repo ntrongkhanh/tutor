@@ -4,7 +4,9 @@ from flask import request
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from flask_restx import Resource
 
+import app.util.response_message as message
 from app.dto.user_dto import UserDto
+from app.model.code import Code
 from app.model.user_model import User
 from app.service import user_service
 from app.util.api_response import response_object
@@ -14,8 +16,6 @@ api = UserDto.api
 
 _message_response = UserDto.message_response
 
-_create_parser = UserDto.create_parser
-
 _update_parser = UserDto.update_parser
 
 _filter_parser = UserDto.filter_parser
@@ -23,9 +23,13 @@ _filter_response = UserDto.user_list_response
 
 _user_response = UserDto.user_response
 
+_create_parser = UserDto.create_parser
+
 
 @api.route('')
 class UserListController(Resource):
+    _create_parser = UserDto.create_parser
+
     # tạm ok
     @api.doc('create user')
     @api.response(201, 'Created')
@@ -39,9 +43,8 @@ class UserListController(Resource):
         """create user (Tạo tài khoản)"""
 
         args = _create_parser.parse_args()
-        # file = request.files['file']
 
-        return user_service.create_user(args, None)
+        return user_service.create_user(args)
 
     # coi lại cái lấy từ parser
     # truyền jwt
@@ -52,11 +55,13 @@ class UserListController(Resource):
     @api.response(500, 'Internal server error')
     @api.expect(_update_parser, validate=True)
     @api.marshal_with(_message_response, 200)
+    @jwt_required()
     def put(self):
         """update user"""
         # args = _update_parser.parse_args()
         args = request.json
-        return user_service.update_user(args, 1)
+        user_id = get_jwt_identity()['user_id']
+        return user_service.update_user(args, user_id)
 
     # tạm
     @api.doc('filter user')
@@ -73,7 +78,7 @@ class UserListController(Resource):
             or_(User.first_name.like("%{}%".format(args['first_name'])), args['first_name'] is None),
             or_(User.last_name.like("%{}%".format(args['last_name'])), args['last_name'] is None),
             or_(User.sex == args['last_name'], args['sex'] is None),
-            or_(User.birthday == args['birthday'], args['birthday'] is None),
+            # or_(User.birthday == args['birthday'], args['birthday'] is None),
             User.is_active
         ).paginate(page, page_size, error_out=False)
 
@@ -173,11 +178,12 @@ class UpdateAvatar(Resource):
     @api.response(403, 'Forbidden')
     @api.response(404, 'Not found')
     @api.response(500, 'Internal server error')
-    @api.expect(_update_avatar_parser)
+    @api.expect(_update_avatar_parser, validate=True)
     @api.marshal_with(_message_response, 200)
+    @jwt_required()
     def put(self):
         """update avatar"""
-        user_id = request.form['user_id']
+        user_id = get_jwt_identity()['user_id']
         file = request.files['file']
         return user_service.update_avatar(file, user_id)
 
@@ -197,11 +203,13 @@ class ChangePassword(Resource):
     @api.response(500, 'Internal server error')
     @api.expect(_change_password_parser, validate=True)
     @api.marshal_with(_message_response, 200)
+    @jwt_required()
     def post(self):
         """change password"""
         # args = _change_password_parser.parse_args()
+        user_id = get_jwt_identity()['user_id']
         args = request.json
-        return user_service.change_password(args, 1)
+        return user_service.change_password(args, user_id)
 
 
 _forgot_password_parser = UserDto.forgot_password_parser
@@ -230,7 +238,6 @@ _reset_parser = UserDto.reset_parser
 
 
 @api.route('/password/reset')
-@api.param('email')
 class Reset(Resource):
     @api.doc('reset password')
     @api.response(401, 'Unauthorized')
@@ -238,9 +245,30 @@ class Reset(Resource):
     @api.response(404, 'Not found')
     @api.response(500, 'Internal server error')
     @api.expect(_reset_parser, validate=True)
-    @api.marshal_with(_message_response)
+    @api.marshal_with(_message_response, 200)
     def post(self):
         """reset password"""
         args = _reset_parser.parse_args()
         password = request.json['password']
         return user_service.reset_password(args, password)
+
+
+_check_code_parser = UserDto.check_code_parser
+
+
+@api.route('/code/check')
+class CheckCode(Resource):
+    @api.doc('check code')
+    @api.expect(_check_code_parser, validate=True)
+    @api.marshal_with(_message_response, 200)
+    def post(self):
+        """check code"""
+        args = _check_code_parser.parse_args()
+
+        reset_code = Code.query.filter_by(email=args['email']).first()
+        if not reset_code:
+            return response_object(status=False, message=message.NOT_FOUND_404), 404
+        if reset_code.code != args['code']:
+            return response_object(status=False, message=message.NOT_FOUND_404), 404
+
+        return response_object(), 200
