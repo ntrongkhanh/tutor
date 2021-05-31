@@ -3,7 +3,6 @@ from flask import Blueprint
 from flask_restx import Api
 from flask_jwt_extended.exceptions import NoAuthorizationError
 from app.controller.auth_controller import api as auth_api
-from app.controller.demo_controller import api as demo_api
 from app.controller.image_controller import api as image_api
 from app.controller.post_controller import api as post_api
 from app.controller.tutor_controller import api as tutor_api
@@ -16,7 +15,6 @@ api = Api(blueprint,
           version='1.0'
           )
 
-api.add_namespace(demo_api, path='/demo')
 api.add_namespace(auth_api, path='/auth')
 api.add_namespace(image_api, path='/image')
 api.add_namespace(user_api, path='/user')
