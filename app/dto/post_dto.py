@@ -12,7 +12,9 @@ class PostDto:
     create_parser = get_auth_required_parser(api)
     create_parser.add_argument("title", type=str, location="json", required=True)
     create_parser.add_argument("description", type=str, location="json", required=False)
-    create_parser.add_argument("teaching_address", type=str, location="json", required=False)
+    create_parser.add_argument("city_address", type=str, location="json", required=False)
+    create_parser.add_argument("district_address", type=str, location="json", required=False)
+    create_parser.add_argument("detailed_address", type=str, location="json", required=False)
     create_parser.add_argument("subject", type=str, location="json", required=True)
     create_parser.add_argument("class_type", type=str, location="json", required=False)
     create_parser.add_argument("other_information", type=str, location="json", required=False)
@@ -24,10 +26,11 @@ class PostDto:
     create_parser.add_argument("form_of_teaching", type=str, location="json", required=False)
 
     update_parser = get_auth_required_parser(api)
-    update_parser.add_argument("id", type=int, location="json", required=True)
     update_parser.add_argument("title", type=str, location="json", required=False)
     update_parser.add_argument("description", type=str, location="json", required=False)
-    update_parser.add_argument("teaching_address", type=str, location="json", required=False)
+    update_parser.add_argument("city_address", type=str, location="json", required=False)
+    update_parser.add_argument("district_address", type=str, location="json", required=False)
+    update_parser.add_argument("detailed_address", type=str, location="json", required=False)
     update_parser.add_argument("subject", type=str, location="json", required=False)
     update_parser.add_argument("class_type", type=str, location="json", required=False)
     update_parser.add_argument("other_information", type=str, location="json", required=False)
@@ -43,7 +46,9 @@ class PostDto:
     filter_parser.add_argument("is_tutor", type=inputs.boolean, location="args", required=False)
     filter_parser.add_argument("title", type=str, location="args", required=False)
     filter_parser.add_argument("description", type=str, location="args", required=False)
-    filter_parser.add_argument("teaching_address", type=str, location="args", required=False)
+    filter_parser.add_argument("city_address", type=str, location="args", required=False)
+    filter_parser.add_argument("district_address", type=str, location="args", required=False)
+    filter_parser.add_argument("detailed_address", type=str, location="args", required=False)
     filter_parser.add_argument("subject", type=str, location="args", required=False)
     filter_parser.add_argument("class_type", type=str, location="args", required=False)
     filter_parser.add_argument("other_information", type=str, location="args", required=False)
@@ -57,7 +62,7 @@ class PostDto:
     filter_parser.add_argument("user_name", type=str, location="args", required=False)
     filter_parser.add_argument("page", type=int, location="args", required=False, default=app.config['DEFAULT_PAGE'])
     filter_parser.add_argument("page_size", type=int, location="args", required=False,
-                                default=app.config['DEFAULT_PAGE_SIZE'])
+                               default=app.config['DEFAULT_PAGE_SIZE'])
     """data"""
 
     post_data = api.inherit('post_data', {
@@ -65,7 +70,9 @@ class PostDto:
         'is_tutor': fields.Boolean(required=False, description='description'),
         'title': fields.String(required=False, description='description'),
         'description': fields.String(required=False, description='description'),
-        'teaching_address': fields.String(required=False, description='description'),
+        'city_address': fields.String(required=False, description='description'),
+        'district_address': fields.String(required=False, description='description'),
+        'detailed_address': fields.String(required=False, description='description'),
         'subject': fields.String(required=False, description='description'),
         'class_type': fields.String(required=False, description='description'),
         'other_information': fields.String(required=False, description='description'),
@@ -77,6 +84,7 @@ class PostDto:
         'form_of_teaching': fields.String(required=False, description='description'),
         'created_date': fields.String(required=False, description='description'),
         'updated_date': fields.String(required=False, description='description'),
+        'status': fields.String(required=False, description='description'),
         'user': fields.Nested(UserDto.user_data, required=False, description='description')
     })
     pagination_data = api.model('pagination', {

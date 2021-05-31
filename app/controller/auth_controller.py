@@ -1,8 +1,11 @@
+import re
+
 from flask import request
 from flask_jwt_extended import jwt_required, create_access_token, get_jwt, get_jwt_identity
 from flask_restx import Resource
 from sqlalchemy import func
 
+import app.util.response_message as message
 from app import app, db
 from app.dto.auth_dto import AuthDto
 from app.model.black_list_token import BlacklistToken
@@ -32,9 +35,12 @@ class Login(Resource):
     def post(self):
         """Login (Đăng nhập)"""
         args = request.json
+        valid = validate_email_and_password(args['email'], args['password'])
+        if not isinstance(valid, bool):
+            return valid
         user = User.query.filter(func.lower(User.email) == func.lower(args['email'])).first()
         if not user:
-            return response_object(status=False, message=response_message.EMAIL_ALREADY_EXISTS), 401
+            return response_object(status=False, message=response_message.EMAIL_NOT_EXISTS), 401
         if not user.is_active:
             return response_object(status=False, message=response_message.ACCOUNT_IS_NOT_ACTIVATED), 401
         if not user.verify_password(args['password']):
@@ -95,3 +101,25 @@ class CheckToken(Resource):
             data['token'] = auth_token
             return response_object(data=data), 200
         return response_object(status=False, message=response_message.UNAUTHORIZED_401), 401
+
+
+def validate_email_and_password(email, password):
+    if not validate_email(email):
+        return response_object(status=False, message=message.INVALID_EMAIL), 400
+    if not validate_password(password):
+        return response_object(status=False, message=message.INVALID_PASSWORD), 400
+
+    return True
+
+
+def validate_password(password):
+    if len(password) < app.config['MIN_PASSWORD_CHARACTERS']:
+        return False
+    return True
+
+
+def validate_email(email):
+    regex = '^(\w|\.|\_|\-)+[@](\w|\_|\-|\.)+[.]\w{2,3}$'
+    if not re.search(regex, email):
+        return False
+    return True

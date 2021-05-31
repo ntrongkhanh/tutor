@@ -71,15 +71,17 @@ def tutor_required():
 
             try:
                 user = User.query.get(user_id)
-                if user.is_tutor:
+                if user.is_tutor and user.is_active:
                     tutor = Tutor.query.get(user.tutor_id)
                     if not tutor:
                         return response_object(status=False, message=UNAUTHORIZED_401), 401
                     if tutor.status == TutorStatus.APPROVED:
                         return function(*args, **kwargs)
+                    return response_object(status=False, message=UNAUTHORIZED_401), 401
                 else:
                     return response_object(status=False, message=UNAUTHORIZED_401), 401
             except:
+
                 return response_object(status=False, message=NOT_FOUND_404), 404
 
         return wrapper

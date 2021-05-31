@@ -88,6 +88,11 @@ class TutorListController(Resource):
         args = _filter_request.parse_args()
         page = args['page']
         page_size = args['page_size']
+        try:
+            get_jwt_identity()
+            identity = True
+        except:
+            identity = False
 
         tutors = Tutor.query.filter(
             or_(Tutor.user.has(User.id == args['user_id']), args['user_id'] is None),
@@ -105,9 +110,9 @@ class TutorListController(Resource):
             or_(Tutor.experience.like("%{}%".format(args['experience'])), args['experience'] is None),
             or_(Tutor.other_information.like("%{}%".format(args['other_information'])),
                 args['other_information'] is None),
-            (Tutor.status == args['status'] if get_jwt_identity()['is_admin']
+            (Tutor.status == args['status'] if identity and get_jwt_identity()['is_admin']
              else Tutor.status == TutorStatus.APPROVED),
-            Tutor.is_active == True
+            Tutor.is_active
         ).paginate(page, page_size, error_out=False)
 
         return response_object(data=[tutor.to_json() for tutor in tutors.items],
@@ -128,6 +133,7 @@ class TutorListController(Resource):
         """Update tutor (Cập nhật thông tin gia sư)"""
         args = _update_request.parse_args()
         user = User.query.get(get_jwt_identity()['user_id'])
+
         if not user:
             return response_object(status=False, message=response_message.NOT_FOUND_404), 404
         tutor = Tutor.query.get(user.tutor_id)
@@ -139,14 +145,16 @@ class TutorListController(Resource):
         tutor.majors = args['majors'] if args['majors'] else tutor.majors
         tutor.degree = args['degree'] if args['degree'] else tutor.degree
         tutor.school = args['school'] if args['school'] else tutor.school
-        tutor.address = args['address'] if args['address'] else tutor.address
+        tutor.city_address = args['city_address'] if args['city_address'] else tutor.city_address
+        tutor.district_address = args['district_address'] if args['district_address'] else tutor.district_address
+        tutor.detailed_address = args['detailed_address'] if args['detailed_address'] else tutor.detailed_address
         tutor.class_type = args['class_type'] if args['class_type'] else tutor.class_type
         tutor.experience = args['experience'] if args['experience'] else tutor.experience
         tutor.other_information = args['other_information'] if args['other_information'] else tutor.other_information
 
         db.session.commit()
 
-        return response_object()
+        return response_object(), 200
 
 
 _create_verification_image_parser = TutorDto.create_verification_image_parser
@@ -175,7 +183,7 @@ class VerificationImageController(Resource):
         db.session.add(image)
         db.session.commit()
 
-        return response_object(data=image.to_json()), 201
+        return response_object(), 201
 
 
 @api.route('/<tutor_id>')

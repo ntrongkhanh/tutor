@@ -2,11 +2,11 @@ import enum
 
 
 class TutorStatus(enum.Enum):
-    PENDING = "Pending"
-    APPROVED = "Approved"
-    REJECTED = "Rejected"
+    PENDING = "PENDING"
+    APPROVED = "APPROVED"
+    REJECTED = "REJECTED"
 
 
 class PostStatus(enum.Enum):
-    OPEN = "Open"
-    CLOSED = "Closed"
+    OPENING = "OPENING"
+    CLOSED = "CLOSED"

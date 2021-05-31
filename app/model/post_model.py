@@ -25,7 +25,7 @@ class Post(db.Model):
     contact = db.Column(db.String(255), nullable=True)
     form_of_teaching = db.Column(db.String(255), nullable=True)
     is_active = db.Column(db.Boolean, default=True, nullable=False)
-    status = db.Column(db.Enum(PostStatus), default=PostStatus.OPEN, nullable=True)
+    status = db.Column(db.Enum(PostStatus), default=PostStatus.OPENING, nullable=True)
 
     city_address = db.Column(db.String(255), nullable=True)
     district_address = db.Column(db.String(255), nullable=True)
@@ -59,7 +59,8 @@ class Post(db.Model):
         self.user_id = user_id
         self.created_date = datetime.datetime.now()
         self.updated_date = datetime.datetime.now()
-        self.status = PostStatus.OPEN
+        self.status = PostStatus.OPENING
+        self.is_active = True
 
     def to_json(self):
         return {
@@ -67,7 +68,9 @@ class Post(db.Model):
             'is_tutor': self.is_tutor,
             'title': self.title,
             'description': self.description,
-            'teaching_address': self.teaching_address,
+            'city_address': self.city_address,
+            'district_address': self.district_address,
+            'detailed_address': self.detailed_address,
             'subject': self.subject,
             'class_type': self.class_type,
             'other_information': self.other_information,
@@ -80,4 +83,5 @@ class Post(db.Model):
             'user': self.user.to_json(),
             'created_date': date_to_json(self.created_date),
             'updated_date': date_to_json(self.updated_date),
+            'status': self.status
         }

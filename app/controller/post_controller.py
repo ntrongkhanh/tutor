@@ -44,13 +44,14 @@ class CreateTutorPost(Resource):
     @tutor_required()
     def post(self):
         """Create tutor post (Gia sư tạo bài đăng)"""
+
         args = _create_request.parse_args()
         user = User.query.get(get_jwt_identity()['user_id'])
         if not user:
             return response_object(status=False, message=response_message.UNAUTHORIZED_401), 401
 
         post = Post(
-            public_id=str(uuid.uuid4())[:8].upper(),
+            public_id='BD' + str(uuid.uuid4())[:6].upper(),
             is_tutor=True,
             title=args['title'],
             description=args['description'],
@@ -89,13 +90,16 @@ class CreateSearchPost(Resource):
     @tutor_required()
     def post(self):
         """Create search post (Đăng bài tìm kiếm gia sư)"""
+
         args = _create_request.parse_args()
         user = User.query.get(get_jwt_identity()['user_id'])
+
         if not user:
             return response_object(status=False, message=response_message.UNAUTHORIZED_401), 401
+
         post = Post(
             is_tutor=False,
-            public_id=str(uuid.uuid4())[:8].upper(),
+            public_id='BD' + str(uuid.uuid4())[:6].upper(),
             title=args['title'],
             description=args['description'],
             city_address=args['city_address'],
@@ -112,7 +116,9 @@ class CreateSearchPost(Resource):
             form_of_teaching=args['form_of_teaching'],
             user_id=user.id
         )
+
         db.session.add(post)
+
         db.session.commit()
 
         return response_object(), 201
@@ -155,7 +161,8 @@ class PostListController(Resource):
             or_(
                 or_(Post.user.has(User.first_name.like("%{}%".format(args['user_name']))), args['user_name'] is None),
                 or_(Post.user.has(User.last_name.like("%{}%".format(args['user_name']))), args['user_name'] is None)
-            )
+            ),
+            Post.is_active
         ).paginate(page, page_size, error_out=False)
 
         return response_object(data=[post.to_json() for post in posts.items],
@@ -174,8 +181,9 @@ class PostController(Resource):
     @api.marshal_with(_post_response, 200)
     def get(self, post_id):
         """Get a post by id (Get bài post)"""
-        post = Post.query.get(post_id)
-
+        post = Post.query.filter(Post.id == post_id, Post.is_active).first()
+        if not post:
+            return response_object(status=False, message=response_message.POST_NOT_FOUND), 404
         return response_object(data=post.to_json()), 200
 
     # chưa test
@@ -188,22 +196,24 @@ class PostController(Resource):
     @api.response(500, 'Internal server error')
     @jwt_required()
     @tutor_required()
-    def put(self):
+    def put(self, post_id):
         """Update post (Cập nhật bài post)"""
         args = _update_request.parse_args()
 
         user = User.query.get(get_jwt_identity()['user_id'])
         if not user:
             return response_object(status=False, message=response_message.USER_NOT_FOUND), 404
-        post = Post.query.get(args['id'])
+        post = Post.query.get(post_id)
         if not post:
-            return response_object(status=False, message=response_message.NOT_FOUND_404), 404
+            return response_object(status=False, message=response_message.POST_NOT_FOUND), 404
         if post.user_id != user.id:
             return response_object(status=False, message=response_message.FORBIDDEN_403), 403
 
         post.title = args['title'] if args['title'] else post.title
         post.description = args['description'] if args['description'] else post.description
-        post.teaching_address = args['teaching_address'] if args['teaching_address'] else post.teaching_address
+        post.city_address = args['city_address'] if args['city_address'] else post.city_address
+        post.district_address = args['district_address'] if args['district_address'] else post.district_address
+        post.detailed_address = args['detailed_address'] if args['detailed_address'] else post.detailed_address
         post.subject = args['subject'] if args['subject'] else post.subject
         post.class_type = args['class_type'] if args['class_type'] else post.class_type
         post.other_information = args['other_information'] if args['other_information'] else post.other_information
@@ -240,6 +250,7 @@ class PostController(Resource):
         if post.user_id != user.id:
             return response_object(status=False, message=response_message.FORBIDDEN_403), 403
         # Post.query.filter(Post.id == post_id).delete()
-        post.delete()
+        post.is_active = False
+
         db.session.commit()
         return response_object(), 200
