@@ -37,6 +37,7 @@ class Image(db.Model):
         return {
             'id': self.id,
             'description': self.description,
+            'is_public': self.is_public,
             'created_date': date_to_json(self.created_date),
             'updated_date': date_to_json(self.updated_date)
         }
