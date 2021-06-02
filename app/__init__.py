@@ -5,6 +5,7 @@ from flask_jwt_extended import JWTManager
 from flask_jwt_extended.exceptions import NoAuthorizationError
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
+from werkzeug.exceptions import abort
 
 from app.util.api_error import CustomError
 from app.util.api_response import response_object
@@ -43,9 +44,9 @@ def create_app(config_name):
         list_token = []
         for token in black_list_token:
             list_token.append(token.token)
-
         if jti in list_token:
-            raise NoAuthorizationError("Unauthorized")
+            abort(401)
+
         return False
 
     @app.route('/')

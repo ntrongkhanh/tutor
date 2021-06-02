@@ -27,6 +27,7 @@ class TutorDto:
     create_verification_image_parser = get_auth_required_parser(api)
     create_verification_image_parser.add_argument("file", type=FileStorage, location="files", required=True)
     create_verification_image_parser.add_argument("description", type=str, location='form', required=False)
+    create_verification_image_parser.add_argument("public", type=bool, location='form', required=False)
 
     update_parser = get_auth_required_parser(api)
     update_parser.add_argument("career", type=str, location='json', required=False)

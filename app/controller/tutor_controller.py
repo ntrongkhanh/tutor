@@ -2,7 +2,7 @@ import uuid
 from operator import or_
 
 from flask import request
-from flask_jwt_extended import get_jwt_identity, jwt_required
+from flask_jwt_extended import get_jwt_identity, jwt_required, verify_jwt_in_request
 from flask_restx import Resource
 
 from app import db
@@ -89,6 +89,7 @@ class TutorListController(Resource):
         page = args['page']
         page_size = args['page_size']
         try:
+            verify_jwt_in_request()
             get_jwt_identity()
             identity = True
         except:
@@ -178,8 +179,10 @@ class VerificationImageController(Resource):
         args = _create_verification_image_parser.parse_args()
         file = args['file'].read()
         description = request.form['description']
+        public = request.form['public']
         # args = request.form
-        image = Image(data=file, description=description, tutor_id=tutor.id)
+        image = Image(data=file, description=description, tutor_id=tutor.id,
+                      is_public=True if public == 'true' else False)
         db.session.add(image)
         db.session.commit()
 

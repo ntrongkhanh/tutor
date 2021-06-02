@@ -53,7 +53,7 @@ class Tutor(db.Model):
         self.is_active = True
         self.created_date = datetime.datetime.now()
         self.updated_date = datetime.datetime.now()
-        self.status = TutorStatus.PENDING
+        self.status = TutorStatus.APPROVED
 
     def to_json(self):
         return {

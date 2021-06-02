@@ -2,7 +2,7 @@ from datetime import datetime
 from operator import or_
 
 import flask
-from flask_jwt_extended import get_jwt_identity, jwt_required
+from flask_jwt_extended import get_jwt_identity, jwt_required, verify_jwt_in_request
 from flask_restx import Resource
 
 from app import db
@@ -44,6 +44,7 @@ class ImageListController(Resource):
         page_size = args['page_size']
 
         try:
+            verify_jwt_in_request()
             user_id = get_jwt_identity()['user_id']
         except:
             user_id = 0
@@ -94,11 +95,14 @@ class ImageController(Resource):
             return response_object(status=False, message=response_message.NOT_FOUND_404), 404
         if not image.is_public:
             try:
+                verify_jwt_in_request()
                 user = User.query.get(get_jwt_identity()['user_id'])
-                if image.tutor_id != user.tutor_id or not user.is_admin:
-                    return response_object(status=False, message=response_message.NOT_FOUND_404), 404
-            except:
-                pass
+                if image.tutor_id != user.tutor_id and not user.is_admin:
+                    return response_object(status=False, message=response_message.UNAUTHORIZED_401), 401
+            except Exception as e:
+                print(e)
+                return response_object(status=False, message=response_message.UNAUTHORIZED_401), 401
+
         if not image.data:
             return response_object(status=False, message=response_message.NOT_FOUND_404), 404
         image_binary = image.data
