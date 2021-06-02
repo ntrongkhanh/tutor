@@ -41,3 +41,8 @@ class Image(db.Model):
             'created_date': date_to_json(self.created_date),
             'updated_date': date_to_json(self.updated_date)
         }
+
+    @staticmethod
+    def to_list_json(images):
+        images = sorted(images, key=lambda x: x.created_date)
+        return [image.to_json() for image in images]

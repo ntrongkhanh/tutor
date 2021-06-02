@@ -236,6 +236,7 @@ class Profile(Resource):
     def get(self):
         user_id = get_jwt_identity()['user_id']
 
+        # tutor = Tutor.query.filter(Tutor.user.has(User.id == user_id)).first()
         tutor = Tutor.query.filter(Tutor.user.has(User.id == user_id)).first()
         if not tutor:
             return response_object(status=False, message=response_message.NOT_FOUND_404), 404

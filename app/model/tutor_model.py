@@ -3,6 +3,7 @@ import datetime
 from sqlalchemy.orm import relationship
 
 from app import db
+from app.model.image_model import Image
 from app.model.model_enum import TutorStatus
 from app.util.api_response import date_to_json
 
@@ -71,7 +72,8 @@ class Tutor(db.Model):
             'class_type': self.class_type,
             'experience': self.experience,
             'other_information': self.other_information,
-            'images': [image.to_json() for image in self.images],
+            # 'images': [image.to_json() for image in self.images],
+            'images': Image.to_list_json(self.images),
             'created_date': date_to_json(self.created_date),
             'updated_date': date_to_json(self.updated_date),
             'user': self.user.to_json(),
