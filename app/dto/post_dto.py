@@ -42,7 +42,8 @@ class PostDto:
     update_parser.add_argument("form_of_teaching", type=str, location="json", required=False)
 
     filter_parser = get_auth_not_required_parser(api)
-    filter_parser.add_argument("id", type=int, location="args", required=False)
+    filter_parser.add_argument("public_id", type=int, location="args", required=False)
+    filter_parser.add_argument("keyword", type=str, location="args", required=False)
     filter_parser.add_argument("is_tutor", type=inputs.boolean, location="args", required=False)
     filter_parser.add_argument("title", type=str, location="args", required=False)
     filter_parser.add_argument("description", type=str, location="args", required=False)
@@ -79,12 +80,14 @@ class PostDto:
         'fee': fields.String(required=False, description='description'),
         'schedule': fields.String(required=False, description='description'),
         'number_of_sessions': fields.String(required=False, description='description'),
+        'number_of_follower': fields.Integer(required=False, description='description'),
         'require': fields.String(required=False, description='description'),
         'contact': fields.String(required=False, description='description'),
         'form_of_teaching': fields.String(required=False, description='description'),
         'created_date': fields.String(required=False, description='description'),
         'updated_date': fields.String(required=False, description='description'),
         'status': fields.String(required=False, description='description'),
+        'followed': fields.Boolean(required=False, description='description'),
         'user': fields.Nested(UserDto.user_data, required=False, description='description')
     })
     pagination_data = api.model('pagination', {

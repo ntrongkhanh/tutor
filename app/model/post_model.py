@@ -89,5 +89,6 @@ class Post(db.Model):
             'user': self.user.to_json(),
             'created_date': date_to_json(self.created_date),
             'updated_date': date_to_json(self.updated_date),
-            'status': self.status
+            'status': self.status,
+            'number_of_follower': self.number_of_follower,
         }

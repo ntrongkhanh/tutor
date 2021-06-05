@@ -2,8 +2,9 @@ import uuid
 from datetime import datetime
 from operator import or_
 
-from flask_jwt_extended import jwt_required, get_jwt_identity
+from flask_jwt_extended import jwt_required, get_jwt_identity, verify_jwt_in_request
 from flask_restx import Resource
+from sqlalchemy import desc
 
 import app.util.response_message as response_message
 from app import db
@@ -139,33 +140,91 @@ class PostListController(Resource):
         page = args['page']
         page_size = args['page_size']
         posts = Post.query.filter(
-            or_(Post.id == args['id'], args['id'] is None),
+            or_(
+                or_(Post.public_id.like("%{}%".format(args['public_id'])), args['public_id'] is None),
+                Post.public_id.like("%{}%".format(args['keyword']))),
             or_(Post.is_tutor == args['is_tutor'], args['is_tutor'] is None),
-            or_(Post.title.like("%{}%".format(args['title'])), args['title'] is None),
-            or_(Post.description.like("%{}%".format(args['description'])), args['description'] is None),
-            or_(Post.city_address.like("%{}%".format(args['city_address'])), args['city_address'] is None),
-            or_(Post.district_address.like("%{}%".format(args['district_address'])), args['district_address'] is None),
-            or_(Post.detailed_address.like("%{}%".format(args['detailed_address'])), args['detailed_address'] is None),
-            or_(Post.subject.like("%{}%".format(args['subject'])), args['subject'] is None),
-            or_(Post.other_information.like("%{}%".format(args['other_information'])),
-                args['other_information'] is None),
+            or_(
+                or_(Post.title.like("%{}%".format(args['title'])), args['title'] is None),
+                Post.title.like("%{}%".format(args['keyword']))),
+            or_(
+                or_(Post.description.like("%{}%".format(args['description'])), args['description'] is None),
+                Post.description.like("%{}%".format(args['keyword']))),
+            or_(
+                or_(Post.city_address.like("%{}%".format(args['city_address'])), args['city_address'] is None),
+                Post.city_address.like("%{}%".format(args['keyword']))),
+            or_(
+                or_(Post.district_address.like("%{}%".format(args['district_address'])),
+                    args['district_address'] is None), Post.district_address.like("%{}%".format(args['keyword']))),
+            or_(
+                or_(Post.detailed_address.like("%{}%".format(args['detailed_address'])),
+                    args['detailed_address'] is None), Post.detailed_address.like("%{}%".format(args['keyword']))),
+            or_(
+                or_(Post.subject.like("%{}%".format(args['subject'])), args['subject'] is None),
+                Post.subject.like("%{}%".format(args['keyword']))),
+            or_(
+                or_(Post.other_information.like("%{}%".format(args['other_information'])),
+                    args['other_information'] is None), Post.other_information.like("%{}%".format(args['keyword']))),
             or_(Post.fee.like("%{}%".format(args['fee'])), args['fee'] is None),
             or_(Post.schedule.like("%{}%".format(args['schedule'])), args['schedule'] is None),
             or_(Post.number_of_sessions.like("%{}%".format(args['number_of_sessions'])),
                 args['number_of_sessions'] is None),
-            or_(Post.require.like("%{}%".format(args['require'])), args['require'] is None),
-            or_(Post.contact.like("%{}%".format(args['contact'])), args['contact'] is None),
+            or_(
+                or_(Post.require.like("%{}%".format(args['require'])), args['require'] is None),
+                Post.require.like("%{}%".format(args['keyword']))),
+            or_(
+                or_(Post.contact.like("%{}%".format(args['contact'])), args['contact'] is None),
+                Post.contact.like("%{}%".format(args['keyword']))),
             or_(Post.form_of_teaching.like("%{}%".format(args['form_of_teaching'])), args['form_of_teaching'] is None),
             or_(Post.user_id == args['user_id'], args['user_id'] is None),
             or_(
-                or_(Post.user.has(User.first_name.like("%{}%".format(args['user_name']))), args['user_name'] is None),
-                or_(Post.user.has(User.last_name.like("%{}%".format(args['user_name']))), args['user_name'] is None)
+                or_(
+                    or_(Post.user.has(User.first_name.like("%{}%".format(args['user_name']))),
+                        args['user_name'] is None),
+                    Post.user.has(User.first_name.like("%{}%".format(args['keyword']))), ),
+                or_(
+                    or_(Post.user.has(User.last_name.like("%{}%".format(args['user_name']))),
+                        args['user_name'] is None),
+                    Post.user.has(User.first_name.like("%{}%".format(args['keyword']))), )
             ),
             Post.is_active
-        ).paginate(page, page_size, error_out=False)
+        ).order_by(desc(Post.created_date)).paginate(page, page_size, error_out=False)
 
-        return response_object(data=[post.to_json() for post in posts.items],
+        # posts = Post.query.filter(Post.follow_users.any(Follow.user_id == user_id)).paginate(page, page_size,
+        #                                                                                      error_out=False)
+        followed_post = []
+        try:
+            verify_jwt_in_request()
+            user = User.query.get(get_jwt_identity()['user_id'])
+            followed_post = user.follow_posts
+        except:
+            pass
+        data = test(posts.items, followed_post)
+        return response_object(data=data,
                                pagination={'total': posts.total, 'page': posts.page}), 200
+
+        # return response_object(data=[post.to_json() for post in posts.items],
+        #                        pagination={'total': posts.total, 'page': posts.page}), 200
+
+
+def test(posts, followed_post):
+    data_list = []
+    if len(followed_post) > 0:
+        for post in posts:
+            data = post.to_json()
+
+            if any(f.id == post.id for f in followed_post):
+                data['followed'] = True
+            else:
+                data['followed'] = False
+            data_list.append(data)
+    else:
+        for post in posts:
+            data = post.to_json()
+            data['followed'] = False
+            data_list.append(data)
+
+    return data_list
 
 
 @api.route('/<int:post_id>')
@@ -253,5 +312,3 @@ class PostController(Resource):
 
         db.session.commit()
         return response_object(), 200
-
-

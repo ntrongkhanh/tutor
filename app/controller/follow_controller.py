@@ -36,8 +36,11 @@ class FollowController(Resource):
             return response_object(status=False, message=response_message.POST_NOT_FOUND), 404
         if post in user.follow_posts:
             user.follow_posts.remove(post)
+
         else:
             user.follow_posts.append(post)
+
+        post.number_of_follower = len(post.follow_users)
         db.session.commit()
         return response_object(), 200
 
@@ -71,3 +74,36 @@ class FollowListController(Resource):
 
         return response_object(data=[post.to_json() for post in posts.items],
                                pagination={'total': posts.total, 'page': posts.page}), 200
+
+
+
+
+
+
+@api.route('/followed')
+class FollowedIdListController(Resource):
+
+    @api.doc('get list id followed post')
+    @api.response(200, 'OK')
+    @api.response(401, 'Unauthorized')
+    @api.response(403, 'Forbidden')
+    @api.response(404, 'Not found')
+    @api.response(500, 'Internal server error')
+    @api.expect(get_auth_required_parser(api), validate=True)
+    @jwt_required()
+    def get(self):
+        """filter các bài post đã follow"""
+        user_id = get_jwt_identity()['user_id']
+
+        post_ids = get_list_followed_post(user_id)
+
+        return response_object(data=post_ids), 200
+
+
+def get_list_followed_post(user_id):
+    user = User.query.get(user_id)
+
+    if not user:
+        return response_object(status=False, message=response_message.USER_NOT_FOUND), 404
+
+    return [p.id for p in user.follow_posts]
