@@ -111,10 +111,14 @@ def login(args):
 def forgot_password(email):
     reset_code = Code(
         email=email,
-        code=''.join(random.choice(string.ascii_letters) for i in range(20))
+        code=''.join(random.choice(string.ascii_letters) for i in range(8))
     )
+
     db.session.add(reset_code)
     db.session.commit()
+
+    print(reset_code.code)
+    print(reset_code.email)
     if send_mail_reset_password(reset_code):
         return response_object(), 200
     else:
@@ -185,7 +189,7 @@ def change_password(args, id_user):
 def send_mail_reset_password(reset_code):
     try:
         # link_reset = app.config['SERVER_ADDRESS'] + f'/api/user/reset/?email={reset_code.email}&code={reset_code.code}'
-        content = 'Your code is: ' + reset_code
+        content = 'Your code is: ' + reset_code.code
         mail.send_mail_without_template(reset_code.email, 'Reset password', content=content)
     except:
         return False
