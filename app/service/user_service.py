@@ -117,8 +117,7 @@ def forgot_password(email):
     db.session.add(reset_code)
     db.session.commit()
 
-    print(reset_code.code)
-    print(reset_code.email)
+
     if send_mail_reset_password(reset_code):
         return response_object(), 200
     else:
