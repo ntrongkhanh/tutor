@@ -87,7 +87,6 @@ class CreateSearchPost(Resource):
     @api.response(404, 'Not found')
     @api.response(500, 'Internal server error')
     @jwt_required()
-    @tutor_required()
     def post(self):
         """Create search post (Đăng bài tìm kiếm gia sư)"""
 
@@ -254,3 +253,5 @@ class PostController(Resource):
 
         db.session.commit()
         return response_object(), 200
+
+

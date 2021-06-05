@@ -228,6 +228,7 @@ class ForgotPassword(Resource):
     def get(self):
         """forgot password"""
         email = _forgot_password_parser.parse_args()['email']
+        print(email)
         return user_service.forgot_password(email)
 
 

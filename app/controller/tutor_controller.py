@@ -1,4 +1,5 @@
 import uuid
+from datetime import datetime
 from operator import or_
 
 from flask import request
@@ -161,8 +162,9 @@ class TutorListController(Resource):
 _create_verification_image_parser = TutorDto.create_verification_image_parser
 
 
+
 @api.route('/verification-image')
-class VerificationImageController(Resource):
+class VerificationImageListController(Resource):
     @api.doc('verification image')
     @api.expect(_create_verification_image_parser, validate=True)
     @api.marshal_with(_message_response, 201)
@@ -180,13 +182,79 @@ class VerificationImageController(Resource):
         file = args['file'].read()
         description = request.form['description']
         public = request.form['public']
-        # args = request.form
+
         image = Image(data=file, description=description, tutor_id=tutor.id,
                       is_public=True if public == 'true' else False)
         db.session.add(image)
         db.session.commit()
 
         return response_object(), 201
+
+
+
+
+
+
+
+_update_verification_image_parser = TutorDto.update_verification_image_parser
+
+
+@api.route('/verification-image/<image_id>')
+class VerificationImageController(Resource):
+    @api.doc('update verification image')
+    @api.expect(_update_verification_image_parser, validate=True)
+    @api.marshal_with(_message_response, 201)
+    @jwt_required()
+    def put(self, image_id):
+        user_id = get_jwt_identity()['user_id']
+        user = User.query.get(user_id)
+        if not user:
+            return response_object(status=False, message=response_message.USER_NOT_FOUND), 404
+        tutor = Tutor.query.get(user.tutor_id)
+        if not tutor:
+            return response_object(status=False, message=response_message.TUTOR_NOT_FOUND), 404
+        args = _update_verification_image_parser.parse_args()
+
+        image = Image.query.get(image_id)
+        if not image:
+            return response_object(status=False, message=response_message.NOT_FOUND_404), 404
+        if image.tutor_id != user.tutor_id:
+            return response_object(status=False, message=response_message.UNAUTHORIZED_401), 401
+
+        file = args['file'].read()
+
+        image.description = args['description'] if args['description'] else image.description
+        image.data = file
+        image.updated_date = datetime.now()
+
+        db.session.commit()
+
+        return response_object(), 200
+
+    @api.doc('delete verification image')
+    @api.expect(get_auth_required_parser(api), validate=True)
+    @api.marshal_with(_message_response, 201)
+    @jwt_required()
+    def delete(self, image_id):
+
+        user_id = get_jwt_identity()['user_id']
+        user = User.query.get(user_id)
+        if not user:
+            return response_object(status=False, message=response_message.USER_NOT_FOUND), 404
+        tutor = Tutor.query.get(user.tutor_id)
+        if not tutor:
+            return response_object(status=False, message=response_message.TUTOR_NOT_FOUND), 404
+
+        image = Image.query.get(image_id)
+        if not image:
+            return response_object(status=False, message=response_message.NOT_FOUND_404), 404
+        if image.tutor_id != user.tutor_id:
+            return response_object(status=False, message=response_message.UNAUTHORIZED_401), 401
+
+        db.session.delete(image)
+        db.session.commit()
+
+        return response_object(), 200
 
 
 @api.route('/<tutor_id>')

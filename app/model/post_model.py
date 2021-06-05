@@ -1,8 +1,10 @@
 import datetime
 
 from sqlalchemy import ForeignKey
+from sqlalchemy.orm import relationship
 
 from app import db
+# from app.model.follow import follow_table
 from app.model.model_enum import PostStatus
 from app.util.api_response import date_to_json
 
@@ -31,7 +33,11 @@ class Post(db.Model):
     district_address = db.Column(db.String(255), nullable=True)
     detailed_address = db.Column(db.String(255), nullable=True)
 
+    number_of_follower=db.Column(db.Integer, default=0, nullable=False)
     user_id = db.Column(db.Integer, ForeignKey('users.id'))
+    follow_users = db.relationship('User', secondary='follow')
+    # follow_users = db.relationship("User",secondary=association_table)
+
     # user = relationship("User", backref="posts")
 
     created_date = db.Column(db.DateTime, nullable=True)

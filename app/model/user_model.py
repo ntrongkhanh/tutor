@@ -8,6 +8,7 @@ from sqlalchemy.orm import relationship
 
 from app import db, bcrypt, app
 from app.model.black_list_token import BlacklistToken
+# from app.model.follow import follow_table
 from app.util.api_response import json_serial, date_to_json
 
 
@@ -31,6 +32,9 @@ class User(db.Model):
     # avatar = relationship("Image", backref="user", lazy=True)
     posts = relationship("Post", backref="user", lazy=True)
     search_history = relationship("SearchHistory", backref="user", lazy=True)
+    follow_posts = db.relationship('Post', secondary='follow')
+    # follow_posts = db.relationship("Post", secondary=follow_table)
+
 
     created_date = db.Column(db.DateTime, nullable=True)
     updated_date = db.Column(db.DateTime, nullable=True)
