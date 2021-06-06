@@ -1,4 +1,4 @@
-from flask_jwt_extended import jwt_required, get_jwt_identity
+from flask_jwt_extended import jwt_required, get_jwt_identity, verify_jwt_in_request
 from flask_restx import Resource
 
 from app import db
@@ -37,6 +37,7 @@ class FollowController(Resource):
         if post in user.follow_posts:
             user.follow_posts.remove(post)
 
+
         else:
             user.follow_posts.append(post)
 
@@ -71,13 +72,36 @@ class FollowListController(Resource):
 
         posts = Post.query.filter(Post.follow_users.any(Follow.user_id == user_id)).paginate(page, page_size,
                                                                                              error_out=False)
-
-        return response_object(data=[post.to_json() for post in posts.items],
+        followed_post = []
+        try:
+            verify_jwt_in_request()
+            user = User.query.get(get_jwt_identity()['user_id'])
+            followed_post = user.follow_posts
+        except:
+            pass
+        data = add_follow_status(posts.items, followed_post)
+        return response_object(data=data,
                                pagination={'total': posts.total, 'page': posts.page}), 200
 
 
+def add_follow_status(posts, followed_post):
+    data_list = []
+    if len(followed_post) > 0:
+        for post in posts:
+            data = post.to_json()
 
+            if any(f.id == post.id for f in followed_post):
+                data['followed'] = True
+            else:
+                data['followed'] = False
+            data_list.append(data)
+    else:
+        for post in posts:
+            data = post.to_json()
+            data['followed'] = False
+            data_list.append(data)
 
+    return data_list
 
 
 @api.route('/followed')

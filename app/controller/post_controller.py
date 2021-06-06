@@ -199,7 +199,7 @@ class PostListController(Resource):
             followed_post = user.follow_posts
         except:
             pass
-        data = test(posts.items, followed_post)
+        data = add_follow_status(posts.items, followed_post)
         return response_object(data=data,
                                pagination={'total': posts.total, 'page': posts.page}), 200
 
@@ -207,7 +207,7 @@ class PostListController(Resource):
         #                        pagination={'total': posts.total, 'page': posts.page}), 200
 
 
-def test(posts, followed_post):
+def add_follow_status(posts, followed_post):
     data_list = []
     if len(followed_post) > 0:
         for post in posts:
@@ -236,13 +236,30 @@ class PostController(Resource):
     @api.response(403, 'Forbidden')
     @api.response(404, 'Not found')
     @api.response(500, 'Internal server error')
+    @api.expect(get_auth_required_parser(api),validate=True)
     @api.marshal_with(_post_response, 200)
     def get(self, post_id):
         """Get a post by id (Get bài post)"""
         post = Post.query.filter(Post.id == post_id, Post.is_active).first()
         if not post:
             return response_object(status=False, message=response_message.POST_NOT_FOUND), 404
-        return response_object(data=post.to_json()), 200
+
+        data = post.to_json()
+
+
+        try:
+            verify_jwt_in_request()
+            user = User.query.get(get_jwt_identity()['user_id'])
+            followed_post = user.follow_posts
+            if any(f.id == post.id for f in followed_post):
+                print(followed_post)
+                data['followed'] = True
+            else:
+                data['followed'] = False
+        except:
+            data['followed'] = False
+
+        return response_object(data=data), 200
 
     # chưa test
     @api.doc('update post')
