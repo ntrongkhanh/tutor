@@ -88,6 +88,7 @@ class PostDto:
         'updated_date': fields.String(required=False, description='description'),
         'status': fields.String(required=False, description='description'),
         'followed': fields.Boolean(required=False, description='description'),
+        'by_user': fields.Boolean(required=False, description='description'),
         'user': fields.Nested(UserDto.user_data, required=False, description='description')
     })
     pagination_data = api.model('pagination', {

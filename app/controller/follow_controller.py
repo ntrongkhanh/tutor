@@ -77,14 +77,15 @@ class FollowListController(Resource):
             verify_jwt_in_request()
             user = User.query.get(get_jwt_identity()['user_id'])
             followed_post = user.follow_posts
+            data = add_follow_status(posts.items, followed_post, user.posts)
         except:
-            pass
-        data = add_follow_status(posts.items, followed_post)
+            data = add_follow_status(posts.items, followed_post)
+
         return response_object(data=data,
                                pagination={'total': posts.total, 'page': posts.page}), 200
 
 
-def add_follow_status(posts, followed_post):
+def add_follow_status(posts, followed_post,created_post=[]):
     data_list = []
     if len(followed_post) > 0:
         for post in posts:
@@ -94,11 +95,20 @@ def add_follow_status(posts, followed_post):
                 data['followed'] = True
             else:
                 data['followed'] = False
+
+            if any(p.id == post.id for p in created_post):
+                data['by_user'] = True
+            else:
+                data['by_user'] = False
             data_list.append(data)
     else:
         for post in posts:
             data = post.to_json()
             data['followed'] = False
+            if any(p.id == post.id for p in created_post):
+                data['by_user'] = True
+            else:
+                data['by_user'] = False
             data_list.append(data)
 
     return data_list
