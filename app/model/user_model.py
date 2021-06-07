@@ -35,7 +35,6 @@ class User(db.Model):
     follow_posts = db.relationship('Post', secondary='follow')
     # follow_posts = db.relationship("Post", secondary=follow_table)
 
-
     created_date = db.Column(db.DateTime, nullable=True)
     updated_date = db.Column(db.DateTime, nullable=True)
 

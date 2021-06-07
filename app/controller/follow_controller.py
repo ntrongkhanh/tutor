@@ -47,6 +47,7 @@ class FollowController(Resource):
 
 
 _filter_response = PostDto.post_list_response
+_filter_parser = FollowDto.filter_parser
 
 
 @api.route('')
@@ -58,15 +59,16 @@ class FollowListController(Resource):
     @api.response(403, 'Forbidden')
     @api.response(404, 'Not found')
     @api.response(500, 'Internal server error')
-    @api.expect(get_auth_required_parser(api), validate=True)
+    @api.expect(_filter_parser, validate=True)
     @api.marshal_with(_filter_response, 200)
     @jwt_required()
     def get(self):
         """filter các bài post đã follow"""
         user_id = get_jwt_identity()['user_id']
         user = User.query.get(user_id)
-        page = 0
-        page_size = 15
+        args = _filter_parser.parse_args()
+        page = args['page']
+        page_size = args['page_size']
         if not user:
             return response_object(status=False, message=response_message.USER_NOT_FOUND), 404
 
@@ -85,7 +87,7 @@ class FollowListController(Resource):
                                pagination={'total': posts.total, 'page': posts.page}), 200
 
 
-def add_follow_status(posts, followed_post,created_post=[]):
+def add_follow_status(posts, followed_post, created_post=[]):
     data_list = []
     if len(followed_post) > 0:
         for post in posts:
@@ -112,6 +114,49 @@ def add_follow_status(posts, followed_post,created_post=[]):
             data_list.append(data)
 
     return data_list
+
+
+_filter_user_parser = FollowDto.filter_user_parser
+
+
+@api.route('/user')
+class UserListController(Resource):
+
+    @api.doc('get list user followed post')
+    @api.response(200, 'OK')
+    @api.response(401, 'Unauthorized')
+    @api.response(403, 'Forbidden')
+    @api.response(404, 'Not found')
+    @api.response(500, 'Internal server error')
+    @api.expect(_filter_user_parser, validate=True)
+    @jwt_required()
+    def get(self):
+        """filter các bài post đã follow"""
+        user_id = get_jwt_identity()['user_id']
+        user = User.query.get(user_id)
+        args = _filter_user_parser.parse_args()
+        page = args['page']
+        page_size = args['page_size']
+        # is_tutor = True if args['tutor'] == 'true' else False
+
+        post_id = args['post_id']
+        user_list = []
+
+        if post_id and any(post_id == p.id for p in user.posts):
+            post = Post.query.get(post_id)
+            user_list = post.follow_users
+        # else:
+        #     for p in user.posts:
+        #         if p.is_tutor == is_tutor and p.follow_users:  # and p.follow_users not in user_list:
+        #             for u in p.follow_users:
+        #                 if u not in user_list:
+        #                     user_list.append(u)
+
+        total = len(user_list)
+        user_list = user_list[(page - 1) * page_size:page_size + (page - 1) * page_size]
+
+        return response_object(data=[user.to_json() for user in user_list],
+                               pagination={'total': total, 'page': page}), 200
 
 
 @api.route('/followed')
