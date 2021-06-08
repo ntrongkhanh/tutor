@@ -84,17 +84,15 @@ def update_avatar(file, user_id):
 
     data = file.read()
 
-
     if not user:
         return response_object(status=False, message=message.USER_NOT_FOUND), 404
     if not user.avatar_id:
         image = Image(description='Avatar of ' + user.email, data=data)
         db.session.add(image)
         db.session.flush()
-        user.avatar_id=image.id
+        user.avatar_id = image.id
     else:
-
-        image = Image.query.filter(Image.user == user).first()
+        image = Image.query.get(user.avatar_id)
         image.data = data
         image.updated_date = datetime.datetime.now()
     db.session.commit()
