@@ -38,7 +38,7 @@ class User(db.Model):
     created_date = db.Column(db.DateTime, nullable=True)
     updated_date = db.Column(db.DateTime, nullable=True)
 
-    def __init__(self, email, password, first_name, last_name, sex, avatar_id):
+    def __init__(self, email, password, first_name, last_name, sex, avatar_id=None):
         self.email = email
         self.password = bcrypt.generate_password_hash(password).decode('utf-8')
         self.first_name = first_name

@@ -124,6 +124,77 @@ class CreateSearchPost(Resource):
         return response_object(), 201
 
 
+@api.route('/get')
+class OwnedPostController(Resource):
+    @api.doc('get user\'s own post')
+    @api.expect(_filter_request, validate=True)
+    @api.marshal_with(_filter_response, 200)
+    @jwt_required()
+    def get(self):
+        """get user's own post"""
+        user = User.query.get(get_jwt_identity()['user_id'])
+        if not user:
+            return response_object(status=False, message=response_message.POST_NOT_FOUND), 404
+        args = _filter_request.parse_args()
+        page = args['page']
+        page_size = args['page_size']
+        posts = Post.query.filter(
+            or_(
+                or_(Post.public_id.like("%{}%".format(args['public_id'])), args['public_id'] is None),
+                Post.public_id.like("%{}%".format(args['keyword']))),
+            or_(Post.is_tutor == args['is_tutor'], args['is_tutor'] is None),
+            or_(
+                or_(Post.title.like("%{}%".format(args['title'])), args['title'] is None),
+                Post.title.like("%{}%".format(args['keyword']))),
+            or_(
+                or_(Post.description.like("%{}%".format(args['description'])), args['description'] is None),
+                Post.description.like("%{}%".format(args['keyword']))),
+            or_(
+                or_(Post.city_address.like("%{}%".format(args['city_address'])), args['city_address'] is None),
+                Post.city_address.like("%{}%".format(args['keyword']))),
+            or_(
+                or_(Post.district_address.like("%{}%".format(args['district_address'])),
+                    args['district_address'] is None), Post.district_address.like("%{}%".format(args['keyword']))),
+            or_(
+                or_(Post.detailed_address.like("%{}%".format(args['detailed_address'])),
+                    args['detailed_address'] is None), Post.detailed_address.like("%{}%".format(args['keyword']))),
+            or_(
+                or_(Post.subject.like("%{}%".format(args['subject'])), args['subject'] is None),
+                Post.subject.like("%{}%".format(args['keyword']))),
+            or_(
+                or_(Post.other_information.like("%{}%".format(args['other_information'])),
+                    args['other_information'] is None), Post.other_information.like("%{}%".format(args['keyword']))),
+            or_(Post.fee.like("%{}%".format(args['fee'])), args['fee'] is None),
+            or_(Post.schedule.like("%{}%".format(args['schedule'])), args['schedule'] is None),
+            or_(Post.number_of_sessions.like("%{}%".format(args['number_of_sessions'])),
+                args['number_of_sessions'] is None),
+            or_(
+                or_(Post.require.like("%{}%".format(args['require'])), args['require'] is None),
+                Post.require.like("%{}%".format(args['keyword']))),
+            or_(
+                or_(Post.contact.like("%{}%".format(args['contact'])), args['contact'] is None),
+                Post.contact.like("%{}%".format(args['keyword']))),
+            or_(Post.form_of_teaching.like("%{}%".format(args['form_of_teaching'])), args['form_of_teaching'] is None),
+
+            or_(
+                or_(
+                    or_(Post.user.has(User.first_name.like("%{}%".format(args['user_name']))),
+                        args['user_name'] is None),
+                    Post.user.has(User.first_name.like("%{}%".format(args['keyword']))), ),
+                or_(
+                    or_(Post.user.has(User.last_name.like("%{}%".format(args['user_name']))),
+                        args['user_name'] is None),
+                    Post.user.has(User.first_name.like("%{}%".format(args['keyword']))), )
+            ),
+            Post.user_id == user.id,
+            Post.is_active
+        ).order_by(Post.created_date if args['sort'] == 'oldest' else desc(Post.created_date)).paginate(page, page_size,
+                                                                                                        error_out=False)
+        print(len(posts.items))
+        data = add_follow(posts.items, user.follow_posts)
+        return response_object(data=data, pagination={'total': posts.total, 'page': posts.page}), 200
+
+
 @api.route('')
 class PostListController(Resource):
     # ok
@@ -208,7 +279,7 @@ class PostListController(Resource):
         #                        pagination={'total': posts.total, 'page': posts.page}), 200
 
 
-def add_follow_status(posts, followed_post,created_post=[]):
+def add_follow(posts, followed_post):
     data_list = []
     if len(followed_post) > 0:
         for post in posts:
@@ -218,7 +289,31 @@ def add_follow_status(posts, followed_post,created_post=[]):
                 data['followed'] = True
             else:
                 data['followed'] = False
-            if any(p.id==post.id for p in created_post):
+
+            data['by_user'] = True
+
+            data_list.append(data)
+    else:
+        for post in posts:
+            data = post.to_json()
+            data['followed'] = False
+            data['by_user'] = True
+            data_list.append(data)
+
+    return data_list
+
+
+def add_follow_status(posts, followed_post, created_post=[]):
+    data_list = []
+    if len(followed_post) > 0:
+        for post in posts:
+            data = post.to_json()
+
+            if any(f.id == post.id for f in followed_post):
+                data['followed'] = True
+            else:
+                data['followed'] = False
+            if any(p.id == post.id for p in created_post):
                 data['by_user'] = True
             else:
                 data['by_user'] = False
@@ -227,7 +322,7 @@ def add_follow_status(posts, followed_post,created_post=[]):
         for post in posts:
             data = post.to_json()
             data['followed'] = False
-            if any(p.id==post.id for p in created_post):
+            if any(p.id == post.id for p in created_post):
                 data['by_user'] = True
             else:
                 data['by_user'] = False
@@ -245,7 +340,7 @@ class PostController(Resource):
     @api.response(403, 'Forbidden')
     @api.response(404, 'Not found')
     @api.response(500, 'Internal server error')
-    @api.expect(get_auth_required_parser(api),validate=True)
+    @api.expect(get_auth_required_parser(api), validate=True)
     @api.marshal_with(_post_response, 200)
     def get(self, post_id):
         """Get a post by id (Get bài post)"""
@@ -254,7 +349,6 @@ class PostController(Resource):
             return response_object(status=False, message=response_message.POST_NOT_FOUND), 404
 
         data = post.to_json()
-
 
         try:
             verify_jwt_in_request()

@@ -22,16 +22,15 @@ def create_user(args):
     if User.query.filter(func.lower(User.email) == func.lower(args['email'])).first():
         return response_object(status=False, message=message.CONFLICT_409), 409
 
-    image = Image(description='Avatar of ' + args['email'], data=None)
-    db.session.add(image)
-    db.session.flush()
+    # image = Image(description='Avatar of ' + args['email'], data=None)
+    # db.session.add(image)
+    # db.session.flush()
     user = User(
         email=args['email'],
         password=args['password'],
         first_name=args['first_name'],
         last_name=args['last_name'],
-        sex=args['sex'],
-        avatar_id=image.id
+        sex=args['sex']
     )
 
     active_code = Code(
@@ -82,15 +81,22 @@ def get_profile(user_id):
 
 def update_avatar(file, user_id):
     user = User.query.get(user_id)
-    if not user:
-        return response_object(status=False, message=message.USER_NOT_FOUND), 404
-    image = Image.query.filter(Image.user == user).first()
 
     data = file.read()
-    file_name = file.filename
-    image.data = data
-    image.description = file_name
-    image.updated_date = datetime.datetime.now()
+
+
+    if not user:
+        return response_object(status=False, message=message.USER_NOT_FOUND), 404
+    if not user.avatar_id:
+        image = Image(description='Avatar of ' + user.email, data=data)
+        db.session.add(image)
+        db.session.flush()
+        user.avatar_id=image.id
+    else:
+
+        image = Image.query.filter(Image.user == user).first()
+        image.data = data
+        image.updated_date = datetime.datetime.now()
     db.session.commit()
 
     return response_object(), 200
@@ -116,7 +122,6 @@ def forgot_password(email):
 
     db.session.add(reset_code)
     db.session.commit()
-
 
     if send_mail_reset_password(reset_code):
         return response_object(), 200

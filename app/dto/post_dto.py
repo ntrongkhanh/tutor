@@ -61,6 +61,7 @@ class PostDto:
     filter_parser.add_argument("form_of_teaching", type=str, location="args", required=False)
     filter_parser.add_argument("user_id", type=int, location="args", required=False)
     filter_parser.add_argument("user_name", type=str, location="args", required=False)
+    filter_parser.add_argument("sort", type=str, location="args", required=False)
     filter_parser.add_argument("page", type=int, location="args", required=False, default=app.config['DEFAULT_PAGE'])
     filter_parser.add_argument("page_size", type=int, location="args", required=False,
                                default=app.config['DEFAULT_PAGE_SIZE'])
