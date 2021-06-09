@@ -6,7 +6,7 @@ from flask_restx import Resource
 
 import app.util.response_message as message
 from app.dto.user_dto import UserDto
-from app.model.code import Code
+from app.model.code_model import Code
 from app.model.user_model import User
 from app.service import user_service
 from app.util.api_response import response_object
@@ -28,7 +28,6 @@ _create_parser = UserDto.create_parser
 
 @api.route('')
 class UserListController(Resource):
-    _create_parser = UserDto.create_parser
 
     # tạm ok
     @api.doc('create user')

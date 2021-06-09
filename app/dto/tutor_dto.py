@@ -1,9 +1,8 @@
-from flask_restx import Namespace, fields, inputs
+from flask_restx import Namespace, fields
 from werkzeug.datastructures import FileStorage
 
 from app import app
 from app.dto.base_dto import base
-from app.dto.user_dto import UserDto
 from app.util.auth_parser_util import get_auth_required_parser, get_auth_not_required_parser
 
 
@@ -65,8 +64,12 @@ class TutorDto:
     filter_parser.add_argument("page_size", type=int, location="args", required=False,
                                default=app.config['DEFAULT_PAGE_SIZE'])
     """data"""
-
+    image = api.inherit('image', {
+        'id': fields.Integer(required=False, description='user email address'),
+        'description': fields.String(required=False, description='user email address'),
+    })
     tutor_data = api.inherit('tutor_data', {
+        'id': fields.Integer(required=False, description='description'),
         'public_id': fields.String(required=False, description='description'),
         'career': fields.String(required=False, description='description'),
         'tutor_description': fields.String(required=False, description='description'),
@@ -80,8 +83,7 @@ class TutorDto:
         'class_type': fields.String(required=False, description='description'),
         'experience': fields.String(required=False, description='description'),
         'other_information': fields.String(required=False, description='description'),
-        'images': fields.String(required=False, description='description'),
-        'user': fields.Nested(UserDto.user_data, required=False, description='description'),
+        'images': fields.Nested(image),
         'created_date': fields.String(required=False, description='description'),
         'updated_date': fields.String(required=False, description='description'),
         'status': fields.String(required=False, description='description'),

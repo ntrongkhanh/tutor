@@ -26,14 +26,15 @@ class User(db.Model):
     is_admin = db.Column(db.Boolean, default=False, nullable=False)
     is_active = db.Column(db.Boolean, default=False, nullable=False)
 
+    average_rating = db.Column(db.Float, default=0.0, nullable=False)
+
     avatar_id = db.Column(db.Integer, ForeignKey('image.id'), nullable=True)
     tutor_id = db.Column(db.Integer, ForeignKey('tutor.id'), nullable=True)
 
-    # avatar = relationship("Image", backref="user", lazy=True)
     posts = relationship("Post", backref="user", lazy=True)
-    search_history = relationship("SearchHistory", backref="user", lazy=True)
-    follow_posts = db.relationship('Post', secondary='follow')
-    # follow_posts = db.relationship("Post", secondary=follow_table)
+    rates = relationship("Rate", backref="user", lazy=True)
+    # search_history = relationship("SearchHistory", backref="user", lazy=True)
+    followed_posts = db.relationship('Post', secondary='follow')
 
     created_date = db.Column(db.DateTime, nullable=True)
     updated_date = db.Column(db.DateTime, nullable=True)
@@ -50,6 +51,7 @@ class User(db.Model):
         self.is_active = False
         self.created_date = datetime.now()
         self.updated_date = datetime.now()
+        self.average_rating = 0.0
 
     def set_password(self, password):
         self.password = bcrypt.generate_password_hash(password).decode('utf-8')
@@ -125,12 +127,15 @@ class User(db.Model):
             'last_name': self.last_name,
             'birthday': date_to_json(self.birthday) if self.birthday else None,
             'sex': self.sex,
+            'average_rating': self.average_rating,
             'is_tutor': self.is_tutor,
             'is_admin': self.is_admin,
             'is_active': self.is_active,
             'avatar_id': self.avatar_id,
             # 'avatar': self.avatar.to_json(),
-            'created_date': date_to_json(self.created_date)  # json.dumps(self.created_date, default=json_serial),
+            'created_date': date_to_json(self.created_date),  # json.dumps(self.created_date, default=json_serial),
+            'updated_date': date_to_json(self.updated_date),  # json.dumps(self.created_date, default=json_serial),
+            'tutor': self.tutor if self.is_tutor else None  # json.dumps(self.created_date, default=json_serial),
         }
 
     def to_payload(self):
@@ -141,7 +146,3 @@ class User(db.Model):
             'is_active': self.is_active,
         }
 
-
-def myconverter(o):
-    if isinstance(o, datetime.datetime):
-        return o.__str__()

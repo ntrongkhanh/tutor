@@ -6,8 +6,8 @@ from app import db
 class Code(db.Model):
     __tablename__ = 'code'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    email = db.Column(db.String(255), nullable=False)
-    code = db.Column(db.String(255), nullable=False)
+    email = db.Column(db.String(255), nullable=True)
+    code = db.Column(db.String(255), nullable=True)
 
     created_date = db.Column(db.DateTime, nullable=True)
 

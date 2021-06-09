@@ -191,7 +191,7 @@ class OwnedPostController(Resource):
         ).order_by(Post.created_date if args['sort'] == 'oldest' else desc(Post.created_date)).paginate(page, page_size,
                                                                                                         error_out=False)
         print(len(posts.items))
-        data = add_follow(posts.items, user.follow_posts)
+        data = add_follow(posts.items, user.followed_posts)
         return response_object(data=data, pagination={'total': posts.total, 'page': posts.page}), 200
 
 
@@ -267,7 +267,7 @@ class PostListController(Resource):
         try:
             verify_jwt_in_request()
             user = User.query.get(get_jwt_identity()['user_id'])
-            followed_post = user.follow_posts
+            followed_post = user.followed_posts
             data = add_follow_status(posts.items, followed_post, user.posts)
         except:
             data = add_follow_status(posts.items, followed_post)
@@ -353,7 +353,7 @@ class PostController(Resource):
         try:
             verify_jwt_in_request()
             user = User.query.get(get_jwt_identity()['user_id'])
-            followed_post = user.follow_posts
+            followed_post = user.followed_posts
             if any(f.id == post.id for f in followed_post):
                 print(followed_post)
                 data['followed'] = True

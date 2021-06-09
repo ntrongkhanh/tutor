@@ -1,1 +1,2 @@
-from . import tutor_model, image_model, post_model, user_model, search_history_model,black_list_token,code,follow
+from . import tutor_model, image_model, post_model, user_model, black_list_token, code_model, follow_model, \
+    rate_model, schedule_model

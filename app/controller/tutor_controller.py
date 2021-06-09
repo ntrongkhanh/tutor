@@ -271,8 +271,8 @@ class TutorController(Resource):
     def get(self, tutor_id):
         """Get a tutor by id (Get 1 gia sư)"""
         tutor = Tutor.query.filter(Tutor.id == tutor_id, Tutor.is_active).first()
-
-        return response_object(data=tutor.to_json()), 200
+        print(tutor)
+        return response_object(data=None), 200
 
     # chưa jwt
     @api.doc('delete tutor')

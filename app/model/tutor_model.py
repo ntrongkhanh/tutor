@@ -30,13 +30,13 @@ class Tutor(db.Model):
     status = db.Column(db.Enum(TutorStatus), default=TutorStatus.PENDING, nullable=True)
 
     images = relationship("Image", backref="tutor", lazy=True)
-    # user = relationship("User", backref="tutor", lazy=True)  # , uselist=False
     user = relationship("User", backref="tutor", lazy=True, uselist=False)
+
     created_date = db.Column(db.DateTime, nullable=True)
     updated_date = db.Column(db.DateTime, nullable=True)
 
     def __init__(self, public_id, career, tutor_description, majors, degree, school, subject, class_type,
-                 experience, other_information,city_address, district_address,
+                 experience, other_information, city_address, district_address,
                  detailed_address):
         self.public_id = public_id
         self.career = career
@@ -72,10 +72,9 @@ class Tutor(db.Model):
             'class_type': self.class_type,
             'experience': self.experience,
             'other_information': self.other_information,
-            # 'images': [image.to_json() for image in self.images],
-            'images': Image.to_list_json(self.images),
+            'images': Image.to_json_list(self.images),
             'created_date': date_to_json(self.created_date),
             'updated_date': date_to_json(self.updated_date),
-            'user': self.user.to_json(),
+            # 'user': self.user.to_json(),
             'status': self.status
         }

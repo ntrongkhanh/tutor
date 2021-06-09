@@ -8,7 +8,7 @@ from sqlalchemy import func
 import app.util.response_message as message
 from app import db, app
 from app.mail import mail
-from app.model.code import Code
+from app.model.code_model import Code
 from app.model.image_model import Image
 from app.model.user_model import User
 from app.util.api_response import response_object
@@ -150,7 +150,6 @@ def send_mail_active_user(active_code):
     link_active = app.config['SERVER_ADDRESS'] + f'/api/user/active/?email={active_code.email}&code={active_code.code}'
     content = 'Please click on the link to activate your account: ' + link_active
     mail.send_mail_without_template(active_code.email, 'Active account', content=content)
-    print('22222222222')
 
     return True
 

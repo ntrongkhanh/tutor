@@ -1,9 +1,8 @@
-from datetime import datetime
-
-from flask_restx import Namespace, fields, inputs
+from flask_restx import Namespace, fields
 from werkzeug.datastructures import FileStorage
 
 from .base_dto import base
+# from .tutor_dto import TutorDto
 from .. import app
 from ..util.auth_parser_util import get_auth_required_parser
 
@@ -62,7 +61,7 @@ class UserDto:
     check_code_parser.add_argument("code", type=str, location='args', required=True)
     """data"""
 
-    avatar = api.inherit('avatar', {
+    image = api.inherit('image', {
         'id': fields.Integer(required=False, description='user email address'),
         'description': fields.String(required=False, description='user email address'),
     })
@@ -79,27 +78,51 @@ class UserDto:
         'created_date': fields.String(required=False, description='user email address')
     })
 
+    tutor_data = api.inherit('tutor_data', {
+        'id': fields.Integer(required=False, description='description'),
+        'public_id': fields.String(required=False, description='description'),
+        'career': fields.String(required=False, description='description'),
+        'tutor_description': fields.String(required=False, description='description'),
+        'majors': fields.String(required=False, description='description'),
+        'degree': fields.String(required=False, description='description'),
+        'school': fields.String(required=False, description='description'),
+        'city_address': fields.String(required=False, description='description'),
+        'district_address': fields.String(required=False, description='description'),
+        'detailed_address': fields.String(required=False, description='description'),
+        'subject': fields.String(required=False, description='description'),
+        'class_type': fields.String(required=False, description='description'),
+        'experience': fields.String(required=False, description='description'),
+        'other_information': fields.String(required=False, description='description'),
+        'images': fields.Nested(image),
+        'created_date': fields.String(required=False, description='description'),
+        'updated_date': fields.String(required=False, description='description'),
+        'status': fields.String(required=False, description='description'),
+    })
     user_data = api.inherit('user_data', {
+        'id': fields.Integer(required=False, description='user email address'),
         'email': fields.String(required=False, description='user email address'),
         'first_name': fields.String(required=False, description='user email address'),
         'last_name': fields.String(required=False, description='user email address'),
         'sex': fields.Boolean(required=False, description='user email address'),
+        'average_rating': fields.Float(required=False, description='user email address'),
         'is_tutor': fields.Boolean(required=False, description='user email address'),
-        'is_admin': fields.Boolean(required=False, description='user email address'),
         'avatar_id': fields.Integer(required=False, description='user email address'),
-        'created_date': fields.String(required=False, description='user email address')
+        'tutor': fields.Nested(tutor_data),
+        'created_date': fields.String(required=False, description='user email address'),
+        'updated_date': fields.String(required=False, description='user email address')
     })
-
     profile_data = api.inherit('profile_data', {
         'id': fields.Integer(required=False, description='user email address'),
         'email': fields.String(required=False, description='user email address'),
         'first_name': fields.String(required=False, description='user email address'),
         'last_name': fields.String(required=False, description='user email address'),
         'sex': fields.Boolean(required=False, description='user email address'),
+        'average_rating': fields.Float(required=False, description='user email address'),
         'is_tutor': fields.Boolean(required=False, description='user email address'),
         'avatar_id': fields.Integer(required=False, description='user email address'),
-        # 'avatar': fields.Nested(avatar),
-        'created_date': fields.String(required=False, description='user email address')
+        'tutor': fields.Nested(tutor_data),
+        'created_date': fields.String(required=False, description='user email address'),
+        'updated_date': fields.String(required=False, description='user email address')
     })
     pagination_data = api.model('pagination', {
         'page': fields.Integer,

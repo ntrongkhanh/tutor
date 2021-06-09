@@ -66,9 +66,16 @@ class PostDto:
     filter_parser.add_argument("page_size", type=int, location="args", required=False,
                                default=app.config['DEFAULT_PAGE_SIZE'])
     """data"""
+    schedule_data = api.inherit('schedule_data', {
+        'id': fields.Integer(required=False, description='description'),
+        'day': fields.String(required=False, description='description'),
+        'start_time': fields.String(required=False, description='description'),
+        'end_time': fields.String(required=False, description='description'),
+    })
 
     post_data = api.inherit('post_data', {
         'id': fields.Integer(required=False, description='description'),
+        'public_id': fields.String(required=False, description='description'),
         'is_tutor': fields.Boolean(required=False, description='description'),
         'title': fields.String(required=False, description='description'),
         'description': fields.String(required=False, description='description'),
@@ -79,7 +86,7 @@ class PostDto:
         'class_type': fields.String(required=False, description='description'),
         'other_information': fields.String(required=False, description='description'),
         'fee': fields.String(required=False, description='description'),
-        'schedule': fields.String(required=False, description='description'),
+        'schedules': fields.Nested(schedule_data),
         'number_of_sessions': fields.String(required=False, description='description'),
         'number_of_follower': fields.Integer(required=False, description='description'),
         'require': fields.String(required=False, description='description'),

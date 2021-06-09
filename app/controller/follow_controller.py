@@ -5,7 +5,7 @@ from app import db
 from app.dto.follow_dto import FollowDto
 from app.dto.post_dto import PostDto
 # from app.model.follow import follow_table
-from app.model.follow import Follow
+from app.model.follow_model import Follow
 from app.model.post_model import Post
 from app.model.user_model import User
 from app.util import response_message
@@ -34,14 +34,14 @@ class FollowController(Resource):
         post = Post.query.get(post_id)
         if not post:
             return response_object(status=False, message=response_message.POST_NOT_FOUND), 404
-        if post in user.follow_posts:
-            user.follow_posts.remove(post)
+        if post in user.followed_posts:
+            user.followed_posts.remove(post)
 
 
         else:
-            user.follow_posts.append(post)
+            user.followed_posts.append(post)
 
-        post.number_of_follower = len(post.follow_users)
+        post.number_of_follower = len(post.followed_users)
         db.session.commit()
         return response_object(), 200
 
@@ -72,13 +72,13 @@ class FollowListController(Resource):
         if not user:
             return response_object(status=False, message=response_message.USER_NOT_FOUND), 404
 
-        posts = Post.query.filter(Post.follow_users.any(Follow.user_id == user_id)).paginate(page, page_size,
-                                                                                             error_out=False)
+        posts = Post.query.filter(Post.followed_users.any(Follow.user_id == user_id)).paginate(page, page_size,
+                                                                                               error_out=False)
         followed_post = []
         try:
             verify_jwt_in_request()
             user = User.query.get(get_jwt_identity()['user_id'])
-            followed_post = user.follow_posts
+            followed_post = user.followed_posts
             data = add_follow_status(posts.items, followed_post, user.posts)
         except:
             data = add_follow_status(posts.items, followed_post)
@@ -144,7 +144,7 @@ class UserListController(Resource):
 
         if post_id and any(post_id == p.id for p in user.posts):
             post = Post.query.get(post_id)
-            user_list = post.follow_users
+            user_list = post.followed_users
         # else:
         #     for p in user.posts:
         #         if p.is_tutor == is_tutor and p.follow_users:  # and p.follow_users not in user_list:
@@ -185,4 +185,4 @@ def get_list_followed_post(user_id):
     if not user:
         return response_object(status=False, message=response_message.USER_NOT_FOUND), 404
 
-    return [p.id for p in user.follow_posts]
+    return [p.id for p in user.followed_posts]
