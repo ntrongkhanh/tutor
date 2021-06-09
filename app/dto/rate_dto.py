@@ -9,6 +9,11 @@ class RateDto:
     __base = api.model("base", base)
 
     """ request"""
-    rate_request=get_auth_required_parser(api)
+    rate_request = get_auth_required_parser(api)
     rate_request.add_argument("star", type=int, location="args", required=True)
-    rate_request.add_argument("content", type=int, location="args", required=False)
+    rate_request.add_argument("content", type=str, location="args", required=False)
+
+    """response"""
+    message_response = api.inherit('message_response', base, {
+        'data': fields.String,
+    })

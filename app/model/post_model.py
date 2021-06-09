@@ -38,6 +38,8 @@ class Post(db.Model):
 
     user_id = db.Column(db.Integer, ForeignKey('users.id'))
     followed_users = db.relationship('User', secondary='follow')
+    registrations = relationship("Registration", backref="post", lazy=True)
+
     # follow_users = db.relationship("User",secondary=association_table)
 
     # user = relationship("User", backref="posts")
@@ -72,7 +74,7 @@ class Post(db.Model):
     def to_json(self):
         return {
             'id': self.id,
-            'public_id ': self.public_id ,
+            'public_id ': self.public_id,
             'is_tutor': self.is_tutor,
             'title': self.title,
             'description': self.description,

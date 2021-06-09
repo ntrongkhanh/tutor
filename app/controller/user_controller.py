@@ -9,6 +9,7 @@ from app.dto.user_dto import UserDto
 from app.model.code_model import Code
 from app.model.user_model import User
 from app.service import user_service
+from app.util import response_message
 from app.util.api_response import response_object
 from app.util.auth_parser_util import get_auth_required_parser
 
@@ -31,11 +32,6 @@ class UserListController(Resource):
 
     # tạm ok
     @api.doc('create user')
-    @api.response(201, 'Created')
-    @api.response(401, 'Unauthorized')
-    @api.response(403, 'Forbidden')
-    @api.response(404, 'Not found')
-    @api.response(500, 'Internal server error')
     @api.expect(_create_parser, validate=True)
     @api.marshal_with(_message_response, 201)
     def post(self):
@@ -48,10 +44,6 @@ class UserListController(Resource):
     # coi lại cái lấy từ parser
     # truyền jwt
     @api.doc('update user')
-    @api.response(401, 'Unauthorized')
-    @api.response(403, 'Forbidden')
-    @api.response(404, 'Not found')
-    @api.response(500, 'Internal server error')
     @api.expect(_update_parser, validate=True)
     @api.marshal_with(_message_response, 200)
     @jwt_required()
@@ -64,7 +56,6 @@ class UserListController(Resource):
 
     # tạm
     @api.doc('filter user')
-    @api.response(500, 'Internal server error')
     @api.expect(_filter_parser, validate=True)
     @api.marshal_with(_filter_response, 200)
     def get(self):
@@ -91,10 +82,6 @@ class UserListController(Resource):
 @api.route('/inactive/<user_id>')
 class Inactive(Resource):
     @api.doc('inactive')
-    @api.response(401, 'Unauthorized')
-    @api.response(403, 'Forbidden')
-    @api.response(404, 'Not found')
-    @api.response(500, 'Internal server error')
     @api.marshal_with(_message_response, 200)
     def get(self, user_id):
         """inactive user"""
@@ -111,10 +98,6 @@ _active_parser = UserDto.active_parser
 @api.route('/active')
 class Active(Resource):
     @api.doc('active account')
-    @api.response(401, 'Unauthorized')
-    @api.response(403, 'Forbidden')
-    @api.response(404, 'Not found')
-    @api.response(500, 'Internal server error')
     @api.expect(_active_parser, validate=True)
     def get(self):
         args = _active_parser.parse_args()
@@ -130,15 +113,18 @@ _get_parser = get_auth_required_parser(api)
 @api.route('/<user_id>')
 class GetById(Resource):
     @api.doc('get by id')
-    @api.response(401, 'Unauthorized')
-    @api.response(403, 'Forbidden')
-    @api.response(404, 'Not found')
-    @api.response(500, 'Internal server error')
     @api.expect(_get_parser, validate=True)
     @api.marshal_with(_user_response, 200)
     def get(self, user_id):
         """get by id user"""
-        return response_object(), 200
+        return get_by_id(user_id)
+
+
+def get_by_id(user_id):
+    user = User.query.get(user_id)
+    if not user:
+        return response_object(status=False, message=response_message.USER_NOT_FOUND), 404
+    return response_object(data=user.to_json()), 200
 
 
 _profile_parser = get_auth_required_parser(api)
@@ -149,10 +135,6 @@ _profile_parser = get_auth_required_parser(api)
 @api.route('/profile')
 class Profile(Resource):
     @api.doc('profile')
-    @api.response(401, 'Unauthorized')
-    @api.response(403, 'Forbidden')
-    @api.response(404, 'Not found')
-    @api.response(500, 'Internal server error')
     @api.expect(_profile_parser, validate=True)
     @api.marshal_with(_user_response, 200)
     @jwt_required()
@@ -173,10 +155,6 @@ _update_avatar_parser = UserDto.update_avatar_parser
 @api.route('/update-avatar')
 class UpdateAvatar(Resource):
     @api.doc('update avatar')
-    @api.response(401, 'Unauthorized')
-    @api.response(403, 'Forbidden')
-    @api.response(404, 'Not found')
-    @api.response(500, 'Internal server error')
     @api.expect(_update_avatar_parser, validate=True)
     @api.marshal_with(_message_response, 200)
     @jwt_required()
@@ -196,10 +174,6 @@ _change_password_parser = UserDto.change_password_parser
 @api.route('/password/change')
 class ChangePassword(Resource):
     @api.doc('change password')
-    @api.response(401, 'Unauthorized')
-    @api.response(403, 'Forbidden')
-    @api.response(404, 'Not found')
-    @api.response(500, 'Internal server error')
     @api.expect(_change_password_parser, validate=True)
     @api.marshal_with(_message_response, 200)
     @jwt_required()
@@ -218,10 +192,6 @@ _forgot_password_parser = UserDto.forgot_password_parser
 @api.route('/password/forgot')
 class ForgotPassword(Resource):
     @api.doc('forgot password')
-    @api.response(401, 'Unauthorized')
-    @api.response(403, 'Forbidden')
-    @api.response(404, 'Not found')
-    @api.response(500, 'Internal server error')
     @api.expect(_forgot_password_parser, validate=True)
     @api.marshal_with(_message_response, 200)
     def get(self):
@@ -240,10 +210,6 @@ _reset_parser = UserDto.reset_parser
 @api.route('/password/reset')
 class Reset(Resource):
     @api.doc('reset password')
-    @api.response(401, 'Unauthorized')
-    @api.response(403, 'Forbidden')
-    @api.response(404, 'Not found')
-    @api.response(500, 'Internal server error')
     @api.expect(_reset_parser, validate=True)
     @api.marshal_with(_message_response, 200)
     def post(self):

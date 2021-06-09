@@ -33,8 +33,10 @@ class User(db.Model):
 
     posts = relationship("Post", backref="user", lazy=True)
     rates = relationship("Rate", backref="user", lazy=True)
+    rated_rates = relationship("Rate", backref="author", lazy=True)
     # search_history = relationship("SearchHistory", backref="user", lazy=True)
     followed_posts = db.relationship('Post', secondary='follow')
+    registrations = relationship("Registration", backref="registrant", lazy=True)
 
     created_date = db.Column(db.DateTime, nullable=True)
     updated_date = db.Column(db.DateTime, nullable=True)
@@ -145,4 +147,3 @@ class User(db.Model):
             'is_admin': self.is_admin,
             'is_active': self.is_active,
         }
-

@@ -29,53 +29,54 @@ _login_response = AuthDto.login_response
 class Login(Resource):
     @api.doc('login ')
     @api.expect(_login_parser, validate=True)
-    @api.response(401, 'Unauthorized')
-    @api.response(404, 'Not found')
     @api.marshal_with(_login_response, code=200)
     def post(self):
         """Login (Đăng nhập)"""
         args = request.json
-        valid = validate_email_and_password(args['email'], args['password'])
-        if not isinstance(valid, bool):
-            return valid
-        user = User.query.filter(func.lower(User.email) == func.lower(args['email'])).first()
-        if not user:
-            return response_object(status=False, message=response_message.EMAIL_NOT_EXISTS), 401
-        if not user.is_active:
-            return response_object(status=False, message=response_message.ACCOUNT_IS_NOT_ACTIVATED), 401
-        if not user.verify_password(args['password']):
-            return response_object(status=False, message=response_message.PASSWORD_WRONG), 401
-        auth_token = create_access_token(identity=user.to_payload(), expires_delta=app.config['TOKEN_EXPIRED_TIME'])
-        if auth_token:
-            data = user.to_json()
-            data['token'] = auth_token
-            return response_object(data=data), 200
-        return response_object(status=False, message=response_message.UNAUTHORIZED_401), 401
+
+        return login(args)
+
+
+def login(args):
+    valid = validate_email_and_password(args['email'], args['password'])
+    if not isinstance(valid, bool):
+        return valid
+    user = User.query.filter(func.lower(User.email) == func.lower(args['email'])).first()
+    if not user:
+        return response_object(status=False, message=response_message.EMAIL_NOT_EXISTS), 401
+    if not user.is_active:
+        return response_object(status=False, message=response_message.ACCOUNT_IS_NOT_ACTIVATED), 401
+    if not user.verify_password(args['password']):
+        return response_object(status=False, message=response_message.PASSWORD_WRONG), 401
+    auth_token = create_access_token(identity=user.to_payload(), expires_delta=app.config['TOKEN_EXPIRED_TIME'])
+    if auth_token:
+        data = user.to_json()
+        data['token'] = auth_token
+        return response_object(data=data), 200
+    return response_object(status=False, message=response_message.UNAUTHORIZED_401), 401
 
 
 # tạm ok
 @api.route('/logout')
 class Logout(Resource):
     @api.doc('logout')
-    @jwt_required()
     @api.expect(get_auth_required_parser(api), validate=True)
-    @api.response(401, 'Unauthorized')
     @api.marshal_with(_message_response, 200)
+    @jwt_required()
     def get(self):
         """Logout (Đăng xuất)"""
-        # jti = get_jwt()["jti"]
-        # jwt_redis_blocklist.set(jti, "", ex=app.config['TOKEN_EXPIRED_TIME'])
-        # return response_object(), 200
         auth_token = request.headers['Authorization'].split(" ")[1]
-        jti = get_jwt()["jti"]
-        if auth_token:
-            black_list = BlacklistToken(token=jti)
-            db.session.add(black_list)
-            db.session.commit()
+        return logout(auth_token)
 
-        # jwt_redis_blocklist
 
-        return response_object(), 200
+def logout(auth_token):
+    jti = get_jwt()["jti"]
+    if auth_token:
+        black_list = BlacklistToken(token=jti)
+        db.session.add(black_list)
+        db.session.commit()
+
+    return response_object(), 200
 
 
 _check_token_parser = api.parser()
@@ -90,17 +91,21 @@ class CheckToken(Resource):
     @jwt_required()
     def get(self):
         """Check token (Kiểm tra hạn của token)"""
+        user_id = get_jwt_identity()['user_id']
+        return check(user_id)
 
-        user = User.query.get(get_jwt_identity()['user_id'])
-        if not user:
-            return response_object(status=False, message=response_message.UNAUTHORIZED_401), 401
 
-        auth_token = create_access_token(identity=user.to_payload(), expires_delta=app.config['TOKEN_EXPIRED_TIME'])
-        if auth_token:
-            data = user.to_json()
-            data['token'] = auth_token
-            return response_object(data=data), 200
+def check(user_id):
+    user = User.query.get(user_id)
+    if not user:
         return response_object(status=False, message=response_message.UNAUTHORIZED_401), 401
+
+    auth_token = create_access_token(identity=user.to_payload(), expires_delta=app.config['TOKEN_EXPIRED_TIME'])
+    if auth_token:
+        data = user.to_json()
+        data['token'] = auth_token
+        return response_object(data=data), 200
+    return response_object(status=False, message=response_message.UNAUTHORIZED_401), 401
 
 
 def validate_email_and_password(email, password):

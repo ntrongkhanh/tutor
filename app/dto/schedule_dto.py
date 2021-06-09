@@ -19,3 +19,8 @@ class ScheduleDto:
     update_request.add_argument("day", type=int, location="args", required=True)
     update_request.add_argument("start_time", type=str, location="args", required=False)
     update_request.add_argument("end_time", type=str, location="args", required=False)
+
+    """response"""
+    message_response = api.inherit('message_response', base, {
+        'data': fields.String,
+    })
