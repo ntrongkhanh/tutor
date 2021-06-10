@@ -4,6 +4,7 @@ from operator import or_
 import flask
 from flask_jwt_extended import get_jwt_identity, jwt_required, verify_jwt_in_request
 from flask_restx import Resource
+from werkzeug.utils import redirect
 
 from app import db
 from app.dto.image_dto import ImageDto
@@ -32,7 +33,7 @@ _filter_response = ImageDto.image_list_response
 class ImageListController(Resource):
     @api.doc('filter')
     @api.expect(_filter_request, validate=True)
-    #@api.marshal_with(_filter_response, 200)
+    # @api.marshal_with(_filter_response, 200)
     def get(self):
         """Filter images (Lọc hình ảnh)"""
         args = _filter_request.parse_args()
@@ -46,7 +47,7 @@ class ImageListController(Resource):
 
     @api.doc('create image')
     @api.expect(_create_request, validate=True)
-    #@api.marshal_with(_create_response, 201)
+    # @api.marshal_with(_create_response, 201)
     def post(self):
         """Create new image (Upload hình ảnh)"""
         args = _create_request.parse_args()
@@ -113,7 +114,7 @@ class ImageController(Resource):
     @api.response(403, 'Forbidden')
     @api.response(404, 'Not found')
     @api.response(500, 'Internal server error')
-    #@api.marshal_with(_create_response, 200)
+    # @api.marshal_with(_create_response, 200)
     @jwt_required()
     def put(self):
         """Update an image (Cập nhật hình ảnh)"""
@@ -148,6 +149,8 @@ def get_by_id(image_id, user_id):
         except Exception as e:
             print(e)
             return response_object(status=False, message=response_message.UNAUTHORIZED_401), 401
+    if image.link:
+        return redirect(image.link, code=200)
 
     if not image.data:
         return response_object(status=False, message=response_message.NOT_FOUND_404), 404

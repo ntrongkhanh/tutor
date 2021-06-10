@@ -13,6 +13,7 @@ class Image(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     description = db.Column(db.String(255), nullable=True)
     data = db.Column(db.LargeBinary(), nullable=True)
+    link = db.Column(db.Text, nullable=True)
     is_public = db.Column(db.Boolean, default=True, nullable=False)
 
     # user = relationship("User", uselist=False, backref="avatar")
@@ -32,6 +33,7 @@ class Image(db.Model):
         self.created_date = datetime.datetime.now()
         self.updated_date = datetime.datetime.now()
         self.is_public = is_public
+        self.link = None
 
     def to_json(self):
         return {
