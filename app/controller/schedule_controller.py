@@ -22,7 +22,7 @@ _message_response = ScheduleDto.message_response
 class CreateScheduleController(Resource):
     @api.doc('create schedule')
     @api.expect(_create_request, validate=True)
-    @api.marshal_with(_message_response, 201)
+    # @api.marshal_with(_message_response, 201)
     @jwt_required()
     def post(self):
         """ create schedule (Tạo lịch học) """
@@ -53,15 +53,14 @@ _update_request = ScheduleDto.update_request
 @api.route('/<schedule_id>')
 class ScheduleController(Resource):
     @api.doc('get schedule')
-    @api.marshal_with(_message_response, 200)
-    @jwt_required()
+    # @api.marshal_with(_message_response, 200)
     def get(self, schedule_id):
         """get by id"""
         return get_by_id(schedule_id)
 
     @api.doc('update schedule')
     @api.expect(_update_request, validate=True)
-    @api.marshal_with(_message_response, 200)
+    # @api.marshal_with(_message_response, 200)
     @jwt_required()
     def put(self, schedule_id):
         """update schedule"""
@@ -72,7 +71,7 @@ class ScheduleController(Resource):
 
     @api.doc('delete schedule')
     @api.expect(get_auth_required_parser(api), validate=True)
-    @api.marshal_with(_message_response, 200)
+    # @api.marshal_with(_message_response, 200)
     @jwt_required()
     def delete(self, schedule_id):
         """delete by id"""

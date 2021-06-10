@@ -1,4 +1,4 @@
-from flask_restx import Namespace, fields
+from flask_restx import Namespace, fields, inputs
 
 from .base_dto import base
 from ..util.auth_parser_util import get_auth_required_parser

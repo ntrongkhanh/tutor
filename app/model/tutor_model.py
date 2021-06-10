@@ -4,7 +4,7 @@ from sqlalchemy.orm import relationship
 
 from app import db
 from app.model.image_model import Image
-from app.model.model_enum import TutorStatus
+from app.model.model_enum import TutorStatus, enum_to_json
 from app.util.api_response import date_to_json
 
 
@@ -76,5 +76,5 @@ class Tutor(db.Model):
             'created_date': date_to_json(self.created_date),
             'updated_date': date_to_json(self.updated_date),
             # 'user': self.user.to_json(),
-            'status': self.status
+            'status': enum_to_json(self.status, TutorStatus)
         }

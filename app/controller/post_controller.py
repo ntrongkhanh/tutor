@@ -36,11 +36,6 @@ _post_request = get_auth_not_required_parser(api)
 class CreateTutorPost(Resource):
     @api.doc('create tutor post')
     @api.expect(_create_request, validate=True)
-    @api.response(201, 'Created')
-    @api.response(401, 'Unauthorized')
-    @api.response(403, 'Forbidden')
-    @api.response(404, 'Not found')
-    @api.response(500, 'Internal server error')
     @jwt_required()
     @tutor_required()
     def post(self):
@@ -69,7 +64,7 @@ def create_tutor_post(args, user_id):
         class_type=args['class_type'],
         other_information=args['other_information'],
         fee=args['fee'],
-        schedule=args['schedule'],
+        # schedule=args['schedule'],
         number_of_sessions=args['number_of_sessions'],
         require=args['require'],
         contact=args['contact'],
@@ -88,11 +83,6 @@ def create_tutor_post(args, user_id):
 class CreateSearchPost(Resource):
     @api.doc('create search post')
     @api.expect(_create_request, validate=True)
-    @api.response(201, 'Created')
-    @api.response(401, 'Unauthorized')
-    @api.response(403, 'Forbidden')
-    @api.response(404, 'Not found')
-    @api.response(500, 'Internal server error')
     @jwt_required()
     def post(self):
         """Create search post (Đăng bài tìm kiếm gia sư)"""
@@ -120,7 +110,7 @@ def create_search_post(args, user_id):
         class_type=args['class_type'],
         other_information=args['other_information'],
         fee=args['fee'],
-        schedule=args['schedule'],
+        # schedule=args['schedule'],
         number_of_sessions=args['number_of_sessions'],
         require=args['require'],
         contact=args['contact'],
@@ -139,7 +129,7 @@ def create_search_post(args, user_id):
 class OwnedPostController(Resource):
     @api.doc('get user\'s own post')
     @api.expect(_filter_request, validate=True)
-    @api.marshal_with(_filter_response, 200)
+    # ##@api.marshal_with(_filter_response, 200)
     @jwt_required()
     def get(self):
         """get user's own post"""
@@ -182,7 +172,7 @@ def get_own_posts(args, user_id):
             or_(Post.other_information.like("%{}%".format(args['other_information'])),
                 args['other_information'] is None), Post.other_information.like("%{}%".format(args['keyword']))),
         or_(Post.fee.like("%{}%".format(args['fee'])), args['fee'] is None),
-        or_(Post.schedule.like("%{}%".format(args['schedule'])), args['schedule'] is None),
+        # or_(Post.schedule.like("%{}%".format(args['schedule'])), args['schedule'] is None),
         or_(Post.number_of_sessions.like("%{}%".format(args['number_of_sessions'])),
             args['number_of_sessions'] is None),
         or_(
@@ -217,7 +207,7 @@ class PostListController(Resource):
     # ok
     @api.doc('filter post')
     @api.expect(_filter_request, validate=True)
-    @api.marshal_with(_filter_response, 200)
+    # ##@api.marshal_with(_filter_response, 200)
     def get(self):
         """Filter posts (lọc các bài post)"""
         args = _filter_request.parse_args()
@@ -259,7 +249,7 @@ def filter_posts(args, user_id):
             or_(Post.other_information.like("%{}%".format(args['other_information'])),
                 args['other_information'] is None), Post.other_information.like("%{}%".format(args['keyword']))),
         or_(Post.fee.like("%{}%".format(args['fee'])), args['fee'] is None),
-        or_(Post.schedule.like("%{}%".format(args['schedule'])), args['schedule'] is None),
+        # or_(Post.schedule.like("%{}%".format(args['schedule'])), args['schedule'] is None),
         or_(Post.number_of_sessions.like("%{}%".format(args['number_of_sessions'])),
             args['number_of_sessions'] is None),
         or_(
@@ -294,6 +284,7 @@ def filter_posts(args, user_id):
     except:
         data = add_follow_status(posts.items, followed_post)
     # data = add_follow_status(posts.items, followed_post,user.posts)
+
     return response_object(data=data,
                            pagination={'total': posts.total, 'page': posts.page}), 200
 
@@ -354,7 +345,7 @@ def add_follow_status(posts, followed_post, created_post=[]):
 class PostController(Resource):
     @api.doc('get post by id')
     @api.expect(get_auth_required_parser(api), validate=True)
-    @api.marshal_with(_post_response, 200)
+    # ##@api.marshal_with(_post_response, 200)
     def get(self, post_id):
         """Get a post by id (Get bài post)"""
         try:
@@ -393,7 +384,8 @@ def get_by_id(post_id, user_id):
     post = Post.query.filter(Post.id == post_id, Post.is_active).first()
     if not post:
         return response_object(status=False, message=response_message.POST_NOT_FOUND), 404
-
+    post.number_of_viewer = (post.number_of_viewer + 1)
+    db.session.commit()
     data = post.to_json()
 
     try:
@@ -424,7 +416,6 @@ def update(args, post_id, user_id):
         return response_object(status=False, message=response_message.POST_NOT_FOUND), 404
     if post.user_id != user.id:
         return response_object(status=False, message=response_message.FORBIDDEN_403), 403
-
     post.title = args['title'] if args['title'] else post.title
     post.description = args['description'] if args['description'] else post.description
     post.city_address = args['city_address'] if args['city_address'] else post.city_address
@@ -434,7 +425,6 @@ def update(args, post_id, user_id):
     post.class_type = args['class_type'] if args['class_type'] else post.class_type
     post.other_information = args['other_information'] if args['other_information'] else post.other_information
     post.fee = args['fee'] if args['fee'] else post.fee
-    post.schedule = args['schedule'] if args['schedule'] else post.schedule
     post.number_of_sessions = args['number_of_sessions'] if args['number_of_sessions'] else post.number_of_sessions
     post.require = args['require'] if args['require'] else post.require
     post.contact = args['contact'] if args['contact'] else post.contact

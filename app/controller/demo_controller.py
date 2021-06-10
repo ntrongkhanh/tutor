@@ -25,7 +25,7 @@
 # class create(Resource):
 #     @api.doc('create demo')
 #     @api.expect(_create, validate=True)
-#     @api.marshal_with(DemoDTO.update_success_response)
+#     #@api.marshal_with(DemoDTO.update_success_response)
 #     # @api.response(DemoDTO.create_success_response)
 #     def post(self):
 #         args = request.json
@@ -158,7 +158,7 @@
 # # class login(Resource):
 # #     @api.doc('login mail')
 # #     @api.expect(_login_request, validate=True)
-# #     @api.marshal_with(_login_response, 200)
+# #     #@api.marshal_with(_login_response, 200)
 # #     def post(self):
 # #         args = request.json
 # #         return service.login(args)
@@ -171,7 +171,7 @@
 # # class profile(Resource):
 # #     @api.doc('profile')
 # #     # @api.expect(_profile_response, validate=True)
-# #     @api.marshal_with(_profile_response, 200)
+# #     #@api.marshal_with(_profile_response, 200)
 # #     def get(self):
 # #         # args = request.json
 # #         return service.get_profile(1)
@@ -184,7 +184,7 @@
 # # class login1(Resource):
 # #     @api.doc('login1 mail')
 # #     @api.expect(_login_request, validate=True)
-# #     # @api.marshal_with(_login_response, 200)
+# #     # #@api.marshal_with(_login_response, 200)
 # #     def post(self):
 # #         # get the post data
 # #         post_data = request.json

@@ -3,7 +3,7 @@ from datetime import datetime
 from sqlalchemy import ForeignKey
 
 from app import db
-from app.model.model_enum import RegistrationStatus
+from app.model.model_enum import RegistrationStatus, enum_to_json
 from app.util.api_response import date_to_json
 
 
@@ -29,7 +29,7 @@ class Registration(db.Model):
     def to_json(self):
         return {
             'id': self.id,
-            'status': self.star,
+            'status': enum_to_json(self.status,RegistrationStatus),
             'post_id': self.content,
             'student_id': self.created_date,
             'created_date': date_to_json(self.created_date),

@@ -21,10 +21,9 @@ class UserDto:
     # create_parser.add_argument("birthday", type=datetime, location='form', required=True)
 
     update_parser = get_auth_required_parser(api)
-    update_parser.add_argument("email", type=str, location='json', required=True)
-    update_parser.add_argument("first_name", type=str, location='json', required=True)
-    update_parser.add_argument("last_name", type=str, location='json', required=True)
-    update_parser.add_argument("sex", type=bool, location='json', required=True)
+    update_parser.add_argument("first_name", type=str, location='json', required=False)
+    update_parser.add_argument("last_name", type=str, location='json', required=False)
+    update_parser.add_argument("sex", type=bool, location='json', required=False)
     # update_parser.add_argument("birthday", type=datetime, location='json', required=True)
 
     filter_parser = get_auth_required_parser(api)
@@ -45,8 +44,8 @@ class UserDto:
     update_avatar_parser.add_argument("file", type=FileStorage, location="files", required=True)
 
     change_password_parser = get_auth_required_parser(api)
-    change_password_parser.add_argument("new_password", type=str, location='json', required=False)
-    change_password_parser.add_argument("old_password", type=str, location='json', required=False)
+    change_password_parser.add_argument("new_password", type=str, location='json', required=True)
+    change_password_parser.add_argument("old_password", type=str, location='json', required=True)
 
     forgot_password_parser = api.parser()
     forgot_password_parser.add_argument("email", type=str, location='args', required=False)

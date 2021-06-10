@@ -51,16 +51,16 @@ _filter_parser = FollowDto.filter_parser
 class FollowListController(Resource):
     @api.doc('get list followed post')
     @api.expect(_filter_parser, validate=True)
-    @api.marshal_with(_filter_response, 200)
+    #@api.marshal_with(_filter_response, 200)
     @jwt_required()
     def get(self):
         """filter các bài post đã follow"""
         user_id = get_jwt_identity()['user_id']
         args = _filter_parser.parse_args()
-        return filter(args, user_id)
+        return filter_followed_post(args, user_id)
 
 
-def filter(args, user_id):
+def filter_followed_post(args, user_id):
     user = User.query.get(user_id)
     page = args['page']
     page_size = args['page_size']

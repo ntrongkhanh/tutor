@@ -37,7 +37,7 @@ class TutorListController(Resource):
     # truyền jwt get user id
     @api.doc('create tutor')
     @api.expect(_create_request, validate=True)
-    @api.marshal_with(_message_response, 201)
+    # @api.marshal_with(_message_response, 201)
     @jwt_required()
     def post(self):
         """Create tutor (Tạo gia sư)"""
@@ -48,7 +48,7 @@ class TutorListController(Resource):
     # ok
     @api.doc('filter tutor')
     @api.expect(_filter_request, validate=True)
-    @api.marshal_with(_filter_response, 200)
+    # @api.marshal_with(_filter_response, 200)
     def get(self):
         """Filter tutors (Lọc các gia sư)"""
         args = _filter_request.parse_args()
@@ -58,7 +58,7 @@ class TutorListController(Resource):
     # chưa jwt
     @api.doc('update tutor')
     @api.expect(_update_request, validate=True)
-    @api.marshal_with(_message_response, 200)
+    # @api.marshal_with(_message_response, 200)
     @jwt_required()
     @tutor_required()
     def put(self):
@@ -88,7 +88,7 @@ def create(args, user_id):
         subject=args['subject'],
         class_type=args['class_type'],
         experience=args['experience'],
-        other_information=args['other_information'],
+        other_information=args['other_information']
     )
     db.session.add(tutor)
     db.session.flush()
@@ -166,7 +166,7 @@ _create_verification_image_parser = TutorDto.create_verification_image_parser
 class VerificationImageListController(Resource):
     @api.doc('verification image')
     @api.expect(_create_verification_image_parser, validate=True)
-    @api.marshal_with(_message_response, 201)
+    # @api.marshal_with(_message_response, 201)
     @jwt_required()
     def post(self):
         """upload verification image"""
@@ -202,7 +202,7 @@ _update_verification_image_parser = TutorDto.update_verification_image_parser
 class VerificationImageController(Resource):
     @api.doc('update verification image')
     @api.expect(_update_verification_image_parser, validate=True)
-    @api.marshal_with(_message_response, 201)
+    # @api.marshal_with(_message_response, 201)
     @jwt_required()
     def put(self, image_id):
         user_id = get_jwt_identity()['user_id']
@@ -211,7 +211,7 @@ class VerificationImageController(Resource):
 
     @api.doc('delete verification image')
     @api.expect(get_auth_required_parser(api), validate=True)
-    @api.marshal_with(_message_response, 201)
+    # @api.marshal_with(_message_response, 201)
     @jwt_required()
     def delete(self, image_id):
         user_id = get_jwt_identity()['user_id']
@@ -269,7 +269,7 @@ class TutorController(Resource):
     # chưa jwt
     @api.doc('get tutor by id')
     @api.expect(get_auth_not_required_parser(api), validate=True)
-    @api.marshal_with(_tutor_response, 200)
+    # @api.marshal_with(_tutor_response, 200)
     def get(self, tutor_id):
         """Get a tutor by id (Get 1 gia sư)"""
         return get_by_id(tutor_id)
@@ -277,7 +277,7 @@ class TutorController(Resource):
     # chưa jwt
     # @api.doc('delete tutor')
     # @api.expect(get_auth_required_parser(api), validate=True)
-    # @api.marshal_with(_message_response, 200)
+    # #@api.marshal_with(_message_response, 200)
     # def delete(self, tutor_id):
     #     """Delete a tutor (Xóa 1 gia sư)"""
     #     tutor = Tutor.query.get(tutor_id)
@@ -294,24 +294,25 @@ def get_by_id(tutor_id):
     tutor = Tutor.query.filter(Tutor.id == tutor_id, Tutor.is_active).first()
     if not tutor:
         return response_object(status=False, message=response_message.TUTOR_NOT_FOUND), 404
-    return response_object(data=tutor.to_json), 200
+
+    return response_object(data=tutor.to_json()), 200
 
 
 @api.route('/profile')
 class Profile(Resource):
     @api.doc('profile')
     @api.expect(get_auth_required_parser(api), validate=True)
-    @api.marshal_with(_tutor_response, 200)
+    # @api.marshal_with(_tutor_response, 200)
     @jwt_required()
     @tutor_required()
     def get(self):
         user_id = get_jwt_identity()['user_id']
         return get_profile(user_id)
-       
+
 
 def get_profile(user_id):
     # tutor = Tutor.query.filter(Tutor.user.has(User.id == user_id)).first()
-    tutor = Tutor.query.filter(Tutor.user.has(User.id == user_id)).first()
+    tutor = Tutor.query.filter(Tutor.user.has(User.id == user_id), Tutor.is_active).first()
     if not tutor:
         return response_object(status=False, message=response_message.NOT_FOUND_404), 404
     return response_object(data=tutor.to_json()), 200

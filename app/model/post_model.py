@@ -5,7 +5,7 @@ from sqlalchemy.orm import relationship
 
 from app import db
 # from app.model.follow import follow_table
-from app.model.model_enum import PostStatus
+from app.model.model_enum import PostStatus, enum_to_json
 from app.model.schedule_model import Schedule
 from app.util.api_response import date_to_json
 
@@ -28,6 +28,7 @@ class Post(db.Model):
     form_of_teaching = db.Column(db.String(255), nullable=True)
     is_active = db.Column(db.Boolean, default=True, nullable=False)
     status = db.Column(db.Enum(PostStatus), default=PostStatus.OPENING, nullable=True)
+    number_of_viewer = db.Column(db.Integer, default=0, nullable=True)
 
     city_address = db.Column(db.String(255), nullable=True)
     district_address = db.Column(db.String(255), nullable=True)
@@ -70,6 +71,7 @@ class Post(db.Model):
         self.updated_date = datetime.datetime.now()
         self.status = PostStatus.OPENING
         self.is_active = True
+        self.number_of_viewer = 0
 
     def to_json(self):
         return {
@@ -93,6 +95,7 @@ class Post(db.Model):
             'user': self.user.to_json(),
             'created_date': date_to_json(self.created_date),
             'updated_date': date_to_json(self.updated_date),
-            'status': self.status,
+            'status': enum_to_json(self.status,PostStatus),
             'number_of_follower': self.number_of_follower,
+            'number_of_viewer': self.number_of_viewer
         }

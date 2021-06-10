@@ -29,7 +29,7 @@ _login_response = AuthDto.login_response
 class Login(Resource):
     @api.doc('login ')
     @api.expect(_login_parser, validate=True)
-    @api.marshal_with(_login_response, code=200)
+    ##@api.marshal_with(_login_response, code=200)
     def post(self):
         """Login (Đăng nhập)"""
         args = request.json
@@ -61,7 +61,7 @@ def login(args):
 class Logout(Resource):
     @api.doc('logout')
     @api.expect(get_auth_required_parser(api), validate=True)
-    @api.marshal_with(_message_response, 200)
+    ##@api.marshal_with(_message_response, 200)
     @jwt_required()
     def get(self):
         """Logout (Đăng xuất)"""
@@ -87,7 +87,7 @@ class CheckToken(Resource):
     @api.doc('check Token expiration time')
     @api.expect(get_auth_required_parser(api), validate=True)
     @api.response(401, 'Unauthorized')
-    @api.marshal_with(_login_response, 200)
+    ##@api.marshal_with(_login_response, 200)
     @jwt_required()
     def get(self):
         """Check token (Kiểm tra hạn của token)"""

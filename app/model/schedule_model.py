@@ -10,8 +10,8 @@ class Schedule(db.Model):
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     day = db.Column(db.Integer, nullable=True)  # 2-8
-    start_time = db.Column(db.DateTime, nullable=True)
-    end_time = db.Column(db.DateTime, nullable=True)
+    start_time = db.Column(db.String, nullable=True)
+    end_time = db.Column(db.String, nullable=True)
 
     post_id = db.Column(db.Integer, ForeignKey('post.id'))
 

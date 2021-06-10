@@ -1,6 +1,7 @@
 import datetime
 
 from sqlalchemy import ForeignKey
+from sqlalchemy.orm import relationship
 
 from app import db
 from app.util.api_response import date_to_json
@@ -13,8 +14,13 @@ class Rate(db.Model):
     star = db.Column(db.Integer, nullable=False)
     content = db.Column(db.Text, nullable=True)
 
-    user_id = db.Column(db.Integer, ForeignKey('users.id'))
-    author_id = db.Column(db.Integer, ForeignKey('users.id'))
+    user_id = db.Column(db.Integer, ForeignKey('users.id'),nullable=True)
+    author_id = db.Column(db.Integer, ForeignKey('users.id'),nullable=True)
+
+    user = db.relationship("User", backref="rates", uselist=False, foreign_keys=[user_id])
+    author = db.relationship("User", backref="rated_rates", uselist=False, foreign_keys=[author_id])
+    # user = relationship("User", foreign_keys=[user_id])
+    # author = relationship("User", foreign_keys=[author_id])
 
     created_date = db.Column(db.DateTime, nullable=True)
     updated_date = db.Column(db.DateTime, nullable=True)
@@ -34,5 +40,6 @@ class Rate(db.Model):
             'content': self.content,
             'created_date': date_to_json(self.created_date),
             'updated_date': date_to_json(self.updated_date),
+            'author': self.author.to_json(),
             'user': self.user.to_json()
         }

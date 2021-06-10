@@ -58,9 +58,10 @@ def update_user(args, user_id):
     user = User.query.get(user_id)
     if not user:
         return response_object(status=False, message=message.USER_NOT_FOUND), 404
-    user.sex = args['sex']
-    user.last_name = args['last_name']
-    user.first_name = args['first_name']
+
+    user.sex = args['sex'] if args['sex'] else user.sex
+    user.last_name = args['last_name'] if args['last_name'] else user.last_name
+    user.first_name = args['first_name'] if args['first_name'] else user.first_name
     # user.birthday = args['birthday']
     user.updated_date = datetime.datetime.now()
 
@@ -171,7 +172,7 @@ def active_user(args):
 
 
 def change_password(args, id_user):
-    if validate_password(args['new_password']):
+    if not validate_password(args['new_password']):
         return response_object(status=False, message=message.INVALID_PASSWORD), 400
     user = User.query.get(id_user)
     if not user:
@@ -196,9 +197,6 @@ def send_mail_reset_password(reset_code):
         return False
     return True
 
-
-def test_send_mail():
-    mail.send_mail_without_template(receiver='trongkhanhvip1@gmail.com', content='hello')
 
 
 def validate_email_and_password(email, password):

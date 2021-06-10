@@ -32,7 +32,7 @@ _filter_response = ImageDto.image_list_response
 class ImageListController(Resource):
     @api.doc('filter')
     @api.expect(_filter_request, validate=True)
-    @api.marshal_with(_filter_response, 200)
+    #@api.marshal_with(_filter_response, 200)
     def get(self):
         """Filter images (Lọc hình ảnh)"""
         args = _filter_request.parse_args()
@@ -46,7 +46,7 @@ class ImageListController(Resource):
 
     @api.doc('create image')
     @api.expect(_create_request, validate=True)
-    @api.marshal_with(_create_response, 201)
+    #@api.marshal_with(_create_response, 201)
     def post(self):
         """Create new image (Upload hình ảnh)"""
         args = _create_request.parse_args()
@@ -113,7 +113,7 @@ class ImageController(Resource):
     @api.response(403, 'Forbidden')
     @api.response(404, 'Not found')
     @api.response(500, 'Internal server error')
-    @api.marshal_with(_create_response, 200)
+    #@api.marshal_with(_create_response, 200)
     @jwt_required()
     def put(self):
         """Update an image (Cập nhật hình ảnh)"""
@@ -127,7 +127,7 @@ class ImageController(Resource):
     # @api.response(404, 'Not found')
     # @api.response(500, 'Internal server error')
     # @api.expect(_delete_request, validate=True)
-    # @api.marshal_with(_message_response, 200)
+    # #@api.marshal_with(_message_response, 200)
     # def delete(self, image_id):
     #     """Delete an image (Xóa hình ảnh)"""
     #     Image.query.filter(Image.id == image_id).delete()

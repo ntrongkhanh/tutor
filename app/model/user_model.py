@@ -32,8 +32,9 @@ class User(db.Model):
     tutor_id = db.Column(db.Integer, ForeignKey('tutor.id'), nullable=True)
 
     posts = relationship("Post", backref="user", lazy=True)
-    rates = relationship("Rate", backref="user", lazy=True)
-    rated_rates = relationship("Rate", backref="author", lazy=True)
+
+    # rates = relationship("Rate", backref="user", lazy=True)
+    # rated_rates = relationship("Rate", backref="author", lazy=True)
     # search_history = relationship("SearchHistory", backref="user", lazy=True)
     followed_posts = db.relationship('Post', secondary='follow')
     registrations = relationship("Registration", backref="registrant", lazy=True)
@@ -137,7 +138,8 @@ class User(db.Model):
             # 'avatar': self.avatar.to_json(),
             'created_date': date_to_json(self.created_date),  # json.dumps(self.created_date, default=json_serial),
             'updated_date': date_to_json(self.updated_date),  # json.dumps(self.created_date, default=json_serial),
-            'tutor': self.tutor if self.is_tutor else None  # json.dumps(self.created_date, default=json_serial),
+            'tutor': self.tutor.to_json() if self.is_tutor else None
+            # json.dumps(self.created_date, default=json_serial),
         }
 
     def to_payload(self):
