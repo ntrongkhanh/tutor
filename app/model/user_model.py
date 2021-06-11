@@ -27,6 +27,7 @@ class User(db.Model):
     is_active = db.Column(db.Boolean, default=False, nullable=False)
 
     average_rating = db.Column(db.Float, default=0.0, nullable=False)
+    number_of_rate = db.Column(db.Integer, default=0, nullable=False)
 
     avatar_id = db.Column(db.Integer, ForeignKey('image.id'), nullable=True)
     tutor_id = db.Column(db.Integer, ForeignKey('tutor.id'), nullable=True)
@@ -55,6 +56,7 @@ class User(db.Model):
         self.created_date = datetime.now()
         self.updated_date = datetime.now()
         self.average_rating = 0.0
+        self.number_of_rate = 0
 
     def set_password(self, password):
         self.password = bcrypt.generate_password_hash(password).decode('utf-8')
@@ -131,6 +133,7 @@ class User(db.Model):
             'birthday': date_to_json(self.birthday) if self.birthday else None,
             'sex': self.sex,
             'average_rating': self.average_rating,
+            'number_of_rate': self.number_of_rate,
             'is_tutor': self.is_tutor,
             'is_admin': self.is_admin,
             'is_active': self.is_active,

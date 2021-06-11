@@ -148,6 +148,7 @@ def create(args, user_id, author_id):
         for temp_rate in user.rates:
             total_rating += temp_rate.star
         user.average_rating = (total_rating + star) / (len(user.rates) + 1)
+        user.number_of_rate=len(user.rates)+1
         db.session.add(rate)
     else:
         return response_object(status=False, message=response_message.CONFLICT_409), 409
@@ -174,11 +175,9 @@ def update(args, rate_id, author_id):
     total_rating = 0
     for temp_rate in user.rates:
         total_rating += temp_rate.star
-    print(total_rating)
-    print(len(user.rates))
-    print(str(rate.star - old_star))
-    user.average_rating = total_rating / len(user.rates)
 
+    user.average_rating = total_rating / len(user.rates)
+    user.number_of_rate = len(user.rates)
     db.session.commit()
     return response_object(), 200
 
@@ -201,7 +200,7 @@ def delete(rate_id, author_id):
         user.average_rating = 0.0
     else:
         user.average_rating = total_rating / len(user.rates)
-
+    user.number_of_rate = len(user.rates)
     db.session.commit()
 
     return response_object(), 200
