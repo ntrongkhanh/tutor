@@ -25,8 +25,8 @@ class Tutor(db.Model):
     point_address = db.Column(db.String(255), nullable=True)
     subject = db.Column(db.String(255), nullable=True)
     class_type = db.Column(db.String(255), nullable=True)
-    experience = db.Column(db.String(255), nullable=True)
-    other_information = db.Column(db.String(255), nullable=True)
+    experience = db.Column(db.Text, nullable=True)
+    other_information = db.Column(db.Text, nullable=True)
     is_active = db.Column(db.Boolean, default=False, nullable=False)
     status = db.Column(db.Enum(TutorStatus), default=TutorStatus.PENDING, nullable=True)
 

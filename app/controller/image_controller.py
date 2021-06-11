@@ -150,7 +150,7 @@ def get_by_id(image_id, user_id):
             print(e)
             return response_object(status=False, message=response_message.UNAUTHORIZED_401), 401
     if image.link:
-        return redirect(image.link, code=200)
+        return redirect(image.link)
 
     if not image.data:
         return response_object(status=False, message=response_message.NOT_FOUND_404), 404
