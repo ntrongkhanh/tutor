@@ -45,10 +45,9 @@ class Registration(db.Model):
         return {
             'id': self.id,
             'status': enum_to_json(self.status, RegistrationStatus),
-            'post_id': self.content,
             'approved_user': self.approved_user.to_json(),
             'post': self.post.to_json(),
-            'author': self.author,
+            'author': self.author.to_json(),
             'created_date': date_to_json(self.created_date),
             'updated_date': date_to_json(self.updated_date)
         }

@@ -12,7 +12,7 @@ class RegistrationDto:
     """request"""
     create_request = get_auth_required_parser(api)
     create_request.add_argument("post_id", type=int, location="args", required=True)
-    create_request.add_argument("approved_user_id", type=int, location="args", required=True)
+    # create_request.add_argument("approved_user_id", type=int, location="args", required=True)
 
     invite_request=get_auth_required_parser(api)
     invite_request.add_argument("title", type=str, location="json", required=True)
@@ -20,6 +20,7 @@ class RegistrationDto:
     invite_request.add_argument("city_address", type=str, location="json", required=False)
     invite_request.add_argument("district_address", type=str, location="json", required=False)
     invite_request.add_argument("detailed_address", type=str, location="json", required=False)
+    invite_request.add_argument("point_address", type=str, location="json", required=False)
     invite_request.add_argument("subject", type=str, location="json", required=True)
     invite_request.add_argument("class_type", type=str, location="json", required=False)
     invite_request.add_argument("other_information", type=str, location="json", required=False)
@@ -39,10 +40,6 @@ class RegistrationDto:
     # create_request.add_argument("author_id", type=int, location="args", required=True)
 
     filter_request = get_auth_required_parser(api)
-    filter_request.add_argument("post_id", type=int, location="args", required=True)
-    filter_request.add_argument("is_looking_for_tutor", type=bool, location="args", required=True)
-    filter_request.add_argument("user_id", type=int, location="args", required=True)
-    filter_request.add_argument("author_id", type=int, location="args", required=True)
     filter_request.add_argument("page", type=int, location="args", required=False, default=app.config['DEFAULT_PAGE'])
     filter_request.add_argument("page_size", type=int, location="args", required=False,
                                 default=app.config['DEFAULT_PAGE_SIZE'])

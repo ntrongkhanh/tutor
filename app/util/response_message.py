@@ -6,6 +6,7 @@ NOT_FOUND_404 = 'Not found'
 INTERNAL_SERVER_ERROR_500 = 'Internal server error'
 
 USER_NOT_FOUND = 'User not found'
+INVITATION_ALREADY_EXISTS = 'You have already sent the invitation'
 REGISTRATION_NOT_FOUND = 'Registration not found'
 TUTOR_NOT_FOUND = 'Tutor not found'
 POST_NOT_FOUND = 'Post not found'

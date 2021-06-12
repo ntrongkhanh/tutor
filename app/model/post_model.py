@@ -41,6 +41,9 @@ class Post(db.Model):
     user_id = db.Column(db.Integer, ForeignKey('users.id'))
     followed_users = db.relationship('User', secondary='follow')
     registrations = relationship("Registration", backref="post", lazy=True)
+    # class_ = relationship("Class", backref="post", lazy=True)
+    class_ = relationship("Class", backref="post", lazy=True, uselist=False)
+
 
     # follow_users = db.relationship("User",secondary=association_table)
 
@@ -51,7 +54,7 @@ class Post(db.Model):
 
     def __init__(self, public_id, is_tutor, title, description, subject, class_type, other_information, fee,
                  number_of_sessions, require, contact, form_of_teaching, user_id, city_address, district_address,
-                 detailed_address,point_address):
+                 detailed_address,point_address,status=PostStatus.OPENING):
         self.public_id = public_id
         self.is_tutor = is_tutor
         self.title = title
@@ -71,7 +74,7 @@ class Post(db.Model):
         self.user_id = user_id
         self.created_date = datetime.datetime.now()
         self.updated_date = datetime.datetime.now()
-        self.status = PostStatus.OPENING
+        self.status = status
         self.is_active = True
         self.number_of_viewer = 0
 

@@ -9,6 +9,7 @@ from sqlalchemy import desc
 import app.util.response_message as response_message
 from app import db
 from app.dto.post_dto import PostDto
+from app.model.model_enum import PostStatus
 from app.model.post_model import Post
 from app.model.user_model import User
 from app.util.api_response import response_object
@@ -60,6 +61,7 @@ def create_tutor_post(args, user_id):
         city_address=args['city_address'],
         district_address=args['district_address'],
         detailed_address=args['detailed_address'],
+        point_address=args['point_address'],
         subject=args['subject'],
         class_type=args['class_type'],
         other_information=args['other_information'],
@@ -270,6 +272,7 @@ def filter_posts(args, user_id):
                     args['user_name'] is None),
                 Post.user.has(User.first_name.like("%{}%".format(args['keyword']))), )
         ),
+        Post.status == PostStatus.OPENING,
         Post.is_active
     ).order_by(desc(Post.created_date)).paginate(page, page_size, error_out=False)
 
