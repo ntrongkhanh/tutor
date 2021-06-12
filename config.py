@@ -20,6 +20,7 @@ class Config(object):
     TOKEN_EXPIRED_TIME = timedelta(days=50)
     PROPAGATE_EXCEPTIONS = True
     MIN_PASSWORD_CHARACTERS = 6
+    FRONTEND_ADDRESS = 'http://localhost:3000'
 
 
 class DevelopmentConfig(Config):
@@ -30,7 +31,7 @@ class DevelopmentConfig(Config):
     DEBUG = True
     SQLALCHEMY_DATABASE_URI = "postgresql://postgres:ntrongkhanh@localhost:5432/tutor"
     SQLALCHEMY_TRACK_MODIFICATIONS = True
-    SERVER_ADDRESS = ' http://127.0.0.1:5000'
+    SERVER_ADDRESS = 'http://127.0.0.1:5000'
 
 
 class MySqlConfig(Config):
@@ -41,7 +42,7 @@ class MySqlConfig(Config):
     DEBUG = True
     SQLALCHEMY_DATABASE_URI = "mysql://ntrongkhanh:ntrongkhanh@127.0.0.1:3306/tutor"
     SQLALCHEMY_TRACK_MODIFICATIONS = True
-    SERVER_ADDRESS = ' http://127.0.0.1:5000'
+    SERVER_ADDRESS = 'http://127.0.0.1:5000'
 
 
 class ProductionConfig(Config):

@@ -14,6 +14,7 @@ class PostStatus(enum.Enum):
 
 class RegistrationStatus(enum.Enum):
     PENDING = 'PENDING'
+    CANCEL = 'CANCEL'
     DECLINED = 'DECLINED'
     ACCEPTED = 'ACCEPTED'
 
@@ -25,7 +26,8 @@ def convert_keys(obj, convert=str):
         return obj
     return {convert(k): convert_keys(v, convert) for k, v in obj.items()}
 
-def enum_to_json(key,type):
+
+def enum_to_json(key, type):
     if isinstance(key, type):
         return key.name
     return str(key)

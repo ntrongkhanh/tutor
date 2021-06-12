@@ -38,7 +38,7 @@ class User(db.Model):
     # rated_rates = relationship("Rate", backref="author", lazy=True)
     # search_history = relationship("SearchHistory", backref="user", lazy=True)
     followed_posts = db.relationship('Post', secondary='follow')
-    registrations = relationship("Registration", backref="registrant", lazy=True)
+    # registrations = relationship("Registration", backref="registrant", lazy=True)
 
     created_date = db.Column(db.DateTime, nullable=True)
     updated_date = db.Column(db.DateTime, nullable=True)

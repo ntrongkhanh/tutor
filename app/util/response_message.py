@@ -5,6 +5,7 @@ FORBIDDEN_403 = 'Forbidden'
 NOT_FOUND_404 = 'Not found'
 
 USER_NOT_FOUND = 'User not found'
+REGISTRATION_NOT_FOUND = 'Registration not found'
 TUTOR_NOT_FOUND = 'Tutor not found'
 POST_NOT_FOUND = 'Post not found'
 SCHEDULE_NOT_FOUND = 'Schedule not found'
