@@ -23,22 +23,20 @@ class Registration(db.Model):
     false:  author là gia sư
             user là học viên                    
     """
-    is_looking_for_tutor = db.Column(db.Boolean, default=False, nullable=False)
 
-    user_id = db.Column(db.Integer, ForeignKey('users.id'), nullable=True)
+    approved_user_id = db.Column(db.Integer, ForeignKey('users.id'), nullable=True)
     author_id = db.Column(db.Integer, ForeignKey('users.id'), nullable=True)
 
-    user = db.relationship("User", backref="registration_user", uselist=False, foreign_keys=[user_id])
+    approved_user = db.relationship("User", backref="approved_user", uselist=False, foreign_keys=[approved_user_id])
     author = db.relationship("User", backref="registration_author", uselist=False, foreign_keys=[author_id])
 
     created_date = db.Column(db.DateTime, nullable=True)
     updated_date = db.Column(db.DateTime, nullable=True)
 
-    def __init__(self, is_looking_for_tutor, post_id, user_id, author_id):
+    def __init__(self, post_id, approved_user_id, author_id):
         self.post_id = post_id
         self.status = RegistrationStatus.PENDING
-        self.is_looking_for_tutor = is_looking_for_tutor
-        self.user_id = user_id
+        self.approved_user_id = approved_user_id
         self.author_id = author_id
         self.created_date = datetime.now()
         self.updated_date = datetime.now()
@@ -48,10 +46,7 @@ class Registration(db.Model):
             'id': self.id,
             'status': enum_to_json(self.status, RegistrationStatus),
             'post_id': self.content,
-            'is_looking_for_tutor': self.is_looking_for_tutor,
-            'user_id': self.user_id,
-            'author_id': self.author_id,
-            'user': self.user,
+            'approved_user': self.approved_user.to_json(),
             'post': self.post.to_json(),
             'author': self.author,
             'created_date': date_to_json(self.created_date),

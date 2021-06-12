@@ -1,3 +1,4 @@
+import uuid
 from datetime import datetime
 from operator import or_, and_
 
@@ -8,6 +9,7 @@ from sqlalchemy import desc
 from app import db
 from app.dto.registration_dto import RegistrationDto
 from app.model.model_enum import RegistrationStatus
+from app.model.post_model import Post
 from app.model.registration_model import Registration
 from app.model.user_model import User
 from app.util import response_message
@@ -142,15 +144,31 @@ class AcceptController(Resource):
 
         return accept(user_id, registration_id)
 
+_invite_request=RegistrationDto.invite_request
+@api.route('/invite-tutor')
+class InviteTutorController(Resource):
+    @api.doc('invite')
+    @api.expect(_invite_request, validate=True)
+    @jwt_required()
+    def post(self, registration_id):
+        user_id = get_jwt_identity()['user_id']
+        args= _invite_request.parse_args()
+        return invite(args,user_id)
 
 def create(args, author_id):
     author = User.query.get(author_id)
     if not author:
         return response_object(status=False, message=response_message.USER_NOT_FOUND), 404
+    post = Post.query.get(args['post_id'])
+    if not post:
+        return response_object(status=False, message=response_message.POST_NOT_FOUND), 404
+    if not post.is_tutor and not author.is_tutor:
+        return response_object(status=False, message=response_message.USER_ARE_NOT_TUTOR), 403
+    if post.user_id == author_id:
+        return response_object(status=False, message=response_message.INTERNAL_SERVER_ERROR_500), 500
     registration = Registration(
-        is_looking_for_tutor=True if args['is_looking_for_tutor'] == 'true' else False,
         post_id=args['post_id'],
-        user_id=args['user_id'],
+        approved_user_id=args['approved_user_id'],
         author_id=author_id
     )
     db.session.add(registration)
@@ -169,7 +187,7 @@ def get_by_id(user_id, registration_id):
         return response_object(status=False, message=response_message.USER_NOT_FOUND), 404
 
     registration = Registration.query.get(registration_id)
-    if registration.user_id != user_id and registration.author_id != user_id:
+    if registration.approved_user_id != user_id and registration.author_id != user_id:
         return response_object(status=False, message=response_message.UNAUTHORIZED_401), 401
 
     data = registration.to_json()
@@ -216,7 +234,7 @@ def get_wait_list(args, user_id):
         return response_object(status=False, message=response_message.USER_NOT_FOUND), 404
     page = args['page']
     page_size = args['page_size']
-    registrations = Registration.query.filter(Registration.user_id == user_id,
+    registrations = Registration.query.filter(Registration.approved_user_id == user_id,
                                               Registration.status == RegistrationStatus.PENDING) \
         .order_by(desc(Registration.created_date)) \
         .paginate(page, page_size, error_out=False)
@@ -231,8 +249,7 @@ def registered_list(args, user_id):
         return response_object(status=False, message=response_message.USER_NOT_FOUND), 404
     page = args['page']
     page_size = args['page_size']
-    registrations = Registration.query.filter(Registration.author_id == user_id,
-                                              Registration.status == RegistrationStatus.PENDING) \
+    registrations = Registration.query.filter(Registration.author_id == user_id) \
         .order_by(desc(Registration.created_date)) \
         .paginate(page, page_size, error_out=False)
 
@@ -248,8 +265,20 @@ def taught_list(args, user_id):
     page_size = args['page_size']
     registrations = Registration.query.filter(
         or_(
-            and_(Registration.is_looking_for_tutor, Registration.user_id == user_id),
-            and_(not Registration.is_looking_for_tutor, Registration.author_id == user_id)
+            and_(
+                and_(Registration.post.has(Post.user_id == user_id), Registration.post.has(Post.is_tutor)),
+                Registration.approved_user_id == user_id
+            ),
+            or_(
+                and_(
+                    and_(Registration.post.has(Post.user_id != user_id), Registration.post.has(not Post.is_tutor)),
+                    Registration.approved_user_id == user_id
+                ),
+                and_(
+                    and_(Registration.post.has(Post.user_id != user_id), Registration.post.has(not Post.is_tutor)),
+                    Registration.approved_user_id != user_id
+                )
+            )
         ),
         Registration.status == RegistrationStatus.ACCEPTED) \
         .order_by(desc(Registration.created_date)) \
@@ -267,8 +296,20 @@ def studied_list(args, user_id):
     page_size = args['page_size']
     registrations = Registration.query.filter(
         or_(
-            and_(not Registration.is_looking_for_tutor, Registration.user_id == user_id),
-            and_(Registration.is_looking_for_tutor, Registration.author_id == user_id)
+            and_(
+                and_(Registration.post.has(Post.user_id == user_id), Registration.post.has(not Post.is_tutor)),
+                Registration.approved_user_id == user_id
+            ),
+            or_(
+                and_(
+                    and_(Registration.post.has(Post.user_id != user_id), Registration.post.has(Post.is_tutor)),
+                    Registration.approved_user_id != user_id
+                ),
+                and_(
+                    and_(Registration.post.has(Post.user_id == user_id), Registration.post.has(not Post.is_tutor)),
+                    Registration.approved_user_id != user_id
+                )
+            )
         ),
         Registration.status == RegistrationStatus.ACCEPTED) \
         .order_by(desc(Registration.created_date)) \
@@ -286,6 +327,9 @@ def decline(user_id, registration_id):
     if not registration:
         return response_object(status=False, message=response_message.REGISTRATION_NOT_FOUND), 404
 
+    if registration.approved_user_id != user_id:
+        return response_object(status=False, message=response_message.INTERNAL_SERVER_ERROR_500), 500
+
     registration.status = RegistrationStatus.DECLINED
     registration.updated_date = datetime.now()
     db.session.commit()
@@ -299,8 +343,44 @@ def accept(user_id, registration_id):
     registration = Registration.query.get(registration_id)
     if not registration:
         return response_object(status=False, message=response_message.REGISTRATION_NOT_FOUND), 404
-
+    if registration.approved_user_id != user_id:
+        return response_object(status=False, message=response_message.INTERNAL_SERVER_ERROR_500), 500
     registration.status = RegistrationStatus.ACCEPTED
     registration.updated_date = datetime.now()
     db.session.commit()
     return response_object(), 200
+
+def invite(args,author_id):
+
+    post = Post(
+        is_tutor=False,
+        public_id='BD' + str(uuid.uuid4())[:6].upper(),
+        title=args['title'],
+        description=args['description'],
+        city_address=args['city_address'],
+        district_address=args['district_address'],
+        detailed_address=args['detailed_address'],
+        subject=args['subject'],
+        class_type=args['class_type'],
+        other_information=args['other_information'],
+        fee=args['fee'],
+        # schedule=args['schedule'],
+        number_of_sessions=args['number_of_sessions'],
+        require=args['require'],
+        contact=args['contact'],
+        form_of_teaching=args['form_of_teaching'],
+        user_id=author_id
+    )
+
+    db.session.add(post)
+    db.session.flush()
+
+    registration = Registration(
+        post_id=post.id,
+        approved_user_id=args['invited_user_id'],
+        author_id=author_id
+    )
+    db.session.add(registration)
+    db.session.commit()
+
+    return response_object(), 201
