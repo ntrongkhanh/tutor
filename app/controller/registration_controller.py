@@ -5,8 +5,9 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 from flask_restx import Resource
 from sqlalchemy import desc
 
-from app import db
+from app import db, app
 from app.dto.registration_dto import RegistrationDto
+from app.mail.mail import mail
 from app.model.class_model import Class
 from app.model.model_enum import RegistrationStatus, PostStatus
 from app.model.post_model import Post
@@ -174,6 +175,13 @@ def create(args, author_id):
         author_id=author_id
     )
     db.session.add(registration)
+    db.session.flush()
+
+    if post.is_tutor:
+        send_mail_register_to_study(registration, post.user.email)
+    else:
+        send_mail_register_to_teach(registration, post.user.email)
+
     db.session.commit()
 
     return response_object(), 201
@@ -412,6 +420,10 @@ def accept(user_id, registration_id):
 
 
 def invite(args, author_id):
+    invited_user = User.query.get(args['invited_user_id'])
+    if not invited_user:
+        return response_object(status=False, message=response_message.USER_NOT_FOUND), 404
+
     post = Post(
         is_tutor=False,
         public_id='BD' + str(uuid.uuid4())[:6].upper(),
@@ -443,6 +455,32 @@ def invite(args, author_id):
         author_id=author_id
     )
     db.session.add(registration)
+    db.session.flush()
+    send_mail_invite(registration, invited_user.email)
     db.session.commit()
 
     return response_object(), 201
+
+
+def send_mail_register_to_study(registration, receiver_mail):
+    link = app.config['SERVER_ADDRESS'] + f'/api/registration/{registration.id}'
+    content = 'Có người đăng ký học lớp học của bạn:' + link
+    mail.send_mail_without_template(receiver_mail, 'Đăng ký lớp', content=content)
+
+    return True
+
+
+def send_mail_register_to_teach(registration, receiver_mail):
+    link = app.config['SERVER_ADDRESS'] + f'/api/registration/{registration.id}'
+    content = 'Có người đăng ký dạy lớp học của bạn:' + link
+    mail.send_mail_without_template(receiver_mail, 'Đăng ký dạy', content=content)
+
+    return True
+
+
+def send_mail_invite(registration, receiver_mail):
+    link = app.config['SERVER_ADDRESS'] + f'/api/registration/{registration.id}'
+    content = 'Có người mời bạn làm gia sư:' + link
+    mail.send_mail_without_template(receiver_mail, 'Mời dạy học', content=content)
+
+    return True

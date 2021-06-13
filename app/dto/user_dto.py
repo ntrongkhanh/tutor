@@ -31,6 +31,7 @@ class UserDto:
     filter_parser.add_argument("first_name", type=str, location='args', required=False)
     filter_parser.add_argument("last_name", type=str, location='args', required=False)
     filter_parser.add_argument("sex", type=bool, location='args', required=False)
+    filter_parser.add_argument("is_tutor", type=bool, location='args', required=False)
     # filter_parser.add_argument("birthday", type=datetime, location='args', required=False)
     filter_parser.add_argument("page", type=int, location="args", required=False, default=app.config['DEFAULT_PAGE'])
     filter_parser.add_argument("page_size", type=int, location="args", required=False,
