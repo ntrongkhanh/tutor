@@ -41,6 +41,9 @@ class Registration(db.Model):
         self.created_date = datetime.now()
         self.updated_date = datetime.now()
 
+    def get_status(self):
+        return enum_to_json(self.status, RegistrationStatus)
+
     def to_json(self):
         return {
             'id': self.id,

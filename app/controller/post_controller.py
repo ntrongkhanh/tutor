@@ -11,6 +11,7 @@ from app import db
 from app.dto.post_dto import PostDto
 from app.model.model_enum import PostStatus
 from app.model.post_model import Post
+from app.model.registration_model import Registration
 from app.model.user_model import User
 from app.util.api_response import response_object
 from app.util.auth_parser_util import get_auth_required_parser, get_auth_not_required_parser
@@ -199,8 +200,10 @@ def get_own_posts(args, user_id):
         Post.is_active
     ).order_by(Post.created_date if args['sort'] == 'oldest' else desc(Post.created_date)).paginate(page, page_size,
                                                                                                     error_out=False)
-    print(len(posts.items))
-    data = add_follow(posts.items, user.followed_posts)
+    # print(len(posts.items))
+    followed_posts = Post.query.filter(Post.followed_users.any(User.id == user_id)).all()
+
+    data = add_follow(posts.items, followed_posts)
     return response_object(data=data, pagination={'total': posts.total, 'page': posts.page}), 200
 
 
@@ -356,7 +359,6 @@ class PostController(Resource):
             user_id = get_jwt_identity()['user_id']
         except:
             user_id = None
-
         return get_by_id(post_id, user_id)
 
     # chưa test
@@ -393,9 +395,16 @@ def get_by_id(post_id, user_id):
 
     try:
         user = User.query.get(user_id)
-        followed_post = user.followed_posts
-        if any(f.id == post.id for f in followed_post):
-            print(followed_post)
+        followed_posts = Post.query.filter(Post.followed_users.any(User.id == user_id)).all()
+        registration = Registration.query.filter(Registration.post.has(Post.id == post_id)).first()
+        if not registration:
+            data['registered'] = False
+            data['status_register'] = None
+        else:
+            data['registered'] = True
+            data['status_register'] = registration.get_status()
+
+        if any(f.id == post.id for f in followed_posts):
             data['followed'] = True
         else:
             data['followed'] = False

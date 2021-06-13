@@ -7,7 +7,7 @@ from sqlalchemy import desc
 
 from app import db, app
 from app.dto.registration_dto import RegistrationDto
-from app.mail.mail import mail
+from app.mail import mail
 from app.model.class_model import Class
 from app.model.model_enum import RegistrationStatus, PostStatus
 from app.model.post_model import Post
@@ -165,7 +165,8 @@ def create(args, author_id):
     if post.user_id == author_id:
         return response_object(status=False, message=response_message.INTERNAL_SERVER_ERROR_500), 500
 
-    check_registration = Registration.query.filter(Registration.post_id == post.id).first()
+    check_registration = Registration.query.filter(Registration.post_id == post.id,
+                                                   Registration.author_id == author_id).first()
     if check_registration:
         return response_object(status=False, message=response_message.INVITATION_ALREADY_EXISTS), 409
 

@@ -33,6 +33,8 @@ def create(user_id, post_id):
     post = Post.query.get(post_id)
     if not post:
         return response_object(status=False, message=response_message.POST_NOT_FOUND), 404
+    followed_posts = Post.query.filter(Post.followed_users.any(User.id == user_id)).all()
+
     if post in user.followed_posts:
         user.followed_posts.remove(post)
     else:
