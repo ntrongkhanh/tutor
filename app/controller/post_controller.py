@@ -76,8 +76,8 @@ def create_tutor_post(args, user_id):
     )
     db.session.add(post)
     db.session.commit()
-
-    return response_object(), 201
+    print(post.id)
+    return response_object(data={'post_id': post.id}), 201
 
 
 # ok
@@ -109,6 +109,7 @@ def create_search_post(args, user_id):
         city_address=args['city_address'],
         district_address=args['district_address'],
         detailed_address=args['detailed_address'],
+        point_address=args['point_address'],
         subject=args['subject'],
         class_type=args['class_type'],
         other_information=args['other_information'],
@@ -125,7 +126,7 @@ def create_search_post(args, user_id):
 
     db.session.commit()
 
-    return response_object(), 201
+    return response_object(data={'post_id': post.id}), 201
 
 
 @api.route('/get')
