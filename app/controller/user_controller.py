@@ -63,13 +63,15 @@ class UserListController(Resource):
         args = _filter_parser.parse_args()
         page = args['page']
         page_size = args['page_size']
-        is_tutor = True if args['is_tutor'] == 'true' else False
+        is_tutor = True if args['is_tutor'] == 'true' or args['is_tutor'] else False
+
         users = User.query.filter(
             or_(User.email.like("%{}%".format(args['email'])), args['email'] is None),
             or_(User.first_name.like("%{}%".format(args['first_name'])), args['first_name'] is None),
-            or_(User.last_name.like("%{}%".format(args['last_name'])), args['last_name'] is None),
+            or_(User.last_name.like("%{}"
+                                    "%".format(args['last_name'])), args['last_name'] is None),
             or_(User.sex == args['last_name'], args['sex'] is None),
-            or_(User.is_tutor ==is_tutor, args['is_tutor'] is None),
+            or_(User.is_tutor == is_tutor, args['is_tutor'] is None),
             # or_(User.birthday == args['birthday'], args['birthday'] is None),
             User.is_active
         ).paginate(page, page_size, error_out=False)
