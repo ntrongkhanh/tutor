@@ -9,7 +9,7 @@ from sqlalchemy import desc
 import app.util.response_message as response_message
 from app import db
 from app.dto.post_dto import PostDto
-from app.model.model_enum import PostStatus
+from app.model.model_enum import PostStatus, RegistrationStatus
 from app.model.post_model import Post
 from app.model.registration_model import Registration
 from app.model.user_model import User
@@ -62,7 +62,8 @@ def create_tutor_post(args, user_id):
         city_address=args['city_address'],
         district_address=args['district_address'],
         detailed_address=args['detailed_address'],
-        point_address=args['point_address'],
+        latitude=args['latitude'],
+        longitude=args['longitude'],
         subject=args['subject'],
         class_type=args['class_type'],
         other_information=args['other_information'],
@@ -109,7 +110,8 @@ def create_search_post(args, user_id):
         city_address=args['city_address'],
         district_address=args['district_address'],
         detailed_address=args['detailed_address'],
-        point_address=args['point_address'],
+        latitude=args['latitude'],
+        longitude=args['longitude'],
         subject=args['subject'],
         class_type=args['class_type'],
         other_information=args['other_information'],
@@ -386,6 +388,21 @@ class PostController(Resource):
         return delete(user_id)
 
 
+@api.route('/<post_id>/relate')
+class RelatedPostController(Resource):
+    @api.expect(get_auth_required_parser(api), validate=True)
+    def get(self, post_id):
+        return related_post(post_id)
+
+
+def related_post(post_id):
+    post = Post.query.get(post_id)
+
+    posts = Post.query.filter(Post.subject.like("%{}%".format(post.subject))).limit(5).all()
+
+    return response_object(data=[post.to_json for post in posts]), 200
+
+
 def get_by_id(post_id, user_id):
     post = Post.query.filter(Post.id == post_id, Post.is_active).first()
     if not post:
@@ -397,7 +414,9 @@ def get_by_id(post_id, user_id):
     try:
         user = User.query.get(user_id)
         followed_posts = Post.query.filter(Post.followed_users.any(User.id == user_id)).all()
-        registration = Registration.query.filter(Registration.post.has(Post.id == post_id)).first()
+        registration = Registration.query.filter(Registration.post.has(Post.id == post_id),
+                                                 Registration.author_id == user_id,
+                                                 Registration.status != RegistrationStatus.CANCEL).first()
         if not registration:
             data['registered'] = False
             data['status_register'] = None
@@ -442,6 +461,8 @@ def update(args, post_id, user_id):
     post.require = args['require'] if args['require'] else post.require
     post.contact = args['contact'] if args['contact'] else post.contact
     post.form_of_teaching = args['form_of_teaching'] if args['form_of_teaching'] else post.form_of_teaching
+    post.latitude=args['latitude'] if args['latitude'] else post.latitude
+    post.longitude=args['longitude'] if args['longitude'] else post.longitude
     post.updated_date = datetime.now()
     db.session.commit()
 

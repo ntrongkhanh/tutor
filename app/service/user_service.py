@@ -149,8 +149,8 @@ def reset_password(args, password):
 
 def send_mail_active_user(active_code):
     link_active = app.config['SERVER_ADDRESS'] + f'/api/user/active/?email={active_code.email}&code={active_code.code}'
-    content = 'Please click on the link to activate your account: ' + link_active
-    mail.send_mail_without_template(active_code.email, 'Active account', content=content)
+    content = 'Vui lòng nhấn vào link để kích hoạt tài khoản: ' + link_active
+    mail.send_mail_without_template(active_code.email, 'Kích hoạt tài khoản', content=content)
 
     return True
 
@@ -191,8 +191,8 @@ def change_password(args, id_user):
 def send_mail_reset_password(reset_code):
     try:
         # link_reset = app.config['SERVER_ADDRESS'] + f'/api/user/reset/?email={reset_code.email}&code={reset_code.code}'
-        content = 'Your code is: ' + reset_code.code
-        mail.send_mail_without_template(reset_code.email, 'Reset password', content=content)
+        content = 'Mã reset mật khẩu của bạn là: ' + reset_code.code
+        mail.send_mail_without_template(reset_code.email, 'Reset mật khẩu', content=content)
     except:
         return False
     return True

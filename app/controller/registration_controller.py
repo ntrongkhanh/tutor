@@ -1,5 +1,6 @@
 import uuid
 from datetime import datetime
+from operator import or_
 
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from flask_restx import Resource
@@ -166,12 +167,15 @@ def create(args, author_id):
         return response_object(status=False, message=response_message.INTERNAL_SERVER_ERROR_500), 500
 
     check_registration = Registration.query.filter(Registration.post_id == post.id,
-                                                   Registration.author_id == author_id).first()
+                                                   Registration.author_id == author_id,
+                                                   Registration.status != RegistrationStatus.CANCEL).first()
     if check_registration:
         return response_object(status=False, message=response_message.INVITATION_ALREADY_EXISTS), 409
 
     registration = Registration(
         post_id=args['post_id'],
+        content=args['content'],
+        contact=args['contact'],
         approved_user_id=post.user_id,
         author_id=author_id
     )
@@ -200,7 +204,9 @@ def get_by_id(user_id, registration_id):
     registration = Registration.query.get(registration_id)
     if registration.approved_user_id != user_id and registration.author_id != user_id:
         return response_object(status=False, message=response_message.UNAUTHORIZED_401), 401
-
+    if registration.approved_user_id == user_id:
+        registration.is_read_by_approved_user = True
+        db.session.commit()
     data = registration.to_json()
 
     return response_object(data=data), 200
@@ -211,7 +217,11 @@ def cancel(user_id, registration_id):
     if not user:
         return response_object(status=False, message=response_message.USER_NOT_FOUND), 404
 
-    registration = Registration.query.get(registration_id)
+    registration = Registration.query.filter(Registration.id == registration_id,
+                                             Registration.status == RegistrationStatus.PENDING).first()
+    if not registration:
+        return response_object(status=False, message=response_message.NOT_FOUND_404), 404
+
     if registration.author_id != user_id:
         return response_object(status=False, message=response_message.UNAUTHORIZED_401), 401
 
@@ -255,12 +265,15 @@ def get_wait_list(args, user_id):
 
 
 def registered_list(args, user_id):
-    user = User.query.get(user_id)
-    if not user:
-        return response_object(status=False, message=response_message.USER_NOT_FOUND), 404
     page = args['page']
     page_size = args['page_size']
-    registrations = Registration.query.filter(Registration.author_id == user_id) \
+
+    status = args['status']
+    if status not in RegistrationStatus._value2member_map_:
+        status = None
+
+    registrations = Registration.query.filter(Registration.author_id == user_id,
+                                              or_(Registration.status == status, status is None)) \
         .order_by(desc(Registration.created_date)) \
         .paginate(page, page_size, error_out=False)
     return response_object(data=[r.to_json() for r in registrations.items],
@@ -384,6 +397,9 @@ def accept(user_id, registration_id):
     if not user:
         return response_object(status=False, message=response_message.USER_NOT_FOUND), 404
     registration = Registration.query.get(registration_id)
+    if registration.status != RegistrationStatus.PENDING:
+        return response_object(status=False, message=response_message.INTERNAL_SERVER_ERROR_500), 500
+
     if not registration:
         return response_object(status=False, message=response_message.REGISTRATION_NOT_FOUND), 404
     if registration.approved_user_id != user_id:
@@ -433,7 +449,8 @@ def invite(args, author_id):
         city_address=args['city_address'],
         district_address=args['district_address'],
         detailed_address=args['detailed_address'],
-        point_address=args['point_address'],
+        latitude=args['latitude'],
+        longitude=args['longitude'],
         subject=args['subject'],
         class_type=args['class_type'],
         other_information=args['other_information'],
@@ -452,6 +469,8 @@ def invite(args, author_id):
 
     registration = Registration(
         post_id=post.id,
+        contact=args['contact'],
+        content=args['content'],
         approved_user_id=args['invited_user_id'],
         author_id=author_id
     )

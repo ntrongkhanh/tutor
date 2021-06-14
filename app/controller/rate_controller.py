@@ -1,4 +1,5 @@
 from datetime import datetime
+from operator import or_
 
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from flask_restx import Resource
@@ -7,6 +8,7 @@ from sqlalchemy import desc
 import app.util.response_message as response_message
 from app import db
 from app.dto.rate_dto import RateDto
+from app.model.class_model import Class
 from app.model.rate_model import Rate
 from app.model.user_model import User
 from app.util.api_response import response_object
@@ -136,8 +138,13 @@ def create(args, user_id, author_id):
         return response_object(status=False, message=response_message.USER_NOT_FOUND), 404
     star = args['star']
     content = args['content']
-    rate = Rate.query.filter(Rate.user_id == user_id, Rate.author_id == author_id).first()
-    if not rate:
+    classes = Class.query.filter(or_(Class.student_id == author_id, Class.teacher_id == author_id)).all()
+    rate = Rate.query.filter(Rate.user_id == user_id, Rate.author_id == author_id).all()
+
+    if len(classes) == 0:
+        return response_object(status=False, message=response_message.NOT_STUDIED_OR_TAUGHT), 400
+
+    if len(classes) > len(rate):
         rate = Rate(
             star=star,
             content=content,
@@ -148,7 +155,7 @@ def create(args, user_id, author_id):
         for temp_rate in user.rates:
             total_rating += temp_rate.star
         user.average_rating = (total_rating + star) / (len(user.rates) + 1)
-        user.number_of_rate=len(user.rates)+1
+        user.number_of_rate = len(user.rates) + 1
         db.session.add(rate)
     else:
         return response_object(status=False, message=response_message.CONFLICT_409), 409

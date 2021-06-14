@@ -33,7 +33,8 @@ class Post(db.Model):
     city_address = db.Column(db.String(255), nullable=True)
     district_address = db.Column(db.String(255), nullable=True)
     detailed_address = db.Column(db.String(255), nullable=True)
-    point_address = db.Column(db.String(255), nullable=True)
+    latitude = db.Column(db.String(255), nullable=True)
+    longitude = db.Column(db.String(255), nullable=True)
 
     number_of_follower = db.Column(db.Integer, default=0, nullable=False)
     schedules = relationship("Schedule", backref="post", lazy=True)
@@ -44,7 +45,6 @@ class Post(db.Model):
     # class_ = relationship("Class", backref="post", lazy=True)
     class_ = relationship("Class", backref="post", lazy=True, uselist=False)
 
-
     # follow_users = db.relationship("User",secondary=association_table)
 
     # user = relationship("User", backref="posts")
@@ -54,7 +54,7 @@ class Post(db.Model):
 
     def __init__(self, public_id, is_tutor, title, description, subject, class_type, other_information, fee,
                  number_of_sessions, require, contact, form_of_teaching, user_id, city_address, district_address,
-                 detailed_address,point_address,status=PostStatus.OPENING):
+                 detailed_address, latitude, longitude, status=PostStatus.OPENING):
         self.public_id = public_id
         self.is_tutor = is_tutor
         self.title = title
@@ -62,7 +62,8 @@ class Post(db.Model):
         self.city_address = city_address
         self.district_address = district_address
         self.detailed_address = detailed_address
-        self.point_address = point_address
+        self.latitude = latitude
+        self.longitude = longitude
         self.subject = subject
         self.class_type = class_type
         self.other_information = other_information
@@ -88,7 +89,8 @@ class Post(db.Model):
             'city_address': self.city_address,
             'district_address': self.district_address,
             'detailed_address': self.detailed_address,
-            'point_address': self.point_address,
+            'latitude': self.latitude,
+            'longitude': self.longitude,
             'subject': self.subject,
             'class_type': self.class_type,
             'other_information': self.other_information,
@@ -101,7 +103,7 @@ class Post(db.Model):
             'user': self.user.to_json(),
             'created_date': date_to_json(self.created_date),
             'updated_date': date_to_json(self.updated_date),
-            'status': enum_to_json(self.status,PostStatus),
+            'status': enum_to_json(self.status, PostStatus),
             'number_of_follower': self.number_of_follower,
             'number_of_viewer': self.number_of_viewer
         }

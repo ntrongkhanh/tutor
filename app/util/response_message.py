@@ -7,6 +7,7 @@ INTERNAL_SERVER_ERROR_500 = 'Internal server error'
 
 USER_NOT_FOUND = 'User not found'
 INVITATION_ALREADY_EXISTS = 'You have already sent the invitation'
+NOT_STUDIED_OR_TAUGHT = 'You have not studied or taught this user user'
 REGISTRATION_NOT_FOUND = 'Registration not found'
 TUTOR_NOT_FOUND = 'Tutor not found'
 POST_NOT_FOUND = 'Post not found'

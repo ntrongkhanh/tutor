@@ -19,10 +19,13 @@ class Tutor(db.Model):
     majors = db.Column(db.String(255), nullable=True)
     degree = db.Column(db.String(255), nullable=True)
     school = db.Column(db.String(255), nullable=True)
+
     city_address = db.Column(db.String(255), nullable=True)
     district_address = db.Column(db.String(255), nullable=True)
     detailed_address = db.Column(db.String(255), nullable=True)
-    point_address = db.Column(db.String(255), nullable=True)
+    latitude = db.Column(db.String(255), nullable=True)
+    longitude = db.Column(db.String(255), nullable=True)
+
     subject = db.Column(db.String(255), nullable=True)
     class_type = db.Column(db.String(255), nullable=True)
     experience = db.Column(db.Text, nullable=True)
@@ -38,7 +41,7 @@ class Tutor(db.Model):
 
     def __init__(self, public_id, career, tutor_description, majors, degree, school, subject, class_type,
                  experience, other_information, city_address, district_address,
-                 detailed_address,point_address=None):
+                 detailed_address, latitude=None, longitude=None):
         self.public_id = public_id
         self.career = career
         self.tutor_description = tutor_description
@@ -48,7 +51,8 @@ class Tutor(db.Model):
         self.city_address = city_address
         self.district_address = district_address
         self.detailed_address = detailed_address
-        self.point_address = point_address
+        self.latitude = latitude
+        self.longitude = longitude
         self.subject = subject
         self.class_type = class_type
         self.experience = experience
@@ -70,7 +74,8 @@ class Tutor(db.Model):
             'city_address': self.city_address,
             'district_address': self.district_address,
             'detailed_address': self.detailed_address,
-            'point_address': self.point_address,
+            'latitude': self.latitude,
+            'longitude': self.longitude,
             'subject': self.subject,
             'class_type': self.class_type,
             'experience': self.experience,

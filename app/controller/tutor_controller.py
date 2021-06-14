@@ -5,6 +5,7 @@ from operator import or_
 from flask import request
 from flask_jwt_extended import get_jwt_identity, jwt_required, verify_jwt_in_request
 from flask_restx import Resource
+from sqlalchemy import desc
 
 from app import db
 from app.dto.tutor_dto import TutorDto
@@ -153,6 +154,9 @@ def update(args, user_id):
     tutor.class_type = args['class_type'] if args['class_type'] else tutor.class_type
     tutor.experience = args['experience'] if args['experience'] else tutor.experience
     tutor.other_information = args['other_information'] if args['other_information'] else tutor.other_information
+    tutor.latitude = args['latitude'] if args['latitude'] else tutor.latitude
+    tutor.longitude = args['longitude'] if args['longitude'] else tutor.longitude
+    tutor.updated_date = datetime.now()
 
     db.session.commit()
 
@@ -308,6 +312,19 @@ class Profile(Resource):
     def get(self):
         user_id = get_jwt_identity()['user_id']
         return get_profile(user_id)
+
+
+@api.route('/best')
+class BestTutorListController(Resource):
+    @api.doc('best list')
+    def get(self):
+        return get_best_list()
+
+
+def get_best_list():
+    users = User.query.order_by(desc(User.average_rating)).limit(4).all()
+
+    return response_object(data=[user.to_json() for user in users]), 200
 
 
 def get_profile(user_id):
