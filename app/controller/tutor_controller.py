@@ -322,7 +322,7 @@ class BestTutorListController(Resource):
 
 
 def get_best_list():
-    users = User.query.order_by(desc(User.average_rating)).limit(4).all()
+    users = User.query.filter(User.is_tutor).order_by(desc(User.average_rating)).limit(4).all()
 
     return response_object(data=[user.to_json() for user in users]), 200
 

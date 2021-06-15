@@ -12,6 +12,7 @@ from app.dto.post_dto import PostDto
 from app.model.model_enum import PostStatus, RegistrationStatus
 from app.model.post_model import Post
 from app.model.registration_model import Registration
+from app.model.schedule_model import Schedule
 from app.model.user_model import User
 from app.util.api_response import response_object
 from app.util.auth_parser_util import get_auth_required_parser, get_auth_not_required_parser
@@ -383,7 +384,7 @@ class PostController(Resource):
         """Delete post by id (Xóa bài post)"""
         user_id = get_jwt_identity()['user_id']
 
-        return delete(user_id)
+        return delete(user_id, post_id)
 
 
 @api.route('/<post_id>/relate')
@@ -459,16 +460,22 @@ def update(args, post_id, user_id):
     post.require = args['require'] if args['require'] else post.require
     post.contact = args['contact'] if args['contact'] else post.contact
     post.form_of_teaching = args['form_of_teaching'] if args['form_of_teaching'] else post.form_of_teaching
-    post.latitude=args['latitude'] if args['latitude'] else post.latitude
-    post.longitude=args['longitude'] if args['longitude'] else post.longitude
+    post.latitude = args['latitude'] if args['latitude'] else post.latitude
+    post.longitude = args['longitude'] if args['longitude'] else post.longitude
     post.updated_date = datetime.now()
+
+    for s in post.schedules:
+        Schedule.query.filter(Schedule.id == s.id).delete()
+
     db.session.commit()
 
     return response_object(), 200
 
 
-def delete(post_id, user_id):
+def delete(user_id, post_id):
     user = User.query.get(user_id)
+    print(user)
+
     if not user:
         return response_object(status=False, message=response_message.USER_NOT_FOUND), 404
     post = Post.query.get(post_id)
@@ -476,6 +483,9 @@ def delete(post_id, user_id):
         return response_object(status=False, message=response_message.POST_NOT_FOUND), 404
     if post.user_id != user.id:
         return response_object(status=False, message=response_message.FORBIDDEN_403), 403
+    if not post.is_active:
+        return response_object(status=False, message=response_message.POST_NOT_FOUND), 404
+
     # Post.query.filter(Post.id == post_id).delete()
     post.is_active = False
 
