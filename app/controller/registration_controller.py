@@ -26,7 +26,7 @@ _filter_request = RegistrationDto.filter_request
 _message_response = RegistrationDto.message_response
 
 
-@api.route('/post_id')
+@api.route('/<post_id>')
 class CreateRegistrationController(Resource):
     @api.doc('create regis')
     @api.expect(_create_request, validate=True)
