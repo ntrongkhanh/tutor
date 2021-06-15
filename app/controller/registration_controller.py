@@ -181,12 +181,13 @@ def create(args, author_id, post_id):
     )
     db.session.add(registration)
     db.session.flush()
-
-    if post.is_tutor:
-        send_mail_register_to_study(registration, post.user.email)
-    else:
-        send_mail_register_to_teach(registration, post.user.email)
-
+    try:
+        if post.is_tutor:
+            send_mail_register_to_study(registration, post.user.email)
+        else:
+            send_mail_register_to_teach(registration, post.user.email)
+    except:
+        pass
     db.session.commit()
 
     return response_object(), 201
