@@ -26,16 +26,16 @@ _filter_request = RegistrationDto.filter_request
 _message_response = RegistrationDto.message_response
 
 
-@api.route('')
+@api.route('/post_id')
 class CreateRegistrationController(Resource):
     @api.doc('create regis')
     @api.expect(_create_request, validate=True)
     @jwt_required()
-    def post(self):
+    def post(self, post_id):
         """ đăng ký, ghi danh học/ dạy 1 bài post """
         args = _create_request.parse_args()
         user_id = get_jwt_identity()['user_id']
-        return create(args, user_id)
+        return create(args, user_id, post_id)
 
 
 @api.route('/<registration_id>')
@@ -154,11 +154,11 @@ class InviteTutorController(Resource):
         return invite(args, user_id)
 
 
-def create(args, author_id):
+def create(args, author_id, post_id):
     author = User.query.get(author_id)
     if not author:
         return response_object(status=False, message=response_message.USER_NOT_FOUND), 404
-    post = Post.query.get(args['post_id'])
+    post = Post.query.get(post_id)
     if not post:
         return response_object(status=False, message=response_message.POST_NOT_FOUND), 404
     if not post.is_tutor and not author.is_tutor:
@@ -173,7 +173,7 @@ def create(args, author_id):
         return response_object(status=False, message=response_message.INVITATION_ALREADY_EXISTS), 409
 
     registration = Registration(
-        post_id=args['post_id'],
+        post_id=post_id,
         content=args['content'],
         contact=args['contact'],
         approved_user_id=post.user_id,
