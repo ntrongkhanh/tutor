@@ -1,8 +1,7 @@
+from elasticsearch import Elasticsearch
 from flask import Flask, redirect
 from flask_bcrypt import Bcrypt
-from flask_cors import CORS
 from flask_jwt_extended import JWTManager
-from flask_jwt_extended.exceptions import NoAuthorizationError
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.exceptions import abort
@@ -16,6 +15,7 @@ db = SQLAlchemy()
 migrate = Migrate()
 bcrypt = Bcrypt()
 jwt = JWTManager(app)
+es = Elasticsearch('http://23.97.59.181:9200')
 
 
 def create_app(config_name):
@@ -31,6 +31,7 @@ def create_app(config_name):
     from . import model
     from app.blueprint import blueprint
     app.register_blueprint(blueprint)
+
     # CORS(app, resources={r"/*": {"origins": "*"}})
     # CORS(app, resources={r"/api/*": {"origins": "http://localhost:3000"}})
 
@@ -48,6 +49,24 @@ def create_app(config_name):
             abort(401)
 
         return False
+
+
+    @app.route('/a', methods=['GET'])
+    def index():
+        if es.ping():
+            # tutor = {
+            #     'id': 2,
+            #     'name': 'tú',
+            #     'age': 20
+            # }
+            # res = es.index(index='tutor',id=2,body=tutor)
+            # print(res)
+            res = es.search(index="tutor")
+            res_list=res['hits']['hits']
+            print(res_list[0]['_id'])
+            return 'ok'
+        else:
+            return 'Oops'
 
     @app.route('/')
     def update():
