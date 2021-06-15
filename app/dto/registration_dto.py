@@ -11,7 +11,7 @@ class RegistrationDto:
 
     """request"""
     create_request = get_auth_required_parser(api)
-    create_request.add_argument("post_id", type=int, location="args", required=True)
+    create_request.add_argument("post_id", type=int, location="json", required=True)
     create_request.add_argument("contact", type=str, location="json", required=False)
     create_request.add_argument("content", type=str, location="json", required=False)
 
