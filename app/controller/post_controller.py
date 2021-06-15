@@ -368,7 +368,6 @@ class PostController(Resource):
     @api.doc('update post')
     @api.expect(_update_request, validate=True)
     @jwt_required()
-    @tutor_required()
     def put(self, post_id):
         """Update post (Cập nhật bài post)"""
         args = _update_request.parse_args()
@@ -380,7 +379,6 @@ class PostController(Resource):
     @api.doc('delete post')
     @api.expect(get_auth_required_parser(api), validate=True)
     @jwt_required()
-    @tutor_required()
     def delete(self, post_id):
         """Delete post by id (Xóa bài post)"""
         user_id = get_jwt_identity()['user_id']
