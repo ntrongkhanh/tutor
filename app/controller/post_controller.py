@@ -435,6 +435,8 @@ def get_by_id(post_id, user_id):
         data['followed'] = False
         data['by_user'] = False
 
+    data['user']['can_rate'] = True
+
     return response_object(data=data), 200
 
 

@@ -23,8 +23,8 @@ class Tutor(db.Model):
     city_address = db.Column(db.String(255), nullable=True)
     district_address = db.Column(db.String(255), nullable=True)
     detailed_address = db.Column(db.String(255), nullable=True)
-    latitude = db.Column(db.String(255), nullable=True)
-    longitude = db.Column(db.String(255), nullable=True)
+    latitude = db.Column(db.Float, nullable=True)
+    longitude = db.Column(db.Float, nullable=True)
 
     subject = db.Column(db.String(255), nullable=True)
     class_type = db.Column(db.String(255), nullable=True)

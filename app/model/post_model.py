@@ -33,8 +33,8 @@ class Post(db.Model):
     city_address = db.Column(db.String(255), nullable=True)
     district_address = db.Column(db.String(255), nullable=True)
     detailed_address = db.Column(db.String(255), nullable=True)
-    latitude = db.Column(db.String(255), nullable=True)
-    longitude = db.Column(db.String(255), nullable=True)
+    latitude = db.Column(db.Float, nullable=True)
+    longitude = db.Column(db.Float, nullable=True)
 
     number_of_follower = db.Column(db.Integer, default=0, nullable=False)
     schedules = relationship("Schedule", backref="post", lazy=True)
