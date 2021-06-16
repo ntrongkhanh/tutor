@@ -27,6 +27,8 @@ class CreateScheduleController(Resource):
     def post(self):
         """ create schedule (Tạo lịch học) """
         args = _create_request.parse_args()
+        if args['day'] < 2 or args['day'] > 8:
+            return response_object(status=False, message=response_message.BAD_REQUEST_400), 400
         user_id = get_jwt_identity()['user_id']
         return create(args, user_id)
 
