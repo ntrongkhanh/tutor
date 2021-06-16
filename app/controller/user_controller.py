@@ -1,12 +1,14 @@
-from operator import or_
+from operator import or_, and_
 
 from flask import request
-from flask_jwt_extended import jwt_required, get_jwt_identity
+from flask_jwt_extended import jwt_required, get_jwt_identity, verify_jwt_in_request
 from flask_restx import Resource
 
 import app.util.response_message as message
 from app.dto.user_dto import UserDto
+from app.model.class_model import Class
 from app.model.code_model import Code
+from app.model.rate_model import Rate
 from app.model.user_model import User
 from app.service import user_service
 from app.util import response_message
@@ -121,13 +123,35 @@ class GetById(Resource):
     # @api.marshal_with(_user_response, 200)
     def get(self, user_id):
         """get by id user"""
-        return get_by_id(user_id)
+        try:
+            verify_jwt_in_request()
+            author_id = get_jwt_identity()['user_id']
+        except:
+            author_id = None
+        return get_by_id(user_id, author_id)
 
 
-def get_by_id(user_id):
+def get_by_id(user_id, author_id):
     user = User.query.get(user_id)
     if not user:
         return response_object(status=False, message=response_message.USER_NOT_FOUND), 404
+    classes = Class.query.filter(
+        or_(
+            and_(Class.student_id == author_id, Class.teacher_id == user_id),
+            and_(Class.teacher_id == author_id, Class.student_id == user_id)
+        )).all()
+    rate = Rate.query.filter(Rate.user_id == user_id, Rate.author_id == author_id).all()
+
+    if len(classes) == 0:
+        can_rate = False
+
+    if len(classes) > len(rate):
+        can_rate = True
+    else:
+        can_rate = False
+
+    data = user.to_json()
+    data['can_rate'] = can_rate
     return response_object(data=user.to_json()), 200
 
 

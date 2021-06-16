@@ -1,6 +1,6 @@
 import uuid
 from datetime import datetime
-from operator import or_
+from operator import or_, and_
 
 from flask_jwt_extended import jwt_required, get_jwt_identity, verify_jwt_in_request
 from flask_restx import Resource
@@ -9,8 +9,10 @@ from sqlalchemy import desc
 import app.util.response_message as response_message
 from app import db
 from app.dto.post_dto import PostDto
+from app.model.class_model import Class
 from app.model.model_enum import PostStatus, RegistrationStatus
 from app.model.post_model import Post
+from app.model.rate_model import Rate
 from app.model.registration_model import Registration
 from app.model.schedule_model import Schedule
 from app.model.user_model import User
@@ -435,7 +437,22 @@ def get_by_id(post_id, user_id):
         data['followed'] = False
         data['by_user'] = False
 
-    data['user']['can_rate'] = True
+    classes = Class.query.filter(
+        or_(
+            and_(Class.student_id == post.user_id, Class.teacher_id == user_id),
+            and_(Class.teacher_id == post.user_id, Class.student_id == user_id)
+        )).all()
+    rate = Rate.query.filter(Rate.user_id == post.user_id, Rate.author_id == user_id).all()
+
+    if len(classes) == 0:
+        can_rate = False
+
+    if len(classes) > len(rate):
+        can_rate = True
+    else:
+        can_rate = False
+
+    data['user']['can_rate'] = can_rate
 
     return response_object(data=data), 200
 
