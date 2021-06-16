@@ -29,7 +29,7 @@ class Schedule(db.Model):
     def to_json(self):
         return {
             'id': self.id,
-            'day': self.day,
+            'day': f'Thứ {self.day}' if self.day != 8 else 'Chủ nhật',
             'start_time': self.start_time,
             'end_time': self.end_time
         }
