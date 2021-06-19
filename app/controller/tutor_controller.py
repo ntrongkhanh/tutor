@@ -128,6 +128,7 @@ def filter_tutor(args):
     users = User.query.filter(
         or_(User.id == args['user_id'], args['user_id'] is None),
         or_(User.tutor.has(Tutor.public_id.like("%{}%".format(args['public_id']))), args['public_id'] is None),
+        or_(User.tutor.has(Tutor.subject.like("%{}%".format(args['subject']))), args['subject'] is None),
         or_(User.tutor.has(Tutor.career.like("%{}%".format(args['career']))), args['career'] is None),
         or_(User.tutor.has(Tutor.tutor_description.like("%{}%".format(args['tutor_description']))),
             args['tutor_description'] is None),

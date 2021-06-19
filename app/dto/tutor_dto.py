@@ -49,6 +49,7 @@ class TutorDto:
     filter_parser.add_argument("user_id", type=int, location='args', required=False)
     filter_parser.add_argument("public_id", type=int, location='args', required=False)
     filter_parser.add_argument("career", type=str, location='args', required=False)
+    filter_parser.add_argument("subject", type=str, location='args', required=False)
     filter_parser.add_argument("tutor_description", type=str, location='args', required=False)
     filter_parser.add_argument("majors", type=str, location='args', required=False)
     filter_parser.add_argument("degree", type=str, location='args', required=False)
