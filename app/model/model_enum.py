@@ -29,7 +29,14 @@ def convert_keys(obj, convert=str):
 
 def enum_to_json(key, type):
     if isinstance(key, type):
-        return key.name
+        if key == RegistrationStatus.PENDING:
+            return 'Chờ xác nhận'
+        elif key == RegistrationStatus.CANCEL:
+            return 'Đã hủy'
+        elif key == RegistrationStatus.ACCEPTED:
+            return 'Đã được chấp nhận'
+        elif key == RegistrationStatus.DECLINED:
+            return 'Đã bị từ chối'
     return str(key)
 
 # def enum_names(key):

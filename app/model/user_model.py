@@ -145,6 +145,28 @@ class User(db.Model):
             # json.dumps(self.created_date, default=json_serial),
         }
 
+    def to_json_tutor(self):
+        return {
+            'id': self.id,
+            'email': self.email,
+            'first_name': self.first_name,
+            'last_name': self.last_name,
+            'birthday': date_to_json(self.birthday) if self.birthday else None,
+            'sex': self.sex,
+            'average_rating': self.average_rating,
+            'number_of_rate': self.number_of_rate,
+            'is_tutor': self.is_tutor,
+            'is_admin': self.is_admin,
+            'is_active': self.is_active,
+            'avatar_id': self.avatar_id,
+            # 'avatar': self.avatar.to_json(),
+            'created_date': date_to_json(self.created_date),  # json.dumps(self.created_date, default=json_serial),
+            'updated_date': date_to_json(self.updated_date),  # json.dumps(self.created_date, default=json_serial),
+            'tutor': self.tutor.to_json() if self.is_tutor else None,
+            'number_of_classes': len(self.teachers)
+            # json.dumps(self.created_date, default=json_serial),
+        }
+
     def to_payload(self):
         return {
             'user_id': self.id,

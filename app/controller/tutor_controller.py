@@ -154,7 +154,7 @@ def filter_tutor(args):
     #     Tutor.is_active
     # ).paginate(page, page_size, error_out=False)
 
-    return response_object(data=[user.to_json() for user in users.items],
+    return response_object(data=[user.to_json_tutor() for user in users.items],
                            pagination={'total': users.total, 'page': users.page}), 200
 
 
