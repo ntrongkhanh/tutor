@@ -7,7 +7,7 @@ from flask_restx import Resource
 from sqlalchemy import desc
 
 import app.util.response_message as response_message
-from app import db
+from app import db, es
 from app.dto.post_dto import PostDto
 from app.model.class_model import Class
 from app.model.model_enum import PostStatus, RegistrationStatus
@@ -16,6 +16,7 @@ from app.model.rate_model import Rate
 from app.model.registration_model import Registration
 from app.model.schedule_model import Schedule
 from app.model.user_model import User
+from app.util import elasticsearch_index
 from app.util.api_response import response_object
 from app.util.auth_parser_util import get_auth_required_parser, get_auth_not_required_parser
 from app.util.jwt_util import tutor_required
@@ -80,6 +81,26 @@ def create_tutor_post(args, user_id):
     )
     db.session.add(post)
     db.session.commit()
+    body = {
+        'id': post.id,
+        'public_id': post.public_id,
+        'title': post.title,
+        'description': post.description,
+        'city_address': post.city_address,
+        'district_address': post.district_address,
+        'detailed_address': post.detailed_address,
+        'latitude': post.latitude,
+        'longitude': post.longitude,
+        'subject': post.subject,
+        'class_type': post.class_type,
+        'fee': post.fee,
+        'number_of_sessions': post.number_of_sessions,
+        'require': post.require,
+        'contact': post.contact,
+        'form_of_teaching': post.form_of_teaching,
+        'schedules': Schedule.to_json_list(post.schedules)
+    }
+    es.index(index=elasticsearch_index.LOOKING_FOR_STUDENT_POST, id=body['id'], body=body)
     print(post.id)
     return response_object(data={'post_id': post.id}), 201
 
@@ -130,6 +151,27 @@ def create_search_post(args, user_id):
     db.session.add(post)
 
     db.session.commit()
+
+    body = {
+        'id': post.id,
+        'public_id': post.public_id,
+        'title': post.title,
+        'description': post.description,
+        'city_address': post.city_address,
+        'district_address': post.district_address,
+        'detailed_address': post.detailed_address,
+        'latitude': post.latitude,
+        'longitude': post.longitude,
+        'subject': post.subject,
+        'class_type': post.class_type,
+        'fee': post.fee,
+        'number_of_sessions': post.number_of_sessions,
+        'require': post.require,
+        'contact': post.contact,
+        'form_of_teaching': post.form_of_teaching,
+        'schedules': Schedule.to_json_list(post.schedules)
+    }
+    es.index(index=elasticsearch_index.LOOKING_FOR_TUTOR_POST, id=body['id'], body=body)
 
     return response_object(data={'post_id': post.id}), 201
 

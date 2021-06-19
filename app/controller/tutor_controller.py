@@ -3,17 +3,17 @@ from datetime import datetime
 from operator import or_
 
 from flask import request
-from flask_jwt_extended import get_jwt_identity, jwt_required, verify_jwt_in_request
+from flask_jwt_extended import get_jwt_identity, jwt_required
 from flask_restx import Resource
 from sqlalchemy import desc
 
-from app import db
+from app import db, es
 from app.dto.tutor_dto import TutorDto
 from app.model.image_model import Image
 from app.model.model_enum import TutorStatus
 from app.model.tutor_model import Tutor
 from app.model.user_model import User
-from app.util import response_message
+from app.util import response_message, elasticsearch_index
 from app.util.api_response import response_object
 from app.util.auth_parser_util import get_auth_required_parser, get_auth_not_required_parser
 from app.util.jwt_util import tutor_required
@@ -96,42 +96,66 @@ def create(args, user_id):
     user.tutor_id = tutor.id
     user.is_tutor = True
     db.session.commit()
+
+    body = {
+        'id': tutor.id,
+        'first_name': tutor.first_name,
+        'last_name': tutor.last_name,
+        'is_tutor': tutor.is_tutor,
+        'public_id': tutor.tutor.public_id,
+        'career': tutor.tutor.career,
+        'tutor_description': tutor.tutor.tutor_description,
+        'majors': tutor.tutor.majors,
+        'degree': tutor.tutor.degree,
+        'school': tutor.tutor.school,
+        'city_address': tutor.tutor.city_address,
+        'district_address': tutor.tutor.district_address,
+        'detailed_address': tutor.tutor.detailed_address,
+        'latitude': tutor.tutor.latitude,
+        'longitude': tutor.tutor.longitude,
+        'subject': tutor.tutor.subject,
+        'class_type': tutor.tutor.class_type
+    }
+    es.index(index=elasticsearch_index.TUTOR, id=body['id'], body=body)
+
     return response_object(), 201
 
 
 def filter_tutor(args):
     page = args['page']
     page_size = args['page_size']
-    try:
-        verify_jwt_in_request()
-        get_jwt_identity()
-        identity = True
-    except:
-        identity = False
 
-    tutors = Tutor.query.filter(
-        or_(Tutor.user.has(User.id == args['user_id']), args['user_id'] is None),
-        or_(Tutor.public_id == args['public_id'], args['public_id'] is None),
-        or_(Tutor.career.like("%{}%".format(args['career'])), args['career'] is None),
-        or_(Tutor.tutor_description.like("%{}%".format(args['tutor_description'])),
+    users = User.query.filter(
+        or_(User.id == args['user_id'], args['user_id'] is None),
+        or_(User.tutor.has(Tutor.public_id.like("%{}%".format(args['public_id']))), args['public_id'] is None),
+        or_(User.tutor.has(Tutor.career.like("%{}%".format(args['career']))), args['career'] is None),
+        or_(User.tutor.has(Tutor.tutor_description.like("%{}%".format(args['tutor_description']))),
             args['tutor_description'] is None),
-        or_(Tutor.majors.like("%{}%".format(args['majors'])), args['majors'] is None),
-        or_(Tutor.degree.like("%{}%".format(args['degree'])), args['degree'] is None),
-        or_(Tutor.school.like("%{}%".format(args['school'])), args['school'] is None),
-        or_(Tutor.city_address.like("%{}%".format(args['city_address'])), args['city_address'] is None),
-        or_(Tutor.district_address.like("%{}%".format(args['district_address'])), args['district_address'] is None),
-        or_(Tutor.detailed_address.like("%{}%".format(args['detailed_address'])), args['detailed_address'] is None),
-        or_(Tutor.class_type.like("%{}%".format(args['class_type'])), args['class_type'] is None),
-        or_(Tutor.experience.like("%{}%".format(args['experience'])), args['experience'] is None),
-        or_(Tutor.other_information.like("%{}%".format(args['other_information'])),
-            args['other_information'] is None),
-        (Tutor.status == args['status'] if identity and get_jwt_identity()['is_admin']
-         else Tutor.status == TutorStatus.APPROVED),
-        Tutor.is_active
+        or_(User.tutor.has(Tutor.majors.like("%{}%".format(args['majors']))), args['majors'] is None),
+        or_(User.tutor.has(Tutor.degree.like("%{}%".format(args['degree']))), args['degree'] is None),
+        or_(User.tutor.has(Tutor.school.like("%{}%".format(args['school']))), args['school'] is None),
+        or_(User.tutor.has(Tutor.city_address.like("%{}%".format(args['city_address']))), args['school'] is None),
+        or_(User.tutor.has(Tutor.district_address.like("%{}%".format(args['district_address']))),
+            args['school'] is None),
+        or_(User.tutor.has(Tutor.detailed_address.like("%{}%".format(args['detailed_address']))),
+            args['school'] is None),
+        or_(User.tutor.has(Tutor.class_type.like("%{}%".format(args['class_type']))), args['school'] is None),
+        or_(User.tutor.has(Tutor.experience.like("%{}%".format(args['experience']))), args['school'] is None),
+        or_(User.tutor.has(Tutor.experience.like("%{}%".format(args['experience']))), args['school'] is None),
+        or_(User.tutor.has(Tutor.status == TutorStatus.APPROVED), args['school'] is None),
+        User.is_tutor,
+        User.is_active
     ).paginate(page, page_size, error_out=False)
 
-    return response_object(data=[tutor.to_json() for tutor in tutors.items],
-                           pagination={'total': tutors.total, 'page': tutors.page}), 200
+    # tutors = Tutor.query.filter(
+    #
+    #     (Tutor.status == args['status'] if identity and get_jwt_identity()['is_admin']
+    #      else Tutor.status == TutorStatus.APPROVED),
+    #     Tutor.is_active
+    # ).paginate(page, page_size, error_out=False)
+
+    return response_object(data=[user.to_json() for user in users.items],
+                           pagination={'total': users.total, 'page': users.page}), 200
 
 
 def update(args, user_id):
