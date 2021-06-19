@@ -144,15 +144,18 @@ def get_by_id(user_id, author_id):
 
     if len(classes) == 0:
         can_rate = False
-
-    if len(classes) > len(rate):
+    elif len(classes) > len(rate):
         can_rate = True
     else:
         can_rate = False
+    if user.is_tutor:
+        data = user.to_json_tutor()
+    else:
+        data = user.to_json()
 
-    data = user.to_json()
     data['can_rate'] = can_rate
-    return response_object(data=user.to_json()), 200
+
+    return response_object(data=data), 200
 
 
 _profile_parser = get_auth_required_parser(api)
