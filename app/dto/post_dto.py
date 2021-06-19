@@ -46,7 +46,7 @@ class PostDto:
     update_parser.add_argument("form_of_teaching", type=str, location="json", required=False)
 
     filter_parser = get_auth_not_required_parser(api)
-    filter_parser.add_argument("public_id", type=int, location="args", required=False)
+    filter_parser.add_argument("public_id", type=str, location="args", required=False)
     filter_parser.add_argument("keyword", type=str, location="args", required=False)
     filter_parser.add_argument("is_tutor", type=inputs.boolean, location="args", required=False)
     filter_parser.add_argument("title", type=str, location="args", required=False)

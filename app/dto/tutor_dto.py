@@ -46,8 +46,9 @@ class TutorDto:
     update_parser.add_argument("other_information", type=str, location='json', required=False)
 
     filter_parser = get_auth_not_required_parser(api)
+    filter_parser.add_argument("keyword", type=str, location='args', required=False)
     filter_parser.add_argument("user_id", type=int, location='args', required=False)
-    filter_parser.add_argument("public_id", type=int, location='args', required=False)
+    filter_parser.add_argument("public_id", type=str, location='args', required=False)
     filter_parser.add_argument("career", type=str, location='args', required=False)
     filter_parser.add_argument("subject", type=str, location='args', required=False)
     filter_parser.add_argument("tutor_description", type=str, location='args', required=False)
