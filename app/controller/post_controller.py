@@ -275,17 +275,26 @@ class PostListController(Resource):
 def filter_posts(args, user_id):
     page = args['page']
     page_size = args['page_size']
+    keyword = args['keyword']
+    id_list = None
+    if keyword or keyword != "":
+        body = {
+            "query": {
+                "multi_match": {
+                    "query": keyword,
+                    "fields": ["_all"]
+                }
+            }
+        }
+
+        res = es.search(index=elasticsearch_index.LOOKING_FOR_TUTOR_POST, body=body)
+
+        res_list = res['hits']['hits']
+        # print(res_list[0]['_id'])
+        id_list = [re['_id'] for re in res_list]
+
     posts = Post.query.filter(
-        or_(
-            or_(Post.public_id.like("%{}%".format(args['public_id'])), args['public_id'] is None),
-            Post.public_id.like("%{}%".format(args['keyword']))),
         or_(Post.is_tutor == args['is_tutor'], args['is_tutor'] is None),
-        or_(
-            or_(Post.title.like("%{}%".format(args['title'])), args['title'] is None),
-            Post.title.like("%{}%".format(args['keyword']))),
-        or_(
-            or_(Post.description.like("%{}%".format(args['description'])), args['description'] is None),
-            Post.description.like("%{}%".format(args['keyword']))),
         or_(
             or_(Post.city_address.like("%{}%".format(args['city_address'])), args['city_address'] is None),
             Post.city_address.like("%{}%".format(args['keyword']))),

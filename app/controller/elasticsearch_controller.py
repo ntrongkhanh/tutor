@@ -39,8 +39,12 @@ class ElasticsearchInitialization(Resource):
                     'city_address': tutor.tutor.city_address,
                     'district_address': tutor.tutor.district_address,
                     'detailed_address': tutor.tutor.detailed_address,
+
                     'latitude': tutor.tutor.latitude,
                     'longitude': tutor.tutor.longitude,
+
+                    # 'latitude': tutor.tutor.latitude,
+                    # 'longitude': tutor.tutor.longitude,
                     'subject': tutor.tutor.subject,
                     'class_type': tutor.tutor.class_type
                 }
@@ -54,8 +58,10 @@ class ElasticsearchInitialization(Resource):
                     'city_address': post.city_address,
                     'district_address': post.district_address,
                     'detailed_address': post.detailed_address,
+
                     'latitude': post.latitude,
                     'longitude': post.longitude,
+
                     'subject': post.subject,
                     'class_type': post.class_type,
                     'fee': post.fee,
@@ -97,26 +103,68 @@ search = api.parser()
 search.add_argument('key', type=str)
 
 
+@api.route('/update')
+class Update(Resource):
+    def get(self):
+        body = {
+            'id': 1065,
+            'first_name':"đã sửa",
+            'last_name': "đã sửa",
+            'is_tutor': 'true',
+            'public_id': "đã sửa",
+            'career': "đã sửa",
+            'tutor_description': "đã sửa",
+            'majors':"đã sửa",
+            'degree':"đã sửa",
+            'school':"đã sửa",
+            'city_address':"đã sửa",
+            'district_address':"đã sửa",
+            'detailed_address': "đã sửa",
+
+            'latitude': 0,
+            'longitude': 0,
+
+            # 'latitude': tutor.tutor.latitude,
+            # 'longitude': tutor.tutor.longitude,
+            'subject':"đã sửa",
+            'class_type': "đã sửa"
+        }
+        es.index(index=elasticsearch_index.TUTOR, id=body['id'], body=body)
+
+
 @api.route('/search')
 class Search(Resource):
     @api.expect(search, validate=True)
     def get(self):
         args = search.parse_args()
         keyword = args['key']
+        print("key")
+        print(keyword)
         body = {
+
+            "size": 3,
             "query": {
                 "multi_match": {
-                    "query": keyword,
-                    "fields": ["content", "title"]
-                }
-            }
+                    "query": 1065,
+                    "fields": ["id"]
+                },
+            },
+
         }
 
-        res = es.search(index=elasticsearch_index.LOOKING_FOR_TUTOR_POST, body=body)
+        res = es.search(index=elasticsearch_index.TUTOR, body=body)
+
+        print(res)
+
         res_list = res['hits']['hits']
+        print(len(res_list))
         # print(res_list[0]['_id'])
         id_list = [re['_id'] for re in res_list]
         # print(id_list)
-        posts = Post.query.filter(Post.id.in_(id_list)).all()
+        posts = User.query.filter(User.id.in_(id_list)).all()
+        # posts = User.query.filter(User.is_tutor).all()
+        # data = []
+        # for post in posts:
+        #     data.append(f'{post.tutor.latitude} + {post.tutor.longitude}= {post.tutor.latitude + post.tutor.longitude}')
 
         return response_object(data=[post.to_json() for post in posts]), 200
