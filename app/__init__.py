@@ -15,7 +15,7 @@ db = SQLAlchemy()
 migrate = Migrate()
 bcrypt = Bcrypt()
 jwt = JWTManager(app)
-es = Elasticsearch('http://13.83.7.16')
+es = Elasticsearch('http://34.126.191.169:9200')
 
 
 def create_app(config_name):
