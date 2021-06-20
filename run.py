@@ -11,6 +11,6 @@ config_name = os.getenv('FLASK_CONFIG', 'development')
 app = create_app(config_name)
 manager = Manager(app)
 manager.add_command('db', MigrateCommand)
-CORS(app, resources={r"/*": {"origins": "*"}})
+CORS(app, resources={r"/*": {"origins": ["http://localhost:3000","http://35.198.233.205:3000"]}})
 if __name__ == '__main__':
     manager.run()
