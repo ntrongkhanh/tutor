@@ -12,7 +12,8 @@ class Config(object):
     DEFAULT_PAGE_SIZE = 15
     DEFAULT_PAGE = 1
     MAIL_SERVER = 'smtp.gmail.com'
-    MAIL_PORT = 465
+    MAIL_PORT = 2525
+    # MAIL_PORT = 465
     MAIL_USERNAME = 'khoaluan.tutor@gmail.com'
     MAIL_PASSWORD = 'khoaluan2021'
     MAIL_SUPPRESS_SEND = False
