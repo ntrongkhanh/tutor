@@ -10,6 +10,13 @@ from app.util.api_response import response_object
 
 api = ElasticsearchDto.api
 
+@api.route('/test')
+class Test(Resource):
+    def get(self):
+        from app.controller.test import test1
+
+        test1()
+        return 'ok'
 
 @api.route('')
 class ElasticsearchInitialization(Resource):
@@ -108,17 +115,17 @@ class Update(Resource):
     def get(self):
         body = {
             'id': 1065,
-            'first_name':"đã sửa",
+            'first_name': "đã sửa",
             'last_name': "đã sửa",
             'is_tutor': 'true',
             'public_id': "đã sửa",
             'career': "đã sửa",
             'tutor_description': "đã sửa",
-            'majors':"đã sửa",
-            'degree':"đã sửa",
-            'school':"đã sửa",
-            'city_address':"đã sửa",
-            'district_address':"đã sửa",
+            'majors': "đã sửa",
+            'degree': "đã sửa",
+            'school': "đã sửa",
+            'city_address': "đã sửa",
+            'district_address': "đã sửa",
             'detailed_address': "đã sửa",
 
             'latitude': 0,
@@ -126,7 +133,7 @@ class Update(Resource):
 
             # 'latitude': tutor.tutor.latitude,
             # 'longitude': tutor.tutor.longitude,
-            'subject':"đã sửa",
+            'subject': "đã sửa",
             'class_type': "đã sửa"
         }
         es.index(index=elasticsearch_index.TUTOR, id=body['id'], body=body)
@@ -138,14 +145,13 @@ class Search(Resource):
     def get(self):
         args = search.parse_args()
         keyword = args['key']
-        print("key")
-        print(keyword)
+
         body = {
 
             "size": 3,
             "query": {
                 "multi_match": {
-                    "query": 1065,
+                    "query": keyword,
                     "fields": ["id"]
                 },
             },
@@ -154,13 +160,10 @@ class Search(Resource):
 
         res = es.search(index=elasticsearch_index.TUTOR, body=body)
 
-        print(res)
-
         res_list = res['hits']['hits']
-        print(len(res_list))
-        # print(res_list[0]['_id'])
+
         id_list = [re['_id'] for re in res_list]
-        # print(id_list)
+
         posts = User.query.filter(User.id.in_(id_list)).all()
         # posts = User.query.filter(User.is_tutor).all()
         # data = []
