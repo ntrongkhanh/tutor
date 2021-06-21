@@ -15,8 +15,8 @@ class Test(Resource):
     def get(self):
         from app.controller.test import test1
 
-        test1()
-        return 'ok'
+
+        return test1()
 
 @api.route('')
 class ElasticsearchInitialization(Resource):

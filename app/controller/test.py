@@ -29,5 +29,6 @@ def test1():
             conn.sendmail(sender, receivers, msg.as_string())
         finally:
             conn.quit()
+        return 'ok'
     except Exception as error:
-        print(error)
+        return str(error)
