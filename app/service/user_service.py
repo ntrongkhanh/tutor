@@ -95,6 +95,7 @@ def update_avatar(file, user_id):
     else:
         image = Image.query.get(user.avatar_id)
         image.data = data
+        image.link=None
         image.updated_date = datetime.datetime.now()
     db.session.commit()
 
