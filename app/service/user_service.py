@@ -49,7 +49,7 @@ def create_user(args):
 
     except Exception as e:
         print(e)
-        return response_object(status=False, message=message.CREATE_FAILED), 500
+        return response_object(status=False, data=str(e)), 500
 
     return response_object(), 201
 
