@@ -15,6 +15,7 @@ class Config(object):
     MAIL_PORT = 465
     MAIL_USERNAME = 'khoaluan.tutor@gmail.com'
     MAIL_PASSWORD = 'khoaluan2021'
+    MAIL_SUPPRESS_SEND = False
     MAIL_USE_TLS = False
     MAIL_USE_SSL = True
     TOKEN_EXPIRED_TIME = timedelta(days=50)

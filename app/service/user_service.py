@@ -21,7 +21,7 @@ def create_user(args):
 
     if User.query.filter(func.lower(User.email) == func.lower(args['email'])).first():
         return response_object(status=False, message=message.CONFLICT_409), 409
-
+    print(args['email'])
     # image = Image(description='Avatar of ' + args['email'], data=None)
     # db.session.add(image)
     # db.session.flush()
@@ -148,6 +148,8 @@ def reset_password(args, password):
 
 
 def send_mail_active_user(active_code):
+    print(active_code.email)
+    print(active_code.code)
     link_active = app.config['SERVER_ADDRESS'] + f'/api/user/active/?email={active_code.email}&code={active_code.code}'
     content = 'Vui lòng nhấn vào link để kích hoạt tài khoản: ' + link_active
     mail.send_mail_without_template(active_code.email, 'Kích hoạt tài khoản', content=content)
