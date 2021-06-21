@@ -101,7 +101,7 @@ def create_tutor_post(args, user_id):
         'schedules': Schedule.to_json_list(post.schedules)
     }
     es.index(index=elasticsearch_index.LOOKING_FOR_STUDENT_POST, id=body['id'], body=body)
-    print(post.id)
+
     return response_object(data={'post_id': post.id}), 201
 
 
@@ -276,62 +276,52 @@ def filter_posts(args, user_id):
     page = args['page']
     page_size = args['page_size']
     keyword = args['keyword']
-    id_list = None
-    if keyword or keyword != "":
+    id_list = []
+    if keyword and keyword != '':
+        """
+
+        """
         body = {
+            "size": 1000,
             "query": {
                 "multi_match": {
                     "query": keyword,
-                    "fields": ["_all"]
-                }
-            }
+                    "fields": ["public_id", "title", "description", "fee", "require", "form_of_teaching",
+                               "degree", "school", "city_address", "district_address", "detailed_address", "latitude",
+                               "longitude", "subject", "class_type"]
+                },
+            },
         }
 
-        res = es.search(index=elasticsearch_index.LOOKING_FOR_TUTOR_POST, body=body)
+        res = es.search(index=elasticsearch_index.TUTOR, body=body)
 
         res_list = res['hits']['hits']
-        # print(res_list[0]['_id'])
+
         id_list = [re['_id'] for re in res_list]
 
     posts = Post.query.filter(
+        Post.id.in_(id_list) if len(id_list) > 0 else True,
         or_(Post.is_tutor == args['is_tutor'], args['is_tutor'] is None),
-        or_(
-            or_(Post.city_address.like("%{}%".format(args['city_address'])), args['city_address'] is None),
-            Post.city_address.like("%{}%".format(args['keyword']))),
-        or_(
-            or_(Post.district_address.like("%{}%".format(args['district_address'])),
-                args['district_address'] is None), Post.district_address.like("%{}%".format(args['keyword']))),
-        or_(
-            or_(Post.detailed_address.like("%{}%".format(args['detailed_address'])),
-                args['detailed_address'] is None), Post.detailed_address.like("%{}%".format(args['keyword']))),
-        or_(
-            or_(Post.subject.like("%{}%".format(args['subject'])), args['subject'] is None),
-            Post.subject.like("%{}%".format(args['keyword']))),
-        or_(
-            or_(Post.other_information.like("%{}%".format(args['other_information'])),
-                args['other_information'] is None), Post.other_information.like("%{}%".format(args['keyword']))),
+
+        or_(Post.city_address.like("%{}%".format(args['city_address'])), args['city_address'] is None),
+
+        or_(Post.district_address.like("%{}%".format(args['district_address'])),
+            args['district_address'] is None),
+
+        or_(Post.detailed_address.like("%{}%".format(args['detailed_address'])), args['detailed_address'] is None),
+
+        or_(Post.subject.like("%{}%".format(args['subject'])), args['subject'] is None),
+
+        or_(Post.other_information.like("%{}%".format(args['other_information'])), args['other_information'] is None),
         or_(Post.fee.like("%{}%".format(args['fee'])), args['fee'] is None),
-        # or_(Post.schedule.like("%{}%".format(args['schedule'])), args['schedule'] is None),
-        or_(Post.number_of_sessions.like("%{}%".format(args['number_of_sessions'])),
-            args['number_of_sessions'] is None),
-        or_(
-            or_(Post.require.like("%{}%".format(args['require'])), args['require'] is None),
-            Post.require.like("%{}%".format(args['keyword']))),
-        or_(
-            or_(Post.contact.like("%{}%".format(args['contact'])), args['contact'] is None),
-            Post.contact.like("%{}%".format(args['keyword']))),
+
+        or_(Post.number_of_sessions.like("%{}%".format(args['number_of_sessions'])),args['number_of_sessions'] is None),
+
+        or_(Post.require.like("%{}%".format(args['require'])), args['require'] is None),
+
+        or_(Post.contact.like("%{}%".format(args['contact'])), args['contact'] is None),
         or_(Post.form_of_teaching.like("%{}%".format(args['form_of_teaching'])), args['form_of_teaching'] is None),
         or_(Post.user_id == args['user_id'], args['user_id'] is None),
-        or_(
-            or_(
-                or_(Post.user.has(User.first_name.like("%{}%".format(args['user_name']))),
-                    args['user_name'] is None),
-                Post.user.has(User.first_name.like("%{}%".format(args['keyword']))), ),
-            or_(
-                or_(Post.user.has(User.last_name.like("%{}%".format(args['user_name']))),
-                    args['user_name'] is None),
-                Post.user.has(User.first_name.like("%{}%".format(args['keyword']))), )
-        ),
         Post.status == PostStatus.OPENING,
         Post.is_active
     ).order_by(desc(Post.created_date)).paginate(page, page_size, error_out=False)
@@ -538,6 +528,29 @@ def update(args, post_id, user_id):
         Schedule.query.filter(Schedule.id == s.id).delete()
 
     db.session.commit()
+
+    body = {
+        'id': post.id,
+        'public_id': post.public_id,
+        'title': post.title,
+        'description': post.description,
+        'city_address': post.city_address,
+        'district_address': post.district_address,
+        'detailed_address': post.detailed_address,
+        'latitude': post.latitude,
+        'longitude': post.longitude,
+        'subject': post.subject,
+        'class_type': post.class_type,
+        'fee': post.fee,
+        'number_of_sessions': post.number_of_sessions,
+        'require': post.require,
+        'contact': post.contact,
+        'form_of_teaching': post.form_of_teaching,
+        'schedules': Schedule.to_json_list(post.schedules)
+    }
+    es.index(
+        index=elasticsearch_index.LOOKING_FOR_TUTOR_POST if not post.is_tutor else elasticsearch_index.LOOKING_FOR_STUDENT_POST,
+        id=body['id'], body=body)
 
     return response_object(), 200
 

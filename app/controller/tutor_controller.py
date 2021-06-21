@@ -98,23 +98,23 @@ def create(args, user_id):
     db.session.commit()
 
     body = {
-        'id': tutor.id,
-        'first_name': tutor.first_name,
-        'last_name': tutor.last_name,
-        'is_tutor': tutor.is_tutor,
-        'public_id': tutor.tutor.public_id,
-        'career': tutor.tutor.career,
-        'tutor_description': tutor.tutor.tutor_description,
-        'majors': tutor.tutor.majors,
-        'degree': tutor.tutor.degree,
-        'school': tutor.tutor.school,
-        'city_address': tutor.tutor.city_address,
-        'district_address': tutor.tutor.district_address,
-        'detailed_address': tutor.tutor.detailed_address,
-        'latitude': tutor.tutor.latitude,
-        'longitude': tutor.tutor.longitude,
-        'subject': tutor.tutor.subject,
-        'class_type': tutor.tutor.class_type
+        'id': user.id,
+        'first_name': user.first_name,
+        'last_name': user.last_name,
+        'is_tutor': user.is_tutor,
+        'public_id': user.tutor.public_id,
+        'career': tutor.career,
+        'tutor_description': tutor.tutor_description,
+        'majors': tutor.majors,
+        'degree': tutor.degree,
+        'school': tutor.school,
+        'city_address': tutor.city_address,
+        'district_address': tutor.district_address,
+        'detailed_address': tutor.detailed_address,
+        'latitude': tutor.latitude,
+        'longitude': tutor.longitude,
+        'subject': tutor.subject,
+        'class_type': tutor.class_type
     }
     es.index(index=elasticsearch_index.TUTOR, id=body['id'], body=body)
 
@@ -124,27 +124,44 @@ def create(args, user_id):
 def filter_tutor(args):
     page = args['page']
     page_size = args['page_size']
+    keyword = args['keyword']
+    id_list = []
+    if keyword and keyword != '':
+        body = {
+            "size": 1000,
+            "query": {
+                "multi_match": {
+                    "query": keyword,
+                    "fields": ["id", "first_name", "last_name", "public_id", "career", "tutor_description", "majors",
+                               "degree", "school", "city_address", "district_address", "detailed_address", "latitude",
+                               "longitude", "subject", "class_type"]
+                },
+            },
+        }
+
+        res = es.search(index=elasticsearch_index.TUTOR, body=body)
+
+        res_list = res['hits']['hits']
+
+        id_list = [re['_id'] for re in res_list]
 
     users = User.query.filter(
+        User.id.in_(id_list) if len(id_list) > 0 else True,
+        User.is_tutor,
         or_(User.id == args['user_id'], args['user_id'] is None),
         or_(User.tutor.has(Tutor.public_id.like("%{}%".format(args['public_id']))), args['public_id'] is None),
         or_(User.tutor.has(Tutor.subject.like("%{}%".format(args['subject']))), args['subject'] is None),
         or_(User.tutor.has(Tutor.career.like("%{}%".format(args['career']))), args['career'] is None),
-        or_(User.tutor.has(Tutor.tutor_description.like("%{}%".format(args['tutor_description']))),
-            args['tutor_description'] is None),
         or_(User.tutor.has(Tutor.majors.like("%{}%".format(args['majors']))), args['majors'] is None),
         or_(User.tutor.has(Tutor.degree.like("%{}%".format(args['degree']))), args['degree'] is None),
-        or_(User.tutor.has(Tutor.school.like("%{}%".format(args['school']))), args['school'] is None),
-        or_(User.tutor.has(Tutor.city_address.like("%{}%".format(args['city_address']))), args['school'] is None),
+        or_(User.tutor.has(Tutor.city_address.like("%{}%".format(args['city_address']))), args['city_address'] is None),
         or_(User.tutor.has(Tutor.district_address.like("%{}%".format(args['district_address']))),
-            args['school'] is None),
+            args['district_address'] is None),
         or_(User.tutor.has(Tutor.detailed_address.like("%{}%".format(args['detailed_address']))),
-            args['school'] is None),
-        or_(User.tutor.has(Tutor.class_type.like("%{}%".format(args['class_type']))), args['school'] is None),
-        or_(User.tutor.has(Tutor.experience.like("%{}%".format(args['experience']))), args['school'] is None),
-        or_(User.tutor.has(Tutor.experience.like("%{}%".format(args['experience']))), args['school'] is None),
-        or_(User.tutor.has(Tutor.status == TutorStatus.APPROVED), args['school'] is None),
-        User.is_tutor,
+            args['detailed_address'] is None),
+        or_(User.tutor.has(Tutor.class_type.like("%{}%".format(args['class_type']))), args['class_type'] is None),
+        or_(User.tutor.has(Tutor.experience.like("%{}%".format(args['experience']))), args['experience'] is None),
+        User.tutor.has(Tutor.status == TutorStatus.APPROVED),
         User.is_active
     ).paginate(page, page_size, error_out=False)
 
@@ -184,6 +201,27 @@ def update(args, user_id):
     tutor.updated_date = datetime.now()
 
     db.session.commit()
+
+    body = {
+        'id': user.id,
+        'first_name': user.first_name,
+        'last_name': user.last_name,
+        'is_tutor': user.is_tutor,
+        'public_id': tutor.public_id,
+        'career': tutor.career,
+        'tutor_description': tutor.tutor_description,
+        'majors': tutor.majors,
+        'degree': tutor.degree,
+        'school': tutor.school,
+        'city_address': tutor.city_address,
+        'district_address': tutor.district_address,
+        'detailed_address': tutor.detailed_address,
+        'latitude': tutor.latitude,
+        'longitude': tutor.longitude,
+        'subject': tutor.subject,
+        'class_type': tutor.class_type
+    }
+    es.index(index=elasticsearch_index.TUTOR, id=body['id'], body=body)
 
     return response_object(), 200
 
