@@ -35,6 +35,7 @@ class TutorDto:
     update_parser = get_auth_required_parser(api)
     update_parser.add_argument("career", type=str, location='json', required=False)
     update_parser.add_argument("tutor_description", type=str, location='json', required=False)
+    update_parser.add_argument("subject", type=str, location='json', required=False)
     update_parser.add_argument("majors", type=str, location='json', required=False)
     update_parser.add_argument("degree", type=str, location='json', required=False)
     update_parser.add_argument("school", type=str, location='json', required=False)

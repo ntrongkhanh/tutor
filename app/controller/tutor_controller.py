@@ -189,6 +189,7 @@ def update(args, user_id):
     tutor.tutor_description = args['tutor_description'] if args['tutor_description'] else tutor.tutor_description
     tutor.majors = args['majors'] if args['majors'] else tutor.majors
     tutor.degree = args['degree'] if args['degree'] else tutor.degree
+    tutor.subject = args['subject'] if args['subject'] else tutor.subject
     tutor.school = args['school'] if args['school'] else tutor.school
     tutor.city_address = args['city_address'] if args['city_address'] else tutor.city_address
     tutor.district_address = args['district_address'] if args['district_address'] else tutor.district_address
