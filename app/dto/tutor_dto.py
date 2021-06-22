@@ -42,6 +42,8 @@ class TutorDto:
     update_parser.add_argument("city_address", type=str, location='json', required=False)
     update_parser.add_argument("district_address", type=str, location='json', required=False)
     update_parser.add_argument("detailed_address", type=str, location='json', required=False)
+    update_parser.add_argument("latitude", type=float, location='json', required=False)
+    update_parser.add_argument("longitude", type=float, location='json', required=False)
     update_parser.add_argument("class_type", type=str, location='json', required=False)
     update_parser.add_argument("experience", type=str, location='json', required=False)
     update_parser.add_argument("other_information", type=str, location='json', required=False)
