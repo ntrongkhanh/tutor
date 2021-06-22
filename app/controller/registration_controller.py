@@ -261,7 +261,7 @@ def get_wait_list(args, user_id):
         .order_by(desc(Registration.created_date)) \
         .paginate(page, page_size, error_out=False)
 
-    return response_object(data=[registration.to_json() for registration in registrations.items],
+    return response_object(data=[registration.to_json_with_read() for registration in registrations.items],
                            pagination={'total': registrations.total, 'page': registrations.page}), 200
 
 
