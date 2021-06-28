@@ -1,6 +1,7 @@
 from elasticsearch import Elasticsearch
 from flask import Flask, redirect
 from flask_bcrypt import Bcrypt
+from flask_cors import CORS
 from flask_jwt_extended import JWTManager
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
@@ -25,7 +26,7 @@ def create_app(config_name):
     app.url_map.strict_slashes = False
     db.init_app(app)
     jwt = JWTManager(app)
-    # cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
+    cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
     migrate.init_app(app, db)
 
     from . import model
