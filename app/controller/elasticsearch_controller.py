@@ -10,13 +10,14 @@ from app.util.api_response import response_object
 
 api = ElasticsearchDto.api
 
+
 @api.route('/test')
 class Test(Resource):
     def get(self):
         from app.controller.test import test1
 
-
         return test1()
+
 
 @api.route('')
 class ElasticsearchInitialization(Resource):
@@ -31,6 +32,7 @@ class ElasticsearchInitialization(Resource):
             tutor_posts = Post.query.filter(Post.is_tutor == False, Post.is_active).all()
             student_posts = Post.query.filter(Post.is_tutor, Post.is_active).all()
 
+            #           es = Elasticsearch('host-address:port')
             for tutor in tutors:
                 body = {
                     'id': tutor.id,
@@ -46,12 +48,8 @@ class ElasticsearchInitialization(Resource):
                     'city_address': tutor.tutor.city_address,
                     'district_address': tutor.tutor.district_address,
                     'detailed_address': tutor.tutor.detailed_address,
-
                     'latitude': tutor.tutor.latitude,
                     'longitude': tutor.tutor.longitude,
-
-                    # 'latitude': tutor.tutor.latitude,
-                    # 'longitude': tutor.tutor.longitude,
                     'subject': tutor.tutor.subject,
                     'class_type': tutor.tutor.class_type
                 }
@@ -146,18 +144,16 @@ class Search(Resource):
         args = search.parse_args()
         keyword = args['key']
 
+#       es = Elasticsearch('host-address:port')
         body = {
-
-            "size": 3,
             "query": {
                 "multi_match": {
                     "query": keyword,
-                    "fields": ["id"]
+                    "fields": ["field-1", "field-2", "field-3", "field-4", ]
                 },
             },
 
         }
-
         res = es.search(index=elasticsearch_index.TUTOR, body=body)
 
         res_list = res['hits']['hits']

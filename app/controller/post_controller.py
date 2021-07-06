@@ -277,7 +277,7 @@ def filter_posts(args, user_id):
     page_size = args['page_size']
     keyword = args['keyword']
     id_list = []
-    if keyword and keyword != '':
+    if keyword and keyword != '' and es.ping():
         """
 
         """

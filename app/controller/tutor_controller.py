@@ -126,7 +126,7 @@ def filter_tutor(args):
     page_size = args['page_size']
     keyword = args['keyword']
     id_list = []
-    if keyword and keyword != '':
+    if keyword and keyword != '' and es.ping():
         body = {
             "size": 1000,
             "query": {
