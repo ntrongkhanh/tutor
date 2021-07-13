@@ -96,27 +96,27 @@ def create(args, user_id):
     user.tutor_id = tutor.id
     user.is_tutor = True
     db.session.commit()
-
-    body = {
-        'id': user.id,
-        'first_name': user.first_name,
-        'last_name': user.last_name,
-        'is_tutor': user.is_tutor,
-        'public_id': user.tutor.public_id,
-        'career': tutor.career,
-        'tutor_description': tutor.tutor_description,
-        'majors': tutor.majors,
-        'degree': tutor.degree,
-        'school': tutor.school,
-        'city_address': tutor.city_address,
-        'district_address': tutor.district_address,
-        'detailed_address': tutor.detailed_address,
-        'latitude': tutor.latitude,
-        'longitude': tutor.longitude,
-        'subject': tutor.subject,
-        'class_type': tutor.class_type
-    }
-    es.index(index=elasticsearch_index.TUTOR, id=body['id'], body=body)
+    if es.ping():
+        body = {
+            'id': user.id,
+            'first_name': user.first_name,
+            'last_name': user.last_name,
+            'is_tutor': user.is_tutor,
+            'public_id': user.tutor.public_id,
+            'career': tutor.career,
+            'tutor_description': tutor.tutor_description,
+            'majors': tutor.majors,
+            'degree': tutor.degree,
+            'school': tutor.school,
+            'city_address': tutor.city_address,
+            'district_address': tutor.district_address,
+            'detailed_address': tutor.detailed_address,
+            'latitude': tutor.latitude,
+            'longitude': tutor.longitude,
+            'subject': tutor.subject,
+            'class_type': tutor.class_type
+        }
+        es.index(index=elasticsearch_index.TUTOR, id=body['id'], body=body)
 
     return response_object(), 201
 
@@ -202,27 +202,27 @@ def update(args, user_id):
     tutor.updated_date = datetime.now()
 
     db.session.commit()
-
-    body = {
-        'id': user.id,
-        'first_name': user.first_name,
-        'last_name': user.last_name,
-        'is_tutor': user.is_tutor,
-        'public_id': tutor.public_id,
-        'career': tutor.career,
-        'tutor_description': tutor.tutor_description,
-        'majors': tutor.majors,
-        'degree': tutor.degree,
-        'school': tutor.school,
-        'city_address': tutor.city_address,
-        'district_address': tutor.district_address,
-        'detailed_address': tutor.detailed_address,
-        'latitude': tutor.latitude,
-        'longitude': tutor.longitude,
-        'subject': tutor.subject,
-        'class_type': tutor.class_type
-    }
-    es.index(index=elasticsearch_index.TUTOR, id=body['id'], body=body)
+    if es.ping():
+        body = {
+            'id': user.id,
+            'first_name': user.first_name,
+            'last_name': user.last_name,
+            'is_tutor': user.is_tutor,
+            'public_id': tutor.public_id,
+            'career': tutor.career,
+            'tutor_description': tutor.tutor_description,
+            'majors': tutor.majors,
+            'degree': tutor.degree,
+            'school': tutor.school,
+            'city_address': tutor.city_address,
+            'district_address': tutor.district_address,
+            'detailed_address': tutor.detailed_address,
+            'latitude': tutor.latitude,
+            'longitude': tutor.longitude,
+            'subject': tutor.subject,
+            'class_type': tutor.class_type
+        }
+        es.index(index=elasticsearch_index.TUTOR, id=body['id'], body=body)
 
     return response_object(), 200
 

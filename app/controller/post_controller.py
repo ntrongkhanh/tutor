@@ -81,26 +81,28 @@ def create_tutor_post(args, user_id):
     )
     db.session.add(post)
     db.session.commit()
-    body = {
-        'id': post.id,
-        'public_id': post.public_id,
-        'title': post.title,
-        'description': post.description,
-        'city_address': post.city_address,
-        'district_address': post.district_address,
-        'detailed_address': post.detailed_address,
-        'latitude': post.latitude,
-        'longitude': post.longitude,
-        'subject': post.subject,
-        'class_type': post.class_type,
-        'fee': post.fee,
-        'number_of_sessions': post.number_of_sessions,
-        'require': post.require,
-        'contact': post.contact,
-        'form_of_teaching': post.form_of_teaching,
-        'schedules': Schedule.to_json_list(post.schedules)
-    }
-    es.index(index=elasticsearch_index.LOOKING_FOR_STUDENT_POST, id=body['id'], body=body)
+
+    if es.ping():
+        body = {
+            'id': post.id,
+            'public_id': post.public_id,
+            'title': post.title,
+            'description': post.description,
+            'city_address': post.city_address,
+            'district_address': post.district_address,
+            'detailed_address': post.detailed_address,
+            'latitude': post.latitude,
+            'longitude': post.longitude,
+            'subject': post.subject,
+            'class_type': post.class_type,
+            'fee': post.fee,
+            'number_of_sessions': post.number_of_sessions,
+            'require': post.require,
+            'contact': post.contact,
+            'form_of_teaching': post.form_of_teaching,
+            'schedules': Schedule.to_json_list(post.schedules)
+        }
+        es.index(index=elasticsearch_index.LOOKING_FOR_STUDENT_POST, id=body['id'], body=body)
 
     return response_object(data={'post_id': post.id}), 201
 
@@ -152,26 +154,27 @@ def create_search_post(args, user_id):
 
     db.session.commit()
 
-    body = {
-        'id': post.id,
-        'public_id': post.public_id,
-        'title': post.title,
-        'description': post.description,
-        'city_address': post.city_address,
-        'district_address': post.district_address,
-        'detailed_address': post.detailed_address,
-        'latitude': post.latitude,
-        'longitude': post.longitude,
-        'subject': post.subject,
-        'class_type': post.class_type,
-        'fee': post.fee,
-        'number_of_sessions': post.number_of_sessions,
-        'require': post.require,
-        'contact': post.contact,
-        'form_of_teaching': post.form_of_teaching,
-        'schedules': Schedule.to_json_list(post.schedules)
-    }
-    es.index(index=elasticsearch_index.LOOKING_FOR_TUTOR_POST, id=body['id'], body=body)
+    if es.ping():
+        body = {
+            'id': post.id,
+            'public_id': post.public_id,
+            'title': post.title,
+            'description': post.description,
+            'city_address': post.city_address,
+            'district_address': post.district_address,
+            'detailed_address': post.detailed_address,
+            'latitude': post.latitude,
+            'longitude': post.longitude,
+            'subject': post.subject,
+            'class_type': post.class_type,
+            'fee': post.fee,
+            'number_of_sessions': post.number_of_sessions,
+            'require': post.require,
+            'contact': post.contact,
+            'form_of_teaching': post.form_of_teaching,
+            'schedules': Schedule.to_json_list(post.schedules)
+        }
+        es.index(index=elasticsearch_index.LOOKING_FOR_TUTOR_POST, id=body['id'], body=body)
 
     return response_object(data={'post_id': post.id}), 201
 
@@ -528,29 +531,29 @@ def update(args, post_id, user_id):
         Schedule.query.filter(Schedule.id == s.id).delete()
 
     db.session.commit()
-
-    body = {
-        'id': post.id,
-        'public_id': post.public_id,
-        'title': post.title,
-        'description': post.description,
-        'city_address': post.city_address,
-        'district_address': post.district_address,
-        'detailed_address': post.detailed_address,
-        'latitude': post.latitude,
-        'longitude': post.longitude,
-        'subject': post.subject,
-        'class_type': post.class_type,
-        'fee': post.fee,
-        'number_of_sessions': post.number_of_sessions,
-        'require': post.require,
-        'contact': post.contact,
-        'form_of_teaching': post.form_of_teaching,
-        'schedules': Schedule.to_json_list(post.schedules)
-    }
-    es.index(
-        index=elasticsearch_index.LOOKING_FOR_TUTOR_POST if not post.is_tutor else elasticsearch_index.LOOKING_FOR_STUDENT_POST,
-        id=body['id'], body=body)
+    if es.ping():
+        body = {
+            'id': post.id,
+            'public_id': post.public_id,
+            'title': post.title,
+            'description': post.description,
+            'city_address': post.city_address,
+            'district_address': post.district_address,
+            'detailed_address': post.detailed_address,
+            'latitude': post.latitude,
+            'longitude': post.longitude,
+            'subject': post.subject,
+            'class_type': post.class_type,
+            'fee': post.fee,
+            'number_of_sessions': post.number_of_sessions,
+            'require': post.require,
+            'contact': post.contact,
+            'form_of_teaching': post.form_of_teaching,
+            'schedules': Schedule.to_json_list(post.schedules)
+        }
+        es.index(
+            index=elasticsearch_index.LOOKING_FOR_TUTOR_POST if not post.is_tutor else elasticsearch_index.LOOKING_FOR_STUDENT_POST,
+            id=body['id'], body=body)
 
     return response_object(), 200
 
