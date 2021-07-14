@@ -280,28 +280,28 @@ def filter_posts(args, user_id):
     page_size = args['page_size']
     keyword = args['keyword']
     id_list = []
+    print('1111111111111111111111111111111')
     if keyword and keyword != '' and es.ping():
-        """
-
-        """
+        print('222222222222')
         body = {
             "size": 1000,
             "query": {
                 "multi_match": {
                     "query": keyword,
-                    "fields": ["public_id", "title", "description", "fee", "require", "form_of_teaching",
-                               "degree", "school", "city_address", "district_address", "detailed_address", "latitude",
-                               "longitude", "subject", "class_type"]
+                    "fields": ["public_id", "title", "fee", "require", "form_of_teaching",
+                               "degree", "school", "city_address", "district_address", "detailed_address"
+                               , "subject", "class_type"]
                 },
             },
         }
-
-        res = es.search(index=elasticsearch_index.TUTOR, body=body)
-
+        if args['is_tutor']:
+            res = es.search(index=elasticsearch_index.LOOKING_FOR_STUDENT_POST,body=body)
+        else:
+            res = es.search(index=elasticsearch_index.LOOKING_FOR_TUTOR_POST,body=body)
         res_list = res['hits']['hits']
 
         id_list = [re['_id'] for re in res_list]
-
+    print(id_list)
     posts = Post.query.filter(
         Post.id.in_(id_list) if len(id_list) > 0 else True,
         or_(Post.is_tutor == args['is_tutor'], args['is_tutor'] is None),
@@ -318,7 +318,8 @@ def filter_posts(args, user_id):
         or_(Post.other_information.like("%{}%".format(args['other_information'])), args['other_information'] is None),
         or_(Post.fee.like("%{}%".format(args['fee'])), args['fee'] is None),
 
-        or_(Post.number_of_sessions.like("%{}%".format(args['number_of_sessions'])),args['number_of_sessions'] is None),
+        or_(Post.number_of_sessions.like("%{}%".format(args['number_of_sessions'])),
+            args['number_of_sessions'] is None),
 
         or_(Post.require.like("%{}%".format(args['require'])), args['require'] is None),
 

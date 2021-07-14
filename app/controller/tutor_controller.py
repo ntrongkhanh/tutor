@@ -132,9 +132,9 @@ def filter_tutor(args):
             "query": {
                 "multi_match": {
                     "query": keyword,
-                    "fields": ["id", "first_name", "last_name", "public_id", "career", "tutor_description", "majors",
-                               "degree", "school", "city_address", "district_address", "detailed_address", "latitude",
-                               "longitude", "subject", "class_type"]
+                    "fields": ["first_name", "last_name", "public_id", "career", "majors",
+                               "degree", "school", "city_address", "district_address", "detailed_address",
+                               "subject", "class_type"]
                 },
             },
         }
