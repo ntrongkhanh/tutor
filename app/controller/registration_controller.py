@@ -6,7 +6,7 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 from flask_restx import Resource
 from sqlalchemy import desc
 
-from app import db, app
+from app import db
 from app.dto.registration_dto import RegistrationDto
 from app.mail import mail
 from app.model.class_model import Class
@@ -104,6 +104,18 @@ class PostTaughtListController(Resource):
         args = _filter_request.parse_args()
         user_id = get_jwt_identity()['user_id']
         return taught_list(args, user_id)
+
+
+@api.route('/class-list')
+class PostTaughtListController(Resource):
+    @api.doc('Taught list')
+    @api.expect(_filter_request, validate=True)
+    @jwt_required()
+    def get(self):
+        """ Danh sách mình đã dạy"""
+        args = _filter_request.parse_args()
+        user_id = get_jwt_identity()['user_id']
+        return class_list(args, user_id)
 
 
 @api.route('/studied')
@@ -297,6 +309,22 @@ def taught_list(args, user_id):
                            pagination={'total': classes.total, 'page': classes.page}), 200
 
 
+def class_list(args, user_id):
+    user = User.query.get(user_id)
+    if not user:
+        return response_object(status=False, message=response_message.USER_NOT_FOUND), 404
+    page = args['page']
+    page_size = args['page_size']
+    # posts = Post.query.filter(Post.class_.has(Class.teacher_id == user_id)) \
+    #     .order_by(desc(Class.created_date)).paginate(
+    #     page, page_size, error_out=False)
+    classes = Class.query.filter(or_(Class.teacher_id == user_id, Class.student_id == user_id)) \
+        .order_by(desc(Class.created_date)) \
+        .paginate(page, page_size, error_out=False)
+    return response_object(data=[class_.to_json() for class_ in classes.items],
+                           pagination={'total': classes.total, 'page': classes.page}), 200
+
+
 def studied_list(args, user_id):
     user = User.query.get(user_id)
     if not user:
@@ -484,7 +512,7 @@ def invite(args, author_id):
 
 
 def send_mail_register_to_study(registration, receiver_mail):
-    link = app.config['SERVER_ADDRESS'] + f'http://localhost:3000/registration-post/{registration.id}'
+    link = f'http://localhost:3000/registration-post/{registration.id}'
     content = 'Có người đăng ký học lớp học của bạn:' + link
     mail.send_mail_without_template(receiver_mail, '[Tutor Online] Đăng ký lớp', content=content)
 
@@ -492,7 +520,7 @@ def send_mail_register_to_study(registration, receiver_mail):
 
 
 def send_mail_register_to_teach(registration, receiver_mail):
-    link = app.config['SERVER_ADDRESS'] + f'http://localhost:3000/registration-post/{registration.id}'
+    link = f'http://localhost:3000/registration-post/{registration.id}'
     content = 'Có người đăng ký dạy lớp học của bạn:' + link
     mail.send_mail_without_template(receiver_mail, '[Tutor Online]Đăng ký dạy', content=content)
 
@@ -500,7 +528,7 @@ def send_mail_register_to_teach(registration, receiver_mail):
 
 
 def send_mail_invite(registration, receiver_mail):
-    link = app.config['SERVER_ADDRESS'] + f'http://localhost:3000/registration-post/{registration.id}'
+    link = f'http://localhost:3000/registration-post/{registration.id}'
     content = 'Có người mời bạn làm gia sư:' + link
     mail.send_mail_without_template(receiver_mail, '[Tutor online] Mời dạy học', content=content)
 
