@@ -89,6 +89,8 @@ def create(args, user_id):
         subject=args['subject'],
         class_type=args['class_type'],
         experience=args['experience'],
+        latitude=args['latitude'],
+        longitude=args['longitude'],
         other_information=args['other_information']
     )
     db.session.add(tutor)

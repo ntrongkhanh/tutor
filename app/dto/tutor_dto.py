@@ -22,6 +22,8 @@ class TutorDto:
     create_parser.add_argument("class_type", type=str, location='json', required=False)
     create_parser.add_argument("experience", type=str, location='json', required=False)
     create_parser.add_argument("other_information", type=str, location='json', required=False)
+    create_parser.add_argument("latitude", type=float, location='json', required=False)
+    create_parser.add_argument("longitude", type=float, location='json', required=False)
 
     create_verification_image_parser = get_auth_required_parser(api)
     create_verification_image_parser.add_argument("file", type=FileStorage, location="files", required=True)
