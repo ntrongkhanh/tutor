@@ -77,7 +77,7 @@ def get_profile(user_id):
     user = User.query.get(user_id)
     if not user:
         return response_object(status=False, message=message.USER_NOT_FOUND), 404
-    return response_object(data=user.to_json()), 200
+    return response_object(data=user.to_json_tutor()), 200
 
 
 def update_avatar(file, user_id):
