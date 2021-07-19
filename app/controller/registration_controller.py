@@ -484,24 +484,24 @@ def invite(args, author_id):
 
 
 def send_mail_register_to_study(registration, receiver_mail):
-    link = app.config['SERVER_ADDRESS'] + f'/api/registration/{registration.id}'
+    link = app.config['SERVER_ADDRESS'] + f'http://localhost:3000/registration-post/{registration.id}'
     content = 'Có người đăng ký học lớp học của bạn:' + link
-    mail.send_mail_without_template(receiver_mail, 'Đăng ký lớp', content=content)
+    mail.send_mail_without_template(receiver_mail, '[Tutor Online] Đăng ký lớp', content=content)
 
     return True
 
 
 def send_mail_register_to_teach(registration, receiver_mail):
-    link = app.config['SERVER_ADDRESS'] + f'/api/registration/{registration.id}'
+    link = app.config['SERVER_ADDRESS'] + f'http://localhost:3000/registration-post/{registration.id}'
     content = 'Có người đăng ký dạy lớp học của bạn:' + link
-    mail.send_mail_without_template(receiver_mail, 'Đăng ký dạy', content=content)
+    mail.send_mail_without_template(receiver_mail, '[Tutor Online]Đăng ký dạy', content=content)
 
     return True
 
 
 def send_mail_invite(registration, receiver_mail):
-    link = app.config['SERVER_ADDRESS'] + f'/api/registration/{registration.id}'
+    link = app.config['SERVER_ADDRESS'] + f'http://localhost:3000/registration-post/{registration.id}'
     content = 'Có người mời bạn làm gia sư:' + link
-    mail.send_mail_without_template(receiver_mail, 'Mời dạy học', content=content)
+    mail.send_mail_without_template(receiver_mail, '[Tutor online] Mời dạy học', content=content)
 
     return True

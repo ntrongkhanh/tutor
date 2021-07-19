@@ -95,7 +95,7 @@ def update_avatar(file, user_id):
     else:
         image = Image.query.get(user.avatar_id)
         image.data = data
-        image.link=None
+        image.link = None
         image.updated_date = datetime.datetime.now()
     db.session.commit()
 
@@ -149,11 +149,9 @@ def reset_password(args, password):
 
 
 def send_mail_active_user(active_code):
-    print(active_code.email)
-    print(active_code.code)
     link_active = app.config['SERVER_ADDRESS'] + f'/api/user/active/?email={active_code.email}&code={active_code.code}'
     content = 'Vui lòng nhấn vào link để kích hoạt tài khoản: ' + link_active
-    mail.send_mail_without_template(active_code.email, 'Kích hoạt tài khoản', content=content)
+    mail.send_mail_without_template(active_code.email, '[Tutor Online] Kích hoạt tài khoản', content=content)
 
     return True
 
@@ -195,11 +193,10 @@ def send_mail_reset_password(reset_code):
     try:
         # link_reset = app.config['SERVER_ADDRESS'] + f'/api/user/reset/?email={reset_code.email}&code={reset_code.code}'
         content = 'Mã reset mật khẩu của bạn là: ' + reset_code.code
-        mail.send_mail_without_template(reset_code.email, 'Reset mật khẩu', content=content)
+        mail.send_mail_without_template(reset_code.email, '[Tutor Online]Reset mật khẩu', content=content)
     except:
         return False
     return True
-
 
 
 def validate_email_and_password(email, password):
