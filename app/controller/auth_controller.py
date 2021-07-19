@@ -102,7 +102,7 @@ def check(user_id):
 
     auth_token = create_access_token(identity=user.to_payload(), expires_delta=app.config['TOKEN_EXPIRED_TIME'])
     if auth_token:
-        data = user.to_json()
+        data = user.to_json_tutor()
         data['token'] = auth_token
         return response_object(data=data), 200
     return response_object(status=False, message=response_message.UNAUTHORIZED_401), 401
