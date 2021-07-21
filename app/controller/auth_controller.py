@@ -4,11 +4,14 @@ from flask import request
 from flask_jwt_extended import jwt_required, create_access_token, get_jwt, get_jwt_identity
 from flask_restx import Resource
 from sqlalchemy import func
+from werkzeug.datastructures import FileStorage
 
 import app.util.response_message as message
 from app import app, db
 from app.dto.auth_dto import AuthDto
 from app.model.black_list_token import BlacklistToken
+from app.model.image_model import Image
+from app.model.tutor_model import Tutor
 from app.model.user_model import User
 from app.util import response_message
 from app.util.api_response import response_object
@@ -22,6 +25,52 @@ _login_parser.add_argument("email", type=str, location="json", required=True)
 _login_parser.add_argument("password", type=str, location="json", required=True)
 
 _login_response = AuthDto.login_response
+
+upload_parser = api.parser()
+upload_parser.add_argument("dh", type=FileStorage, location="files", required=True)
+upload_parser.add_argument("ta", type=FileStorage, location="files", required=True)
+upload_parser.add_argument("thpt", type=FileStorage, location="files", required=True)
+
+
+@api.route('/upfile')
+class Upload(Resource):
+    @api.expect(_login_parser, validate=True)
+    def post(self):
+        dh = request.files['dh']
+        ta = request.files['ta']
+        thpt = request.files['thpt']
+
+        data_dh = dh.read()
+        data_ta = ta.read()
+        data_thpt = thpt.read()
+
+        tutors = Tutor.query.filter(Tutor.id > 1017).all
+
+        for tutor in tutors:
+            if tutor.career.lower() == 'sinh viên':
+                image = Image(data=data_thpt,
+                              description='Bằng cấp, chứng chỉ',
+                              tutor_id=tutor.id,
+                              is_public=True)
+                db.session.add(image)
+
+            else:
+                image = Image(data=data_dh,
+                              description='Bằng cấp, chứng chỉ',
+                              tutor_id=tutor.id,
+                              is_public=True)
+                db.session.add(image)
+
+            if tutor.majors.lower() == 'tiếng anh':
+                image = Image(data=data_ta,
+                              description='Bằng cấp, chứng chỉ',
+                              tutor_id=tutor.id,
+                              is_public=True)
+                db.session.add(image)
+
+        db.session.commit()
+
+        return response_object(), 201
 
 
 # tạm ok
