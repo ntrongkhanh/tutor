@@ -30,6 +30,9 @@ class TutorDto:
     create_verification_image_parser.add_argument("description", type=str, location='form', required=True)
     create_verification_image_parser.add_argument("public", type=bool, location='form', required=True)
 
+    certificate_parser = get_auth_required_parser(api)
+    certificate_parser.add_argument("file", type=FileStorage, location="files", required=True)
+
     update_verification_image_parser = get_auth_required_parser(api)
     update_verification_image_parser.add_argument("file", type=FileStorage, location="files", required=True)
     update_verification_image_parser.add_argument("description", type=str, location='form', required=False)

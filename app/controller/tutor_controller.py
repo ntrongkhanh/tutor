@@ -245,6 +245,42 @@ class VerificationImageListController(Resource):
         return upload_verification_image(args, user_id)
 
 
+_certificate_paser = TutorDto.certificate_parser
+
+
+@api.route('/certificate')
+class CertificateController(Resource):
+    @api.doc('verification image')
+    @api.expect(_certificate_paser, validate=True)
+    # @api.marshal_with(_message_response, 201)
+    @jwt_required()
+    def post(self):
+        user_id = get_jwt_identity()['user_id']
+        file = request.files['file']
+
+        return certificate(file, user_id)
+
+
+def certificate(file, user_id):
+    user = User.query.get(user_id)
+    if not user:
+        return response_object(status=False, message=response_message.USER_NOT_FOUND), 404
+    tutor = Tutor.query.get(user.tutor_id)
+    if not tutor:
+        return response_object(status=False, message=response_message.TUTOR_NOT_FOUND), 404
+
+    data = file.read()
+
+    image = Image(data=data,
+                  description='Bằng cấp, chứng chỉ',
+                  tutor_id=tutor.id,
+                  is_public=True)
+    db.session.add(image)
+    db.session.commit()
+
+    return response_object(), 201
+
+
 def upload_verification_image(args, user_id):
     user = User.query.get(user_id)
     if not user:

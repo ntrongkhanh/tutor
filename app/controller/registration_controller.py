@@ -107,7 +107,7 @@ class PostTaughtListController(Resource):
 
 
 @api.route('/class-list')
-class PostTaughtListController(Resource):
+class ClassListController(Resource):
     @api.doc('Taught list')
     @api.expect(_filter_request, validate=True)
     @jwt_required()
@@ -116,6 +116,25 @@ class PostTaughtListController(Resource):
         args = _filter_request.parse_args()
         user_id = get_jwt_identity()['user_id']
         return class_list(args, user_id)
+
+
+@api.route('/class/<class_id>')
+class ClassController(Resource):
+    @api.doc('Taught list')
+    @api.expect(get_auth_required_parser(api), validate=True)
+    @jwt_required()
+    def get(self, class_id):
+        user_id = get_jwt_identity()['user_id']
+        return get_class_by_id(user_id, class_id)
+
+
+def get_class_by_id(user_id, class_id):
+    class_ = Class.query.get(class_id)
+    if not class_:
+        return response_object(status=False, message=response_message.USER_NOT_FOUND), 404
+    if class_.student_id != user_id and class_.teacher_id != user_id:
+        return response_object(status=False, message=response_message.UNAUTHORIZED_401), 401
+    return response_object(data=class_.to_json()), 200
 
 
 @api.route('/studied')
