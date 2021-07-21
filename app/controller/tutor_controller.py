@@ -146,9 +146,9 @@ def filter_tutor(args):
         res_list = res['hits']['hits']
 
         id_list = [re['_id'] for re in res_list]
-    if len(id_list) > 0:
+    if keyword and keyword != '':
         users = User.query.filter(
-            User.id.in_(id_list) if len(id_list) > 0 else True,
+            User.id.in_(id_list) if len(id_list) > 0 else False,
             User.is_tutor,
             or_(User.id == args['user_id'], args['user_id'] is None),
             or_(User.tutor.has(Tutor.public_id.like("%{}%".format(args['public_id']))), args['public_id'] is None),
