@@ -186,7 +186,7 @@ def filter_tutor(args):
             or_(User.tutor.has(Tutor.experience.like("%{}%".format(args['experience']))), args['experience'] is None),
             User.tutor.has(Tutor.status == TutorStatus.APPROVED),
             User.is_active
-        ).order_by(User.average_rating.desc()) \
+        ).order_by(User.average_rating.desc(), User.number_of_rate.desc()) \
             .paginate(page, page_size, error_out=False)
     # tutors = Tutor.query.filter(
     #
