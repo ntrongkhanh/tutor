@@ -250,7 +250,7 @@ _certificate_paser = TutorDto.certificate_parser
 
 @api.route('/certificate')
 class CertificateController(Resource):
-    @api.doc('verification image')
+    @api.doc('cer image')
     @api.expect(_certificate_paser, validate=True)
     # @api.marshal_with(_message_response, 201)
     @jwt_required()
