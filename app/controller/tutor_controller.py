@@ -146,27 +146,48 @@ def filter_tutor(args):
         res_list = res['hits']['hits']
 
         id_list = [re['_id'] for re in res_list]
-
-    users = User.query.filter(
-        User.id.in_(id_list) if len(id_list) > 0 else True,
-        User.is_tutor,
-        or_(User.id == args['user_id'], args['user_id'] is None),
-        or_(User.tutor.has(Tutor.public_id.like("%{}%".format(args['public_id']))), args['public_id'] is None),
-        or_(User.tutor.has(Tutor.subject.like("%{}%".format(args['subject']))), args['subject'] is None),
-        or_(User.tutor.has(Tutor.career.like("%{}%".format(args['career']))), args['career'] is None),
-        or_(User.tutor.has(Tutor.majors.like("%{}%".format(args['majors']))), args['majors'] is None),
-        or_(User.tutor.has(Tutor.degree.like("%{}%".format(args['degree']))), args['degree'] is None),
-        or_(User.tutor.has(Tutor.city_address.like("%{}%".format(args['city_address']))), args['city_address'] is None),
-        or_(User.tutor.has(Tutor.district_address.like("%{}%".format(args['district_address']))),
-            args['district_address'] is None),
-        or_(User.tutor.has(Tutor.detailed_address.like("%{}%".format(args['detailed_address']))),
-            args['detailed_address'] is None),
-        or_(User.tutor.has(Tutor.class_type.like("%{}%".format(args['class_type']))), args['class_type'] is None),
-        or_(User.tutor.has(Tutor.experience.like("%{}%".format(args['experience']))), args['experience'] is None),
-        User.tutor.has(Tutor.status == TutorStatus.APPROVED),
-        User.is_active
-    ).paginate(page, page_size, error_out=False)
-
+    if len(id_list) > 0:
+        users = User.query.filter(
+            User.id.in_(id_list) if len(id_list) > 0 else True,
+            User.is_tutor,
+            or_(User.id == args['user_id'], args['user_id'] is None),
+            or_(User.tutor.has(Tutor.public_id.like("%{}%".format(args['public_id']))), args['public_id'] is None),
+            or_(User.tutor.has(Tutor.subject.like("%{}%".format(args['subject']))), args['subject'] is None),
+            or_(User.tutor.has(Tutor.career.like("%{}%".format(args['career']))), args['career'] is None),
+            or_(User.tutor.has(Tutor.majors.like("%{}%".format(args['majors']))), args['majors'] is None),
+            or_(User.tutor.has(Tutor.degree.like("%{}%".format(args['degree']))), args['degree'] is None),
+            or_(User.tutor.has(Tutor.city_address.like("%{}%".format(args['city_address']))),
+                args['city_address'] is None),
+            or_(User.tutor.has(Tutor.district_address.like("%{}%".format(args['district_address']))),
+                args['district_address'] is None),
+            or_(User.tutor.has(Tutor.detailed_address.like("%{}%".format(args['detailed_address']))),
+                args['detailed_address'] is None),
+            or_(User.tutor.has(Tutor.class_type.like("%{}%".format(args['class_type']))), args['class_type'] is None),
+            or_(User.tutor.has(Tutor.experience.like("%{}%".format(args['experience']))), args['experience'] is None),
+            User.tutor.has(Tutor.status == TutorStatus.APPROVED),
+            User.is_active
+        ).paginate(page, page_size, error_out=False)
+    else:
+        users = User.query.filter(
+            User.is_tutor,
+            or_(User.id == args['user_id'], args['user_id'] is None),
+            or_(User.tutor.has(Tutor.public_id.like("%{}%".format(args['public_id']))), args['public_id'] is None),
+            or_(User.tutor.has(Tutor.subject.like("%{}%".format(args['subject']))), args['subject'] is None),
+            or_(User.tutor.has(Tutor.career.like("%{}%".format(args['career']))), args['career'] is None),
+            or_(User.tutor.has(Tutor.majors.like("%{}%".format(args['majors']))), args['majors'] is None),
+            or_(User.tutor.has(Tutor.degree.like("%{}%".format(args['degree']))), args['degree'] is None),
+            or_(User.tutor.has(Tutor.city_address.like("%{}%".format(args['city_address']))),
+                args['city_address'] is None),
+            or_(User.tutor.has(Tutor.district_address.like("%{}%".format(args['district_address']))),
+                args['district_address'] is None),
+            or_(User.tutor.has(Tutor.detailed_address.like("%{}%".format(args['detailed_address']))),
+                args['detailed_address'] is None),
+            or_(User.tutor.has(Tutor.class_type.like("%{}%".format(args['class_type']))), args['class_type'] is None),
+            or_(User.tutor.has(Tutor.experience.like("%{}%".format(args['experience']))), args['experience'] is None),
+            User.tutor.has(Tutor.status == TutorStatus.APPROVED),
+            User.is_active
+        ).order_by(User.average_rating.desc()) \
+            .paginate(page, page_size, error_out=False)
     # tutors = Tutor.query.filter(
     #
     #     (Tutor.status == args['status'] if identity and get_jwt_identity()['is_admin']
