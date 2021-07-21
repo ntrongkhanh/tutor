@@ -34,7 +34,7 @@ upload_parser.add_argument("thpt", type=FileStorage, location="files", required=
 
 @api.route('/upfile')
 class Upload(Resource):
-    @api.expect(_login_parser, validate=True)
+    @api.expect(upload_parser, validate=True)
     def post(self):
         dh = request.files['dh']
         ta = request.files['ta']
@@ -44,15 +44,23 @@ class Upload(Resource):
         data_ta = ta.read()
         data_thpt = thpt.read()
 
-        tutors = Tutor.query.filter(Tutor.id > 1017).all
+        tutors = Tutor.query.filter(Tutor.id > 1017).all()
+        print('111111111111111111111111111111111')
+        print('111111111111111111111111111111111')
 
         for tutor in tutors:
+            print('111111111111111111111111111111111')
+
             if tutor.career.lower() == 'sinh viên':
+                print('111111111111111111111111111111111')
+
                 image = Image(data=data_thpt,
                               description='Bằng cấp, chứng chỉ',
                               tutor_id=tutor.id,
                               is_public=True)
                 db.session.add(image)
+                print('22222222222222222222222222222222')
+
 
             else:
                 image = Image(data=data_dh,
@@ -60,6 +68,7 @@ class Upload(Resource):
                               tutor_id=tutor.id,
                               is_public=True)
                 db.session.add(image)
+                print('333333333333333333333333333333333333')
 
             if tutor.majors.lower() == 'tiếng anh':
                 image = Image(data=data_ta,
@@ -67,6 +76,9 @@ class Upload(Resource):
                               tutor_id=tutor.id,
                               is_public=True)
                 db.session.add(image)
+                print('4444444444444444444444444444444444444')
+
+        print('111111111111111111111111111111111')
 
         db.session.commit()
 
