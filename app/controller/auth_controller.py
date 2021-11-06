@@ -1,20 +1,9 @@
-import re
-
 from flask import request
-from flask_jwt_extended import jwt_required, create_access_token, get_jwt, get_jwt_identity
+from flask_jwt_extended import jwt_required, get_jwt_identity
 from flask_restx import Resource
-from sqlalchemy import func
-from werkzeug.datastructures import FileStorage
 
-import app.util.response_message as message
-from app import app, db
 from app.dto.auth_dto import AuthDto
-from app.model.black_list_token import BlacklistToken
-from app.model.image_model import Image
-from app.model.tutor_model import Tutor
-from app.model.user_model import User
-from app.util import response_message
-from app.util.api_response import response_object
+from app.service import auth_service
 from app.util.auth_parser_util import get_auth_required_parser
 
 api = AuthDto.api
@@ -26,66 +15,7 @@ _login_parser.add_argument("password", type=str, location="json", required=True)
 
 _login_response = AuthDto.login_response
 
-upload_parser = api.parser()
-upload_parser.add_argument("dh", type=FileStorage, location="files", required=True)
-upload_parser.add_argument("ta", type=FileStorage, location="files", required=True)
-upload_parser.add_argument("thpt", type=FileStorage, location="files", required=True)
 
-
-@api.route('/upfile')
-class Upload(Resource):
-    @api.expect(upload_parser, validate=True)
-    def post(self):
-        dh = request.files['dh']
-        ta = request.files['ta']
-        thpt = request.files['thpt']
-
-        data_dh = dh.read()
-        data_ta = ta.read()
-        data_thpt = thpt.read()
-
-        tutors = Tutor.query.filter(Tutor.id > 1017).all()
-        print('111111111111111111111111111111111')
-        print('111111111111111111111111111111111')
-
-        for tutor in tutors:
-            print('111111111111111111111111111111111')
-
-            if tutor.career.lower() == 'sinh viên':
-                print('111111111111111111111111111111111')
-
-                image = Image(data=data_thpt,
-                              description='Bằng cấp, chứng chỉ',
-                              tutor_id=tutor.id,
-                              is_public=True)
-                db.session.add(image)
-                print('22222222222222222222222222222222')
-
-
-            else:
-                image = Image(data=data_dh,
-                              description='Bằng cấp, chứng chỉ',
-                              tutor_id=tutor.id,
-                              is_public=True)
-                db.session.add(image)
-                print('333333333333333333333333333333333333')
-
-            if tutor.majors.lower() == 'tiếng anh':
-                image = Image(data=data_ta,
-                              description='Bằng cấp, chứng chỉ',
-                              tutor_id=tutor.id,
-                              is_public=True)
-                db.session.add(image)
-                print('4444444444444444444444444444444444444')
-
-        print('111111111111111111111111111111111')
-
-        db.session.commit()
-
-        return response_object(), 201
-
-
-# tạm ok
 @api.route('/login')
 class Login(Resource):
     @api.doc('login ')
@@ -95,26 +25,7 @@ class Login(Resource):
         """Login (Đăng nhập)"""
         args = request.json
 
-        return login(args)
-
-
-def login(args):
-    valid = validate_email_and_password(args['email'], args['password'])
-    if not isinstance(valid, bool):
-        return valid
-    user = User.query.filter(func.lower(User.email) == func.lower(args['email'])).first()
-    if not user:
-        return response_object(status=False, message=response_message.EMAIL_NOT_EXISTS), 401
-    if not user.is_active:
-        return response_object(status=False, message=response_message.ACCOUNT_IS_NOT_ACTIVATED), 401
-    if not user.verify_password(args['password']):
-        return response_object(status=False, message=response_message.PASSWORD_WRONG), 401
-    auth_token = create_access_token(identity=user.to_payload(), expires_delta=app.config['TOKEN_EXPIRED_TIME'])
-    if auth_token:
-        data = user.to_json()
-        data['token'] = auth_token
-        return response_object(data=data), 200
-    return response_object(status=False, message=response_message.UNAUTHORIZED_401), 401
+        return auth_service.login(args)
 
 
 # tạm ok
@@ -127,17 +38,7 @@ class Logout(Resource):
     def get(self):
         """Logout (Đăng xuất)"""
         auth_token = request.headers['Authorization'].split(" ")[1]
-        return logout(auth_token)
-
-
-def logout(auth_token):
-    jti = get_jwt()["jti"]
-    if auth_token:
-        black_list = BlacklistToken(token=jti)
-        db.session.add(black_list)
-        db.session.commit()
-
-    return response_object(), 200
+        return auth_service.logout(auth_token)
 
 
 _check_token_parser = api.parser()
@@ -153,39 +54,4 @@ class CheckToken(Resource):
     def get(self):
         """Check token (Kiểm tra hạn của token)"""
         user_id = get_jwt_identity()['user_id']
-        return check(user_id)
-
-
-def check(user_id):
-    user = User.query.get(user_id)
-    if not user:
-        return response_object(status=False, message=response_message.UNAUTHORIZED_401), 401
-
-    auth_token = create_access_token(identity=user.to_payload(), expires_delta=app.config['TOKEN_EXPIRED_TIME'])
-    if auth_token:
-        data = user.to_json_tutor()
-        data['token'] = auth_token
-        return response_object(data=data), 200
-    return response_object(status=False, message=response_message.UNAUTHORIZED_401), 401
-
-
-def validate_email_and_password(email, password):
-    if not validate_email(email):
-        return response_object(status=False, message=message.INVALID_EMAIL), 400
-    if not validate_password(password):
-        return response_object(status=False, message=message.INVALID_PASSWORD), 400
-
-    return True
-
-
-def validate_password(password):
-    if len(password) < app.config['MIN_PASSWORD_CHARACTERS']:
-        return False
-    return True
-
-
-def validate_email(email):
-    regex = '^(\w|\.|\_|\-)+[@](\w|\_|\-|\.)+[.]\w{2,3}$'
-    if not re.search(regex, email):
-        return False
-    return True
+        return auth_service.check(user_id)

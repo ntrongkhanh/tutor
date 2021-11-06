@@ -2,14 +2,17 @@ import datetime
 import random
 import re
 import string
+from operator import or_, and_
 
 from sqlalchemy import func
 
 import app.util.response_message as message
 from app import db, app
 from app.mail import mail
+from app.model.class_model import Class
 from app.model.code_model import Code
 from app.model.image_model import Image
+from app.model.rate_model import Rate
 from app.model.user_model import User
 from app.util.api_response import response_object
 
@@ -219,3 +222,30 @@ def validate_email(email):
     if not re.search(regex, email):
         return False
     return True
+
+
+def get_by_id(user_id, author_id):
+    user = User.query.get(user_id)
+    if not user:
+        return response_object(status=False, message=message.USER_NOT_FOUND), 404
+    classes = Class.query.filter(
+        or_(
+            and_(Class.student_id == author_id, Class.teacher_id == user_id),
+            and_(Class.teacher_id == author_id, Class.student_id == user_id)
+        )).all()
+    rate = Rate.query.filter(Rate.user_id == user_id, Rate.author_id == author_id).all()
+
+    if len(classes) == 0:
+        can_rate = False
+    elif len(classes) > len(rate):
+        can_rate = True
+    else:
+        can_rate = False
+    if user.is_tutor:
+        data = user.to_json_tutor()
+    else:
+        data = user.to_json()
+
+    data['can_rate'] = can_rate
+
+    return response_object(data=data), 200
