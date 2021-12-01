@@ -1,0 +1,9 @@
+version: "3.5"
+services:
+  tutor:
+    container_name: tutor
+    image: tutor
+    build: ./
+    working_dir: /app
+    ports:
+      - "5000:5000"
